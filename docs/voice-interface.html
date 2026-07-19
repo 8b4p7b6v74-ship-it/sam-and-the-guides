@@ -139,9 +139,9 @@
     </button>
     <div class="chips">
       <button data-dest="store"><span class="em">🏪</span> Store</button>
-      <button data-dest="bathroom"><span class="em">🚻</span> Bathroom</button>
-      <button data-dest="reception"><span class="em">🛎️</span> Reception</button>
-      <button data-dest="dining"><span class="em">🍽️</span> Dining room</button>
+      <button data-dest="school"><span class="em">🏫</span> School</button>
+      <button data-dest="park"><span class="em">🌳</span> Park</button>
+      <button data-dest="plaza"><span class="em">⛲</span> Plaza</button>
     </div>
     <button class="stop" id="stop" aria-label="Stop the robots now">■ STOP</button>
   </div>
@@ -173,10 +173,10 @@ if(new URLSearchParams(location.search).get("frame")==="phone") document.body.cl
 const $=s=>document.querySelector(s);
 const DEST={
   store:{name:"the store",keys:["store","shop","market"]},
-  bathroom:{name:"the bathroom",keys:["bathroom","toilet","restroom","washroom"]},
-  reception:{name:"reception",keys:["reception","desk","entrance","front"]},
-  dining:{name:"the dining room",keys:["dining","cafeteria","canteen","food","eat","lunch","dinner"]},
-  home:{name:"the living room",keys:["home","living","back","lounge"]}
+  school:{name:"the school",keys:["school","class","classroom"]},
+  park:{name:"the park",keys:["park","garden","trees"]},
+  plaza:{name:"the plaza",keys:["plaza","square","center","centre"]},
+  home:{name:"home",keys:["home","house","back"]}
 };
 const GLOW={ready:"rgba(77,141,255,.35)",go:"rgba(77,141,255,.35)",listen:"rgba(255,176,32,.32)",alert:"rgba(255,91,91,.38)",done:"rgba(61,220,132,.34)"};
 const ACC={ready:"#4d8dff",go:"#4d8dff",listen:"#ffb020",alert:"#ff5b5b",done:"#3ddc84"};
@@ -252,7 +252,7 @@ function demoJourney(d){
     [10000,"Obstacle ahead. Stopping.","Stopped","alert"],[13000,"The path is clear. Continuing.","On the way","go"],
     [16500,"Almost there.","Arriving","go"],[19500,"You have arrived at "+d.name+".","Arrived","done"]];
   steps.forEach(([ms,t,s,tone])=>timers.push(setTimeout(()=>{ announce(t,s,tone); if(s==="Arrived"){busy=false; setTimeout(()=>announce("Where would you like to go?","Ready","ready"),4000);} },ms))); }
-function stopAll(){ clearJourney(); busy=false; if(robot) send(" "); announce("Stopping now. You are safe.","Stopped","alert"); setTimeout(()=>announce("Where would you like to go?","Ready","ready"),3200); }
+function stopAll(){ clearJourney(); busy=false; if(robot) send(" "); if(bc) bc.postMessage({kind:"stop"}); announce("Stopping now. You are safe.","Stopped","alert"); setTimeout(()=>announce("Where would you like to go?","Ready","ready"),3200); }
 
 // optional robot
 const NUS="6e400001-b5a3-f393-e0a9-e50e24dcca9e",RX="6e400002-b5a3-f393-e0a9-e50e24dcca9e",TX="6e400003-b5a3-f393-e0a9-e50e24dcca9e";
@@ -281,7 +281,17 @@ $("#testVoice").onclick=()=>{ const oS=SYS_VOICE,oR=RATE,oK=EL_KEY,oV=EL_VOICE; 
 $("#mic").onclick=listen; $("#stop").onclick=stopAll;
 document.querySelectorAll(".chips button").forEach(b=>b.onclick=()=>go(b.dataset.dest));
 $("#startBtn").onclick=()=>{ $("#gate").style.display="none"; updateEngine(); announce("Hello. Where would you like to go? You can tap and speak, or choose a place.","Ready","ready"); };
-if(bc) bc.onmessage=ev=>{ const m=ev.data; if(!m||m.kind!=="event"||!m.e) return; lastHub=Date.now(); clearJourney(); const k=m.e.kind, tone=(k==="alert")?"alert":(k==="ok")?"done":"go", st=(k==="alert")?"Stopped":(k==="ok")?"Arrived":(k==="turn")?"Turning":"On the way"; announce(m.e.text,st,tone); if(k==="ok"){ busy=false; setTimeout(()=>announce("Where would you like to go?","Ready","ready"),4000); } };
+if(bc) bc.onmessage=ev=>{ const m=ev.data; if(!m) return;
+  if(m.kind==="ack"){ lastHub=Date.now(); clearJourney(); busy=true; return; }
+  let k=null, text=null;
+  if(m.kind==="say"){ k=m.tone||"go"; text=m.text; }
+  else if(m.kind==="event"&&m.e){ k=m.e.kind; text=m.e.text; }
+  if(text==null) return;
+  lastHub=Date.now(); clearJourney();
+  const tone=(k==="alert")?"alert":(k==="ok")?"done":"go";
+  const st=(k==="alert")?"Stopped":(k==="ok")?"Arrived":(k==="turn")?"Turning":"On the way";
+  announce(text,st,tone);
+  if(k==="ok"){ busy=false; setTimeout(()=>announce("Where would you like to go?","Ready","ready"),4000); } };
 if(window.speechSynthesis){ speechSynthesis.onvoiceschanged=loadVoices; loadVoices(); }
 updateEngine();
 </script>

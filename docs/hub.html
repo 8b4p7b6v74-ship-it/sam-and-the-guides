@@ -3,174 +3,265 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sam & the Guides — Fleet Hub</title>
+<title>Sam & the Guides — City Hub</title>
 <style>
   :root{--bg:#0a0c10;--panel:#12161d;--panel2:#161b23;--line:#20262f;--line2:#2a3240;
     --ink:#e9edf4;--muted:#7d8798;--accent:#4d8dff;--ok:#3ddc84;--warn:#ffb020;--bad:#ff5b5b;
-    --f:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;}
+    --f:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,Menlo,monospace;}
   @media(prefers-color-scheme:light){:root{--bg:#f5f7fa;--panel:#fff;--panel2:#f1f4f8;--line:#e3e8ef;--line2:#d5dce6;--ink:#1b2430;--muted:#5a6675;}}
   *{box-sizing:border-box}html,body{margin:0}
   body{background:var(--bg);color:var(--ink);font-family:var(--f);min-height:100vh}
   header{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);
-    display:flex;align-items:center;gap:12px;padding:13px 22px}
-  .mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(150deg,var(--accent),#2a5cc0);display:grid;place-items:center}
-  .mark svg{width:20px;height:20px}
-  h1{font-size:16px;margin:0;font-weight:700}.sub{color:var(--muted);font-size:11px}
+    display:flex;align-items:center;gap:12px;padding:12px 20px}
+  .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(150deg,var(--accent),#2a5cc0);display:grid;place-items:center}
+  .mark svg{width:19px;height:19px}
+  h1{font-size:15px;margin:0;font-weight:700}.sub{color:var(--muted);font-size:11px}
   .spacer{flex:1}
-  button{font-family:var(--f);font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid var(--line2);
-    background:var(--panel2);color:var(--ink);border-radius:10px;padding:9px 13px;transition:.15s}
+  button{font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--line2);
+    background:var(--panel2);color:var(--ink);border-radius:10px;padding:8px 12px;transition:.15s}
   button:hover{border-color:var(--accent)}
-  .stop{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:800}
-  .wrap{max-width:1160px;margin:0 auto;padding:22px}
-  .go{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line2);border-radius:16px;padding:16px;margin-bottom:18px}
-  .go h2{font-size:13px;margin:0 0 12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-  .dests{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-  @media(max-width:720px){.dests{grid-template-columns:repeat(2,1fr)}}
-  .dests .d{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);align-items:flex-start}
-  .dests .d b{font-size:15px}.dests .d input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:6px 8px;font-family:var(--mono);font-size:12px}
-  .dests .d small{color:var(--muted);font-size:10.5px}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  @media(max-width:820px){.grid{grid-template-columns:1fr}}
-  .rc{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:15px}
-  .rt{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  .role{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted)}
+  .stopb{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:800}
+  .primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+  @media(max-width:940px){.wrap{grid-template-columns:1fr}}
+  .panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:15px}
+  .panel h2{font-size:12px;margin:0 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
   .st{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
   .st.on{color:var(--ok);border-color:rgba(61,220,132,.3)}.st.alert{color:var(--bad);border-color:rgba(255,91,91,.35)}
   .led{width:8px;height:8px;border-radius:50%;background:currentColor}
-  .mission{font-size:22px;font-weight:700;margin:2px 0}
-  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
-  .metric{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
-  .metric .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-  .metric .v{font-family:var(--mono);font-size:17px;font-weight:600}
-  .cols{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px}
-  .panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:16px}
-  .panel h2{font-size:13px;margin:0 0 12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-  .feed{max-height:260px;overflow:auto}
-  .fi{display:flex;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line);font-size:13px}
-  .fi:last-child{border:none}.fi .t{font-family:var(--mono);color:var(--muted);font-size:11px}
-  .fdot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none;background:var(--muted)}
+  #map{width:100%;height:auto;display:block;background:var(--panel2);border:1px solid var(--line);border-radius:12px}
+  .mrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  select,input{font-family:var(--f);font-size:13px;padding:8px 10px;border:1px solid var(--line2);border-radius:9px;background:var(--panel2);color:var(--ink)}
+  .robots{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+  .rc{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:10px}
+  .rc .role{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em}
+  .rc .mv{font-family:var(--mono);font-size:13px;font-weight:700;margin-top:3px}
+  .rc .k{font-size:10px;color:var(--muted)}
+  .rc button{width:100%;margin-top:7px;padding:6px;font-size:11.5px}
+  .feed{max-height:230px;overflow:auto}
+  .fi{display:flex;gap:9px;padding:7px 2px;border-bottom:1px solid var(--line);font-size:12.5px}
+  .fi:last-child{border:none}.fi .t{font-family:var(--mono);color:var(--muted);font-size:10.5px}
+  .fdot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex:none;background:var(--muted)}
   .fdot.alert{background:var(--bad)}.fdot.ok{background:var(--ok)}.fdot.turn{background:var(--warn)}
-  .banner{background:rgba(255,176,32,.1);border:1px solid rgba(255,176,32,.3);border-radius:10px;padding:10px 13px;font-size:13px;margin-bottom:16px;display:none}
+  textarea{width:100%;min-height:110px;background:var(--panel2);border:1px solid var(--line2);color:var(--ink);
+    border-radius:10px;padding:10px;font-family:var(--mono);font-size:11.5px}
+  .banner{background:rgba(255,176,32,.1);border:1px solid rgba(255,176,32,.3);border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:12px;display:none}
+  .tag{font-family:var(--mono);font-size:11px;color:var(--accent)}
+  details summary{cursor:pointer;color:var(--muted);font-size:12px;margin-bottom:8px}
 </style>
 </head>
 <body>
 <header>
   <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3.4" r="1.2" fill="#fff" stroke="none"/><path d="M8.5 13h.01M15.5 13h.01"/><path d="M9.5 16.2c1.4.9 3.6.9 5 0"/></svg></div>
-  <div><h1>Fleet Hub</h1><div class="sub">Sam &amp; the Guides · coordinator</div></div>
+  <div><h1>City Hub</h1><div class="sub">Sam &amp; the Guides · map, routing &amp; fleet</div></div>
   <span class="spacer"></span>
+  <span class="st" id="pos">📍 at Home</span>
   <span class="st" id="fleetSt"><span class="led"></span><span id="online">0 online</span></span>
-  <button class="stop" onclick="stopAll()">■ STOP ALL</button>
+  <button class="stopb" onclick="stopAll()">■ STOP ALL</button>
 </header>
 
 <div class="wrap">
-  <div class="banner" id="btWarn">⚠️ Web Bluetooth unavailable — open in desktop Chrome over localhost/https.</div>
-
-  <div class="go">
-    <h2>Destinations — route = markers · S straight · L left · R right · A arrive</h2>
-    <div class="dests" id="dests"></div>
+  <div>
+    <div class="banner" id="btWarn">⚠️ Web Bluetooth unavailable — use desktop Chrome on localhost/https.</div>
+    <div class="panel">
+      <h2>City map <span class="tag" id="modeTag"></span></h2>
+      <svg id="map" viewBox="0 0 560 330"></svg>
+      <div class="mrow">
+        <span class="sub">Go to</span>
+        <select id="dest"></select>
+        <span class="sub">via</span>
+        <select id="via"><option value="">— direct —</option></select>
+        <select id="navmode"><option value="LINE">line + markers</option><option value="PATH">no line (encoders)</option></select>
+        <button class="primary" onclick="dispatchTrip()">▶ Go</button>
+        <button onclick="goHome()">⌂ Return home</button>
+      </div>
+      <div class="mrow"><span class="sub" id="planTxt">—</span></div>
+    </div>
+    <div class="panel" style="margin-top:14px">
+      <details><summary>City editor — paste Monday's real city here (JSON) · cm coordinates</summary>
+        <textarea id="cityjson" spellcheck="false"></textarea>
+        <div class="mrow"><button onclick="loadCity()">Load city</button><span class="sub">nodes: id, name, x, y (cm, y = north) · edges: pairs of ids · home: start node</span></div>
+      </details>
+    </div>
   </div>
 
-  <div class="grid" id="robots"></div>
-
-  <div class="cols">
-    <div class="panel"><h2>Activity</h2><div class="feed" id="feed"></div></div>
+  <div>
+    <div class="panel">
+      <h2>Fleet</h2>
+      <div class="robots" id="robots"></div>
+      <div class="mrow">
+        <span class="sub">Sam turn delay</span><input id="dSam" type="number" value="1200" style="width:70px"> ms
+        <span class="sub">Closer</span><input id="dClo" type="number" value="2400" style="width:70px"> ms
+        <span class="sub">speed</span><input id="spd" type="number" value="0.45" step="0.05" style="width:64px">
+      </div>
+    </div>
+    <div class="panel" style="margin-top:14px"><h2>Activity</h2><div class="feed" id="feed"></div></div>
   </div>
 </div>
 
 <script>
-const NUS="6e400001-b5a3-f393-e0a9-e50e24dcca9e",RX="6e400002-b5a3-f393-e0a9-e50e24dcca9e",TX="6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-const ROLES=["LEAD","GUARD","COMPANION"];
-const DESTS=[
-  {key:"store",name:"Store",route:"SSRA"},
-  {key:"bathroom",name:"Bathroom",route:"SLA"},
-  {key:"reception",name:"Reception",route:"SA"},
-  {key:"dining",name:"Dining room",route:"SSLA"}
-];
-const slots=[null,null,null];
-const bc=("BroadcastChannel" in window)?new BroadcastChannel("companion"):null;
+const NUS="6e400001-b5a3-f393-e0a9-e50e24dcca9e",RXU="6e400002-b5a3-f393-e0a9-e50e24dcca9e",TXU="6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+const ROLES=["OPENER","SAM","CLOSER"];
 const $=s=>document.querySelector(s);
 const nowStr=()=>new Date().toLocaleTimeString("en-GB",{hour12:false});
+const bc=("BroadcastChannel" in window)?new BroadcastChannel("companion"):null;
 
-function renderDests(){
-  $("#dests").innerHTML=DESTS.map((d,i)=>`<div class="d"><b>${d.name}</b>
-    <input id="rt${i}" value="${d.route}" spellcheck="false">
-    <small>marker actions</small>
-    <button style="width:100%;margin-top:4px" onclick="dispatch(${i})">▶ Go</button></div>`).join("");
+// ---------------- city model ----------------
+let CITY={
+  home:"home",
+  nodes:[{id:"home",name:"Home",x:0,y:0},{id:"plaza",name:"Plaza",x:120,y:0},
+    {id:"store",name:"Store",x:120,y:100},{id:"school",name:"School",x:240,y:0},
+    {id:"park",name:"Park",x:240,y:100}],
+  edges:[["home","plaza"],["plaza","store"],["plaza","school"],["store","park"],["school","park"]]
+};
+let cur=CITY.home, plan=null;   // plan={path:[ids], route:"..", pathCmd:"..", dest, prog}
+
+const N=id=>CITY.nodes.find(n=>n.id===id);
+function nbrs(id){const o=[];CITY.edges.forEach(([a,b])=>{if(a===id)o.push(b);if(b===id)o.push(a);});return o;}
+function bfs(a,b){if(a===b)return[a];const prev={[a]:null},q=[a];while(q.length){const u=q.shift();for(const v of nbrs(u))if(!(v in prev)){prev[v]=u;if(v===b){const p=[b];let c=b;while(prev[c]){c=prev[c];p.unshift(c);}return p;}q.push(v);}}return null;}
+const hd=(a,b)=>Math.atan2(N(b).y-N(a).y,N(b).x-N(a).x)*180/Math.PI;
+function turnOf(i,o){let r=o-i;while(r>180)r-=360;while(r<-180)r+=360;return Math.abs(r)<30?"S":(r>0?"L":"R");}
+function segLen(a,b){return Math.hypot(N(b).x-N(a).x,N(b).y-N(a).y);}
+
+function makePlan(from,dest,via){
+  let p1=bfs(from,via||dest); if(!p1)return null;
+  let path=p1;
+  if(via){const p2=bfs(via,dest); if(!p2)return null; path=p1.concat(p2.slice(1));}
+  let route="",cmds=[];
+  for(let i=0;i<path.length-1;i++){
+    const h=hd(path[i],path[i+1]);
+    if(i>0){const t=turnOf(hd(path[i-1],path[i]),h); route+=(t==="S"?"S":t); if(t!=="S")cmds.push(t+"90");}
+    cmds.push("D"+Math.round(segLen(path[i],path[i+1])));
+  }
+  route+="A"; cmds.push("A");
+  return {path,route,pathCmd:cmds.join(","),dest,prog:0};
 }
+
+// ---------------- map drawing ----------------
+function drawMap(){
+  const svg=$("#map"); const pad=45;
+  const xs=CITY.nodes.map(n=>n.x),ys=CITY.nodes.map(n=>n.y);
+  const mnx=Math.min(...xs),mxx=Math.max(...xs),mny=Math.min(...ys),mxy=Math.max(...ys);
+  const W=560,H=330;
+  const sx=x=>pad+(x-mnx)*(W-2*pad)/Math.max(1,mxx-mnx);
+  const sy=y=>H-pad-(y-mny)*(H-2*pad)/Math.max(1,mxy-mny);
+  let s="";
+  const onPath=(a,b)=>plan&&plan.path.some((id,i)=>i<plan.path.length-1&&((plan.path[i]===a&&plan.path[i+1]===b)||(plan.path[i]===b&&plan.path[i+1]===a)));
+  CITY.edges.forEach(([a,b])=>{s+=`<line x1="${sx(N(a).x)}" y1="${sy(N(a).y)}" x2="${sx(N(b).x)}" y2="${sy(N(b).y)}" stroke="${onPath(a,b)?'var(--accent)':'var(--line2)'}" stroke-width="${onPath(a,b)?5:3}" stroke-linecap="round"/>`;});
+  CITY.nodes.forEach(n=>{
+    const here=n.id===cur, dest=plan&&n.id===plan.dest;
+    s+=`<circle cx="${sx(n.x)}" cy="${sy(n.y)}" r="${here?13:9}" fill="${here?'var(--ok)':dest?'var(--warn)':'var(--panel)'}" stroke="${dest?'var(--warn)':'var(--line2)'}" stroke-width="2" style="cursor:pointer" onclick="quickGo('${n.id}')"/>`;
+    s+=`<text x="${sx(n.x)}" y="${sy(n.y)-18}" text-anchor="middle" fill="var(--ink)" font-size="13" font-weight="600" font-family="var(--f)">${n.name}</text>`;
+    if(here)s+=`<text x="${sx(n.x)}" y="${sy(n.y)+4}" text-anchor="middle" font-size="11">🤖</text>`;
+  });
+  svg.innerHTML=s;
+  $("#pos").textContent="📍 at "+(N(cur)?N(cur).name:cur);
+}
+function fillSelects(){
+  $("#dest").innerHTML=CITY.nodes.filter(n=>n.id!==cur).map(n=>`<option value="${n.id}">${n.name}</option>`).join("");
+  $("#via").innerHTML='<option value="">— direct —</option>'+CITY.nodes.filter(n=>n.id!==cur).map(n=>`<option value="${n.id}">${n.name}</option>`).join("");
+}
+function loadCity(){
+  try{const c=JSON.parse($("#cityjson").value);if(!c.nodes||!c.edges)throw 0;CITY=c;cur=c.home||c.nodes[0].id;plan=null;fillSelects();drawMap();log("ok","City loaded — "+CITY.nodes.length+" places");}
+  catch(e){log("alert","Invalid city JSON");}
+}
+function quickGo(id){ if(id!==cur){$("#dest").value=id;dispatchTrip();} }
+
+// ---------------- fleet (BLE) ----------------
+const slots=[null,null,null];
 function renderRobots(){
   const host=$("#robots");host.innerHTML="";
   for(let i=0;i<3;i++){const s=slots[i],on=s&&s.connected;
-    const c=document.createElement("div");c.className="rc";
-    c.innerHTML=`<div class="rt"><span class="role">${ROLES[i]}</span><span class="spacer" style="flex:1"></span>
-      <span class="st ${on?(s.alert?'alert':'on'):''}" id="stp${i}"><span class="led"></span>${on?(s.alert?'ALERT':'ONLINE'):'OFFLINE'}</span>
-      <button class="small" style="padding:6px 10px;font-size:12px" onclick="${on?`disc(${i})`:`conn(${i})`}">${on?'Disconnect':'Connect'}</button></div>
-      <div class="mission" id="m${i}">${on?(s.mission||'—'):'Offline'}</div>
-      <div class="metrics">
-        <div class="metric"><div class="k">Distance</div><div class="v" id="d${i}">—</div></div>
-        <div class="metric"><div class="k">Marker</div><div class="v" id="mk${i}">—</div></div>
-        <div class="metric"><div class="k">State</div><div class="v" id="ss${i}" style="font-size:13px">—</div></div>
-        <div class="metric"><div class="k">Line L·R</div><div class="v" id="lr${i}" style="font-size:13px">—</div></div>
-      </div>`;
-    host.appendChild(c);}
-  updateSummary();
+    host.innerHTML+=`<div class="rc"><div class="role">${ROLES[i]}</div>
+      <div class="mv" id="mv${i}">${on?(s.state||"—"):"offline"}</div>
+      <div class="k" id="mk${i}">front — · rear —</div>
+      <button onclick="${on?`disc(${i})`:`conn(${i})`}">${on?"Disconnect":"Connect"}</button></div>`;}
+  const n=slots.filter(s=>s&&s.connected).length;
+  $("#online").textContent=n+" online";
+  $("#fleetSt").className="st "+(slots.some(s=>s&&s.alert)?"alert":(n?"on":""));
 }
-function updateSummary(){const n=slots.filter(s=>s&&s.connected).length,al=slots.some(s=>s&&s.alert);
-  $("#online").textContent=n+" online";$("#fleetSt").className="st "+(al?"alert":(n?"on":""));}
-
 async function conn(i){
   if(!navigator.bluetooth){$("#btWarn").style.display="block";return;}
   try{const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[NUS]});
     const srv=await dev.gatt.connect(),svc=await srv.getPrimaryService(NUS);
-    const rx=await svc.getCharacteristic(RX),tx=await svc.getCharacteristic(TX);
+    const rx=await svc.getCharacteristic(RXU),tx=await svc.getCharacteristic(TXU);
     await tx.startNotifications();const buf={s:""};
     tx.addEventListener("characteristicvaluechanged",e=>{buf.s+=new TextDecoder().decode(e.target.value);let k;while((k=buf.s.indexOf("\n"))>=0){const ln=buf.s.slice(0,k).trim();buf.s=buf.s.slice(k+1);if(ln)parse(i,ln);}});
     dev.addEventListener("gattserverdisconnected",()=>{if(slots[i])slots[i].connected=false;renderRobots();log("info",ROLES[i]+" disconnected");});
-    slots[i]={dev,rx,connected:true,mission:"IDLE",dist:null,marker:0,state:"",alert:false};
-    send(i,"ROLE "+ROLES[i]);
-    renderRobots();log("ok",ROLES[i]+" connected — role assigned");
-  }catch(e){log("info","Connect cancelled: "+e.message);}
+    slots[i]={dev,rx,connected:true,state:"",front:null,rear:null,alert:false};
+    send(i,"ROLE "+ROLES[i]);renderRobots();log("ok",ROLES[i]+" connected");
+  }catch(e){log("info","Connect cancelled");}
 }
 function disc(i){try{slots[i]&&slots[i].dev.gatt.disconnect();}catch(e){}if(slots[i])slots[i].connected=false;renderRobots();}
 function send(i,str){const s=slots[i];if(!s||!s.connected)return;try{const d=new TextEncoder().encode(str+"\n");(s.rx.writeValueWithoutResponse?s.rx.writeValueWithoutResponse(d):s.rx.writeValue(d));}catch(e){}}
-function sendAll(str){for(let i=0;i<3;i++)if(slots[i]&&slots[i].connected)send(i,str);}
+function sendAll(str){for(let i=0;i<3;i++)send(i,str);}
+function stopAll(){sendAll("STOP");log("alert","STOP ALL");say("Stopping now. You are safe.","alert");}
 
-function dispatch(di){
-  const d=DESTS[di],route=($("#rt"+di).value||d.route).toUpperCase();
-  const lead=leadIndex();
-  if(lead<0){log("info","No LEAD connected — connect Robot 1 first");}
-  else send(lead,"ROUTE "+route);
+// ---------------- trips ----------------
+function dispatchTrip(){
+  const dest=$("#dest").value,via=$("#via").value||null,mode=$("#navmode").value;
+  const p=makePlan(cur,dest,via); if(!p){log("alert","No route found");return;}
+  plan=p;$("#modeTag").textContent=mode==="LINE"?"· line mode":"· no-line mode";
+  $("#planTxt").textContent="Route: "+p.path.map(id=>N(id).name).join(" → ")+"   ·   markers "+p.route+"   ·   path "+p.pathCmd;
+  const spd=parseFloat($("#spd").value)||0.45;
+  sendAll("SPD "+spd);
+  if(mode==="LINE")send(0,"ROUTE "+p.route); else send(0,"PATH "+p.pathCmd);
   sendAll("GO");
-  log("ok","→ "+d.name+"  (route "+route+")");
-  if(bc)bc.postMessage({kind:"event",e:{t:nowStr(),kind:"info",text:"Heading to "+d.name}});
+  drawMap();
+  log("ok","→ "+N(dest).name+(via?" via "+N(via).name:"")+"  ["+mode+"]");
+  say("Okay — taking you to "+N(dest).name+(via?", passing by "+N(via).name:"")+". The guides are leading.","go");
 }
-function leadIndex(){for(let i=0;i<3;i++)if(slots[i]&&slots[i].connected&&ROLES[i]==="LEAD")return i;return -1;}
-function stopAll(){sendAll("STOP");log("alert","STOP ALL");if(bc)bc.postMessage({kind:"event",e:{t:nowStr(),kind:"alert",text:"Emergency stop"}});}
+function goHome(){ if(cur===CITY.home){log("info","Already home");return;} $("#dest").value=CITY.home;$("#via").value="";dispatchTrip(); }
 
+// mirrored turns for the blind members
+function mirror(cmd){
+  const dS=parseInt($("#dSam").value)||1200,dC=parseInt($("#dClo").value)||2400;
+  setTimeout(()=>send(1,cmd),dS);
+  setTimeout(()=>send(2,cmd),dC);
+}
+
+// Sam speed control from the opener's rear eye
+let lastSpd=0,lastSent=0;
+function samSpeed(rear){
+  if(rear==null||rear>200)return;
+  const target=30,base=parseFloat($("#spd").value)||0.45;
+  let v=base+(rear-target)*0.008; v=Math.max(0.15,Math.min(0.65,v));
+  if(Math.abs(v-lastSpd)>0.04&&Date.now()-lastSent>500){lastSpd=v;lastSent=Date.now();send(1,"SPD "+v.toFixed(2));}
+}
+
+// ---------------- telemetry / events ----------------
 function parse(i,line){
-  const s=slots[i];if(!s)return;const p=line.split("|");
-  if(p[0]==="T"){s.mission=p[2];s.dist=parseFloat(p[3]);s.marker=parseInt(p[6]);s.state=p[7];s.alert=(p[7]==="ALERT");
-    setT(i,s,p[4],p[5]);updateSummary();}
+  const p=line.split("|");const s=slots[i];if(!s)return;
+  if(p[0]==="T"){s.front=parseFloat(p[3]);s.rear=parseFloat(p[4]);s.state=p[8]||p[7];s.alert=(s.state==="ALERT");
+    const mv=document.getElementById("mv"+i),mk=document.getElementById("mk"+i);
+    if(mv)mv.textContent=s.state||"—";
+    if(mk)mk.textContent="front "+(s.front<900?s.front.toFixed(0)+"cm":"—")+" · rear "+(s.rear<900?s.rear.toFixed(0)+"cm":"—");
+    if(i===0)samSpeed(s.rear<900?s.rear:null);
+    renderFleetState();}
   else if(p[0]==="E"){const t=p[1],m=p[2]||"";
-    if(t==="ALERT"){log("alert","⚠ Obstacle — "+ROLES[i]+" — STOPPING FLEET");stopAll();relay("alert","Obstacle ahead. Stopping.");}
-    else if(t==="TURN"){log("turn","Turn "+m+" — "+ROLES[i]);relay("turn","Turning "+m+".");}
-    else if(t==="MARK"){log("info","Marker "+m+" — "+ROLES[i]);}
-    else if(t==="ARRIVE"){log("ok","Arrived — "+ROLES[i]);relay("ok","You have arrived.");}
-    else if(t==="ROLE"){log("info",ROLES[i]+" ready");}
-    else if(t==="READY"){log("ok",ROLES[i]+" firmware ready");}}
+    if(t==="ALERT"){log("alert","⚠ Obstacle — stopping fleet");sendAll("STOP");say("Obstacle ahead. Stopping.","alert");}
+    else if(t==="LOST"){log("alert","Opener lost sight of Sam — waiting");say("Please keep up — waiting for you.","alert");}
+    else if(t==="TURN"){log("turn","Turn "+m);mirror(m==="left"?"TURNL":"TURNR");say("Turning "+m+".","turn");}
+    else if(t==="MARK"||t==="STEP"){if(plan){plan.prog=parseInt(m)||plan.prog+1;const idx=Math.min(plan.prog,plan.path.length-1);cur=plan.path[idx];drawMap();}log("info",(t==="MARK"?"Marker ":"Step ")+m);}
+    else if(t==="ARRIVE"&&i===0){if(plan){cur=plan.dest;plan=null;}fillSelects();drawMap();log("ok","Arrived");say("You have arrived. "+ (N(cur)?N(cur).name:"")+".","ok");setTimeout(()=>sendAll("STOP"),1500);}
+    else if(t==="READY")log("ok",ROLES[i]+" firmware ready ["+m+"]");
+    else if(t==="ROLE")log("info",ROLES[i]+" role set");}
 }
-function setT(i,s,l,r){const set=(id,v)=>{const e=document.getElementById(id+i);if(e)e.textContent=v;};
-  set("m",s.mission||"—");set("d",s.dist!=null?s.dist.toFixed(0)+" cm":"—");set("mk",s.marker||"0");set("ss",s.state||"—");set("lr",(parseFloat(l)).toFixed(2)+" · "+(parseFloat(r)).toFixed(2));
-  const p=document.getElementById("stp"+i);if(p){p.className="st "+(s.alert?"alert":"on");p.innerHTML='<span class="led"></span>'+(s.alert?"ALERT":"ONLINE");}}
+function renderFleetState(){const n=slots.filter(s=>s&&s.connected).length;$("#fleetSt").className="st "+(slots.some(s=>s&&s.alert)?"alert":(n?"on":""));}
 
+// ---------------- log / voice bridge ----------------
 const FEED=[];
-function log(kind,text){FEED.unshift({t:nowStr(),kind,text});if(FEED.length>120)FEED.pop();
-  $("#feed").innerHTML=FEED.slice(0,50).map(e=>`<div class="fi"><span class="fdot ${e.kind}"></span><div>${e.text}<div class="t">${e.t}</div></div></div>`).join("");}
-function relay(kind,text){if(bc)bc.postMessage({kind:"event",e:{t:nowStr(),kind,text}});}
+function log(kind,text){FEED.unshift({t:nowStr(),kind,text});if(FEED.length>150)FEED.pop();
+  $("#feed").innerHTML=FEED.slice(0,60).map(e=>`<div class="fi"><span class="fdot ${e.kind}"></span><div>${e.text}<div class="t">${e.t}</div></div></div>`).join("");}
+function say(text,tone){if(bc)bc.postMessage({kind:"say",text,tone});}
+if(bc)bc.onmessage=ev=>{const d=ev.data;
+  if(d&&d.kind==="mission"&&d.dest){const n=CITY.nodes.find(x=>x.id===d.dest||x.name.toLowerCase()===d.dest.toLowerCase());
+    if(n&&n.id!==cur){bc.postMessage({kind:"ack"});$("#dest").value=n.id;$("#via").value="";dispatchTrip();}}
+  if(d&&d.kind==="stop")stopAll();};
 
-// let the voice interface trigger a destination by name
-if(bc)bc.onmessage=ev=>{const d=ev.data;if(d&&d.kind==="mission"&&d.dest){const idx=DESTS.findIndex(x=>x.key===d.dest);if(idx>=0)dispatch(idx);}};
-
-renderDests();renderRobots();
+// ---------------- boot ----------------
+$("#cityjson").value=JSON.stringify(CITY,null,1);
+fillSelects();drawMap();renderRobots();
 if(!navigator.bluetooth)$("#btWarn").style.display="block";
 </script>
 </body>
