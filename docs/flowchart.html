@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sam & the Guides — System Process Flow</title>
+<style>
+  :root{
+    --bg:#ffffff; --surface:#f6f8fb; --border:#d6dde7; --bstrong:#9aa6b6;
+    --ink:#1e2733; --muted:#5a6675;
+    --blue:#3b6fe0; --bluef:#e8effc; --red:#d6553f; --redf:#fdece8;
+    --green:#2e9e6b; --greenf:#e6f6ee;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --bg:#0d1117; --surface:#171d26; --border:#2b3542; --bstrong:#4a5666;
+      --ink:#e7ecf3; --muted:#96a2b3; --blue:#4d8dff; --bluef:#15233c;
+      --red:#ff6b57; --redf:#2c1512; --green:#46c987; --greenf:#12291d; }
+  }
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:28px 20px 40px}
+  header{margin-bottom:6px}
+  h1{font-size:22px;margin:0 0 2px;font-weight:700;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:13px}
+  svg{width:100%;height:auto;display:block;margin-top:8px}
+  text{fill:var(--ink)}
+  .th{font-size:14px;font-weight:600}
+  .ts{font-size:12px;fill:var(--muted)}
+  .lbl{font-size:11px;font-weight:600;fill:var(--muted)}
+  .box{fill:var(--surface);stroke:var(--border);stroke-width:1.3}
+  .dec{fill:var(--bluef);stroke:var(--blue);stroke-width:1.4}
+  .safe{fill:var(--redf);stroke:var(--red);stroke-width:1.4}
+  .done{fill:var(--greenf);stroke:var(--green);stroke-width:1.4}
+  .start{fill:var(--bluef);stroke:var(--blue);stroke-width:1.4}
+  .arr{stroke:var(--bstrong);stroke-width:1.5;fill:none}
+  .loop{stroke:var(--border);stroke-width:1.2;stroke-dasharray:5 5;fill:none}
+  .rail{stroke:var(--red);stroke-width:1.4;stroke-dasharray:5 6;fill:none;opacity:.85}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Sam &amp; the Guides — System Process Flow</h1>
+  <div class="sub">From destination request to safe arrival, with the real-time coordination loop.</div>
+</header>
+
+<svg viewBox="0 0 680 1350" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Sam and the Guides system process flowchart</title>
+<desc>Connect the three-robot fleet, take a destination from Sam, plan route and ETA, run the trip, and repeat a 5 Hz coordination loop handling obstacles, spacing and arrival; an emergency stop is monitored at every step.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+<line class="rail" x1="58" y1="60" x2="58" y2="1288"/>
+<text class="lbl" x="44" y="680" transform="rotate(-90 44 680)" text-anchor="middle" fill="var(--red)">Emergency stop — Sam STOP or link lost → safe-stop all, any step</text>
+
+<rect class="loop" x="100" y="648" width="540" height="512" rx="14"/>
+<text class="ts" x="112" y="640" text-anchor="start">Coordination loop · ~5 Hz</text>
+
+<line class="arr" x1="300" y1="84" x2="300" y2="112" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="158" x2="300" y2="196" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="242" x2="300" y2="282" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="350" x2="300" y2="392" marker-end="url(#arrow)"/>
+<line class="arr" x1="385" y1="316" x2="450" y2="317" marker-end="url(#arrow)"/>
+<path class="arr" d="M540 294 L540 178 L300 178 L300 196" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="438" x2="300" y2="478" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="546" x2="300" y2="588" marker-end="url(#arrow)"/>
+<line class="arr" x1="385" y1="512" x2="450" y2="513" marker-end="url(#arrow)"/>
+<path class="arr" d="M540 536 L540 565 L300 565 L300 588" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="634" x2="300" y2="668" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="714" x2="300" y2="758" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="826" x2="300" y2="870" marker-end="url(#arrow)"/>
+<line class="arr" x1="385" y1="792" x2="450" y2="793" marker-end="url(#arrow)"/>
+<path class="arr" d="M540 816 L540 850 L300 850 L300 870" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="938" x2="300" y2="980" marker-end="url(#arrow)"/>
+<line class="arr" x1="385" y1="904" x2="450" y2="905" marker-end="url(#arrow)"/>
+<path class="arr" d="M540 928 L540 958 L300 958 L300 980" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="1026" x2="300" y2="1070" marker-end="url(#arrow)"/>
+<path class="arr" d="M215 1104 L112 1104 L112 691 L185 691" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="1138" x2="300" y2="1184" marker-end="url(#arrow)"/>
+<line class="arr" x1="300" y1="1230" x2="300" y2="1264" marker-end="url(#arrow)"/>
+
+<rect class="start" x="185" y="44" width="230" height="40" rx="20"/><text class="th" x="300" y="69" text-anchor="middle">Start: robots + app</text>
+<rect class="box" x="185" y="112" width="230" height="46" rx="8"/><text class="th" x="300" y="131" text-anchor="middle">Connect fleet, assign roles</text><text class="ts" x="300" y="147" text-anchor="middle">Companion · Lead · Guard</text>
+<rect class="box" x="185" y="196" width="230" height="46" rx="8"/><text class="th" x="300" y="215" text-anchor="middle">Sam picks a destination</text><text class="ts" x="300" y="231" text-anchor="middle">voice or tap</text>
+<polygon class="dec" points="300,282 385,316 300,350 215,316"/><text class="th" x="300" y="321" text-anchor="middle">On the map?</text>
+<rect class="box" x="450" y="294" width="180" height="46" rx="8"/><text class="th" x="540" y="321" text-anchor="middle">Ask again</text>
+<rect class="box" x="185" y="392" width="230" height="46" rx="8"/><text class="th" x="300" y="419" text-anchor="middle">Plan route + ETA</text>
+<polygon class="dec" points="300,478 385,512 300,546 215,512"/><text class="th" x="300" y="517" text-anchor="middle">Timed arrival?</text>
+<rect class="box" x="450" y="490" width="180" height="46" rx="8"/><text class="th" x="540" y="517" text-anchor="middle">Wait for departure</text>
+<rect class="box" x="185" y="588" width="230" height="46" rx="8"/><text class="th" x="300" y="607" text-anchor="middle">Start mission</text><text class="ts" x="300" y="623" text-anchor="middle">lead follows line</text>
+<rect class="box" x="185" y="668" width="230" height="46" rx="8"/><text class="th" x="300" y="687" text-anchor="middle">Read telemetry</text><text class="ts" x="300" y="703" text-anchor="middle">all 3 robots</text>
+<polygon class="dec" points="300,758 385,792 300,826 215,792"/><text class="th" x="300" y="797" text-anchor="middle">Obstacle ahead?</text>
+<rect class="safe" x="450" y="770" width="180" height="46" rx="8"/><text class="th" x="540" y="789" text-anchor="middle">Stop all, alert</text><text class="ts" x="540" y="805" text-anchor="middle">wait until clear</text>
+<polygon class="dec" points="300,870 385,904 300,938 215,904"/><text class="th" x="300" y="909" text-anchor="middle">Sam lagging?</text>
+<rect class="box" x="450" y="882" width="180" height="46" rx="8"/><text class="th" x="540" y="901" text-anchor="middle">Slow lead</text><text class="ts" x="540" y="917" text-anchor="middle">speed up companion</text>
+<rect class="box" x="185" y="980" width="230" height="46" rx="8"/><text class="th" x="300" y="999" text-anchor="middle">Guide + publish state</text><text class="ts" x="300" y="1015" text-anchor="middle">cloud, family view</text>
+<polygon class="dec" points="300,1070 385,1104 300,1138 215,1104"/><text class="th" x="300" y="1109" text-anchor="middle">Arrived?</text>
+<rect class="done" x="185" y="1184" width="230" height="46" rx="8"/><text class="th" x="300" y="1203" text-anchor="middle">Announce arrival, stop</text><text class="ts" x="300" y="1219" text-anchor="middle">voice + arm tap</text>
+<rect class="done" x="185" y="1264" width="230" height="40" rx="20"/><text class="th" x="300" y="1289" text-anchor="middle">Done</text>
+
+<text class="lbl" x="312" y="374" text-anchor="start">yes</text>
+<text class="lbl" x="417" y="308" text-anchor="start">no</text>
+<text class="lbl" x="312" y="570" text-anchor="start">no</text>
+<text class="lbl" x="415" y="504" text-anchor="start">yes</text>
+<text class="lbl" x="312" y="850" text-anchor="start">no</text>
+<text class="lbl" x="415" y="784" text-anchor="start">yes</text>
+<text class="lbl" x="312" y="962" text-anchor="start">no</text>
+<text class="lbl" x="415" y="896" text-anchor="start">yes</text>
+<text class="lbl" x="312" y="1162" text-anchor="start">yes</text>
+<text class="lbl" x="118" y="684" text-anchor="start">no · repeat</text>
+
+<rect class="dec" x="40" y="1316" width="14" height="14" rx="3"/><text class="ts" x="60" y="1327" text-anchor="start">Decision</text>
+<rect class="box" x="150" y="1316" width="14" height="14" rx="3"/><text class="ts" x="170" y="1327" text-anchor="start">Action</text>
+<rect class="safe" x="255" y="1316" width="14" height="14" rx="3"/><text class="ts" x="275" y="1327" text-anchor="start">Safety stop</text>
+<rect class="done" x="400" y="1316" width="14" height="14" rx="3"/><text class="ts" x="420" y="1327" text-anchor="start">Complete</text>
+</svg>
+</div>
+</body>
+</html>

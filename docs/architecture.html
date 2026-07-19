@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sam & the Guides — Software Architecture</title>
+<style>
+  :root{
+    --bg:#ffffff; --surface:#f6f8fb; --border:#d6dde7; --bstrong:#9aa6b6;
+    --ink:#1e2733; --muted:#5a6675;
+    --blue:#3b6fe0; --bluef:#e8effc; --red:#d6553f; --redf:#fdece8;
+    --green:#2e9e6b; --greenf:#e6f6ee; --band:#f2f5f9;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --bg:#0d1117; --surface:#171d26; --border:#2b3542; --bstrong:#4a5666;
+      --ink:#e7ecf3; --muted:#96a2b3; --blue:#4d8dff; --bluef:#15233c;
+      --red:#ff6b57; --redf:#2c1512; --green:#46c987; --greenf:#12291d; --band:#12171f; }
+  }
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:960px;margin:0 auto;padding:28px 20px 40px}
+  h1{font-size:22px;margin:0 0 2px;font-weight:700}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:8px}
+  svg{width:100%;height:auto;display:block}
+  text{fill:var(--ink)}
+  .th{font-size:14px;font-weight:600}
+  .ts{font-size:12px;fill:var(--muted)}
+  .m{font-size:12px;font-weight:600}
+  .lyr{font-size:11px;font-weight:700;fill:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  .band{fill:var(--band)}
+  .box{fill:var(--surface);stroke:var(--border);stroke-width:1.3}
+  .dec{fill:var(--bluef);stroke:var(--blue);stroke-width:1.3}
+  .core{fill:var(--blue);stroke:var(--blue);stroke-width:1.3}
+  .hub{fill:none;stroke:var(--blue);stroke-width:1.6}
+  .cloud{fill:var(--surface);stroke:var(--bstrong);stroke-width:1.3;stroke-dasharray:5 5}
+  .arr{stroke:var(--bstrong);stroke-width:1.6;fill:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Software Architecture — Sam &amp; the Guides</h1>
+<div class="sub">Dumb robots, one intelligent hub. The app coordinates the three robots over Bluetooth and pushes live state to the cloud.</div>
+
+<svg viewBox="0 0 900 612" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Layered software architecture</title>
+<desc>Five layers from top to bottom: clients (operator UI and remote family view), optional cloud, the hub coordinator with its ten software modules, the Bluetooth transport, and three robots running identical firmware.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+<rect class="band" x="12" y="210" width="876" height="230" rx="12"/>
+
+<text class="lyr" x="24" y="82" text-anchor="start">Clients</text>
+<text class="lyr" x="24" y="170" text-anchor="start">Cloud</text>
+<text class="lyr" x="24" y="322" text-anchor="start">Hub</text>
+<text class="lyr" x="24" y="478" text-anchor="start">Transport</text>
+<text class="lyr" x="24" y="548" text-anchor="start">Robots</text>
+
+<line class="arr" x1="300" y1="102" x2="300" y2="222" marker-end="url(#arrow)"/>
+<line class="arr" x1="710" y1="102" x2="710" y2="140" marker-end="url(#arrow)"/>
+<line class="arr" x1="710" y1="188" x2="710" y2="222" marker-end="url(#arrow)"/>
+<line class="arr" x1="515" y1="432" x2="515" y2="452" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<line class="arr" x1="262" y1="496" x2="262" y2="512" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<line class="arr" x1="514" y1="496" x2="514" y2="512" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<line class="arr" x1="766" y1="496" x2="766" y2="512" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+
+<rect class="dec" x="150" y="48" width="300" height="54" rx="9"/><text class="th" x="300" y="72" text-anchor="middle">Operator &amp; Sam — Hub UI</text><text class="ts" x="300" y="90" text-anchor="middle">voice in · dashboard · STOP</text>
+<rect class="dec" x="560" y="48" width="300" height="54" rx="9"/><text class="th" x="710" y="72" text-anchor="middle">Family view</text><text class="ts" x="710" y="90" text-anchor="middle">remote · read-only</text>
+
+<rect class="cloud" x="560" y="140" width="300" height="48" rx="9"/><text class="th" x="710" y="160" text-anchor="middle">Cloud — Supabase Realtime</text><text class="ts" x="710" y="177" text-anchor="middle">live state + journey logs · optional</text>
+
+<rect class="hub" x="150" y="222" width="730" height="206" rx="12"/>
+<text class="th" x="165" y="243" text-anchor="start">Hub / Coordinator — the brain</text><text class="ts" x="620" y="243" text-anchor="start">web app · Web Bluetooth</text>
+
+<rect class="box" x="168" y="258" width="124" height="44" rx="8"/><text class="m" x="230" y="284" text-anchor="middle">Mission ctrl</text>
+<rect class="box" x="310" y="258" width="124" height="44" rx="8"/><text class="m" x="372" y="284" text-anchor="middle">Planner + ETA</text>
+<rect class="core" x="452" y="258" width="124" height="44" rx="8"/><text class="m" x="514" y="284" text-anchor="middle" fill="#fff">Coordinator</text>
+<rect class="core" x="594" y="258" width="124" height="44" rx="8"/><text class="m" x="656" y="284" text-anchor="middle" fill="#fff">Safety sup.</text>
+<rect class="box" x="736" y="258" width="124" height="44" rx="8"/><text class="m" x="798" y="284" text-anchor="middle">Voice I/O</text>
+<rect class="box" x="168" y="316" width="124" height="44" rx="8"/><text class="m" x="230" y="342" text-anchor="middle">Map model</text>
+<rect class="box" x="310" y="316" width="124" height="44" rx="8"/><text class="m" x="372" y="342" text-anchor="middle">Telemetry store</text>
+<rect class="box" x="452" y="316" width="124" height="44" rx="8"/><text class="m" x="514" y="342" text-anchor="middle">Fleet (BLE)</text>
+<rect class="box" x="594" y="316" width="124" height="44" rx="8"/><text class="m" x="656" y="342" text-anchor="middle">Cloud sync</text>
+<rect class="box" x="736" y="316" width="124" height="44" rx="8"/><text class="m" x="798" y="342" text-anchor="middle">UI</text>
+<text class="ts" x="515" y="392" text-anchor="middle">Coordinator + Safety = the ~5 Hz control loop (speed · spacing · e-stop)</text>
+<text class="ts" x="515" y="410" text-anchor="middle">commands ↓   ·   telemetry ↑</text>
+
+<rect class="box" x="150" y="452" width="730" height="44" rx="8"/><text class="th" x="515" y="479" text-anchor="middle">Bluetooth (BLE) — Nordic UART · one link per robot</text>
+
+<rect class="box" x="150" y="512" width="224" height="64" rx="9"/><text class="th" x="262" y="537" text-anchor="middle">Lead guide</text><text class="ts" x="262" y="555" text-anchor="middle">scouts the line</text>
+<rect class="box" x="402" y="512" width="224" height="64" rx="9"/><text class="th" x="514" y="537" text-anchor="middle">Guard guide</text><text class="ts" x="514" y="555" text-anchor="middle">side safety</text>
+<rect class="box" x="654" y="512" width="224" height="64" rx="9"/><text class="th" x="766" y="537" text-anchor="middle">Companion</text><text class="ts" x="766" y="555" text-anchor="middle">stays with Sam</text>
+
+<text class="ts" x="515" y="598" text-anchor="middle">All three run identical MicroPython firmware: line-follow · ultrasound follow · stop-on-obstacle · LED/arm · emit telemetry</text>
+</svg>
+</div>
+</body>
+</html>

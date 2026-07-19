@@ -1,0 +1,6 @@
+# Raspberry Pi Robot Dependencies
+# Uncomment what you need:
+
+# RPi.GPIO==0.7.0
+# adafruit-circuitpython-dht==3.7.10
+# flask==2.3.0

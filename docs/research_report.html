@@ -1,0 +1,275 @@
+<html><head><meta charset="utf-8"><title>Sam &amp; the Guides — Research Report</title></head><body><h1>Sam &amp; the Guides: A System of Coordinated Low-Cost Robots for Indoor Guidance of Blind and Visually-Impaired People</h1>
+<p><em>Market, technology, competitive and impact assessment — compiled from the research team's findings. Prepared 17 July 2026.</em></p>
+
+<h2>1. Executive Summary</h2>
+<p>"Sam &amp; the Guides" is a concept for a camera-free, internet-free system of three low-cost robots and a coordinating phone app that <strong>physically leads</strong> a blind or visually-impaired person along pre-mapped indoor routes. This report assesses the opportunity across demographics, market size, competition, incumbent alternatives, technical feasibility, academic precedent, regulation, business model, risk and social impact, drawing only on the team's sourced findings.</p>
+<ul>
+<li><strong>The need is large, growing and under-served.</strong> At least 2.2 billion people worldwide have a vision impairment [1]; an estimated 43 million were blind in 2020, projected to reach about 61 million by 2050 as populations age [2]. Yet only 28% of blind and partially sighted people feel able to travel independently, and unfamiliar indoor spaces — the exact target venues — defeat the white cane because they lack tactile landmarks [3][4].</li>
+<li><strong>The incumbent "physical guidance" solution does not scale.</strong> Guide dogs cost roughly US$45,000–$60,000 to train [27], serve only about 2% of blind people [28], and number fewer than 19,000 working animals worldwide — a total that is actually declining [29]. The white cane, used by the majority, only senses obstacles by contact below the waist within ~1.2–1.5 m and misses head-height hazards, which injure over 40% of users monthly [34][35].</li>
+<li><strong>The enabling technology is mature and cheap.</strong> Ultra-wideband radios give 10–30 cm follow-the-leader precision [36], BLE beacons cost a few dollars each [37], ultrasonic sensors cost $1–3 [38], commercial "follow-me" modules already exist [39], and camera-free operation sidesteps real privacy/HIPAA barriers in care homes and hospitals [42][71].</li>
+<li><strong>The market is real and regulation is a tailwind.</strong> The assistive-technology-for-visually-impaired market is roughly $6.3B in 2025, growing ~12% a year [9], accelerated by the European Accessibility Act (enforceable June 2025) and a web of accessibility mandates on the exact institutional buyers targeted [52][53].</li>
+<li><strong>The closest commercial competitor validates the model but is different.</strong> Glidance's "Glide" ($1,499 hardware + ~$30/month) physically steers one user via a hand-held handle, but was not yet shipping in mid-2026 [17][48]. No shipping product uses a coordinated multi-robot escort — a genuine novelty opportunity and, equally, an unproven-architecture risk.</li>
+</ul>
+<p><strong>Bottom line:</strong> The problem, the demographics, the enabling technology, the pricing headroom and the regulatory environment all support a low-cost physical-guidance system for institutions. The principal uncertainties are architectural (no multi-robot precedent), operational (dense dynamic crowds remain unsolved even for the field's most advanced project [46]) and behavioural (assistive devices are abandoned at high rates without co-design [70]).</p>
+
+<h2>2. The Problem &amp; Who It Affects</h2>
+<p>Vision impairment is one of the largest health conditions globally. At least <strong>2.2 billion people</strong> have a near or distance vision impairment, and for at least 1 billion of them the condition is preventable or still unaddressed; the annual global productivity cost is estimated at <strong>US$411 billion</strong> [1]. An estimated 43.3 million people were blind and 295 million had moderate-to-severe vision impairment as of 2020, and most people with vision impairment are over the age of 50 [1] — a demographic skew that maps directly onto the care-home and hospital settings the product targets.</p>
+<p>The population is expanding, not shrinking. By 2050 the number of blind people is projected to rise to about <strong>61 million</strong> and those with moderate/severe impairment to 474 million; between 1990 and 2020 the count of blind adults aged 50+ grew 50.6% even as age-standardised rates fell 28.5%, because population growth and ageing outpace medical progress [2]. In the U.S. alone, roughly 60% of people with vision impairment are 65 or older, 1 in 4 adults over 71 are affected, and total cases are expected to double to more than 8 million by 2050 [7].</p>
+
+<h3>Indoor mobility is the sharpest unmet need</h3>
+<p>RNIB research found only <strong>28%</strong> of blind and partially sighted people feel able to travel independently, with just 42% confident moving around their own home and 43% outdoors — even after receiving support [3]. Indoor navigation is uniquely hard: unlike outdoors, blind people cannot use curbs, walls and traffic sound as landmarks, which makes first-time navigation of an unfamiliar building — airports, stations, museums — effectively "too difficult to attempt" [4]. Today the fallback in complex public buildings is scarce, on-demand human assistance: U.S. airlines are legally required to escort blind passengers, but the passenger must self-identify and request it, and terminal wayfinding is described as a major challenge affecting mobility and quality of life for the 4M+ Americans with impaired vision [8].</p>
+
+<h3>The downstream harms</h3>
+<p>The mobility gap tracks directly with severe secondary harms. Only about <strong>44%</strong> of people who are blind or visually impaired are employed, versus 79% of people without disabilities, and over half of working-age blind/VI adults are entirely out of the labour force [5]. Meta-analytic evidence puts diagnosed depression among blind people at about <strong>25%</strong>, with significantly higher rates of anxiety and social isolation than the sighted population — with loss of independent mobility repeatedly cited as a driver [6]. Restoring independent movement is therefore a mental-health and economic-inclusion lever, not merely a convenience.</p>
+
+<h2>3. Market Opportunity</h2>
+<p>The addressable population (2.2 billion with vision impairment [1]) is enormous, but the <em>commercially</em> relevant figure is the assistive-technology market that this product sits in. Analysts cluster around a mid-single-digit-billion 2024/2025 base growing at roughly 12% a year, though firms disagree widely on absolute size — so any TAM should be treated as a <strong>range</strong>, not a point estimate.</p>
+
+<h3>Category market estimates</h3>
+<div style="overflow-x:auto">
+<table>
+<thead>
+<tr><th>Market segment</th><th>Base value</th><th>Projected value</th><th>CAGR</th><th>Source</th></tr>
+</thead>
+<tbody>
+<tr><td>Assistive tech for the visually impaired</td><td>~US$6.34B (2025)</td><td>US$12.42B by 2031</td><td>11.86%</td><td>Mordor Intelligence [9]</td></tr>
+<tr><td>Assistive tech for the visually impaired (alt.)</td><td>US$5.72B (2024)</td><td>US$21.01B by 2034</td><td>13.89%</td><td>Zion Market Research [10]</td></tr>
+<tr><td>Assistive tech for the visually impaired (alt.)</td><td>US$6.33B (2024)</td><td>US$12.95B by 2030</td><td>12.67%</td><td>NextMSC [65]</td></tr>
+<tr><td>Low-vision &amp; blind-aids products (established)</td><td>—</td><td>~US$7.5B by 2033</td><td>5.8%</td><td>Strategic Revenue Insights [16]</td></tr>
+<tr><td>Assistive robotics (broad)</td><td>—</td><td>US$57.88B by 2033</td><td>~20.9%</td><td>MarketsandMarkets [11]</td></tr>
+<tr><td>Elder-care assistive robots</td><td>US$3.4B (2025)</td><td>US$9.8B by 2033</td><td>14.2%</td><td>Grand View Research [12]</td></tr>
+</tbody>
+</table>
+</div>
+<p>Two structural signals matter. First, established low-vision aids grow at only ~6% [16] while the robotics segments grow at 14–21% [11][12] — the growth upside lies in the robotics/navigation crossover the product occupies. Second, the elder-care robot market skews toward exactly this use case: "physically assistive robots" hold 55.1% share, mobility assistance is a named functionality, and North America alone was US$1.12B in 2025 [12].</p>
+
+<h3>TAM / SAM / SOM (bottom-up by facility)</h3>
+<p>Because the buyers are institutions, the institutional TAM is best sized bottom-up from facility counts rather than from a single top-down number:</p>
+<ul>
+<li><strong>TAM (outer bound):</strong> the global venue universe — roughly 41,700 airports worldwide [13], ~104,000 museums [15], hundreds of thousands of hospitals and long-term-care facilities (the global long-term-care market was US$1,100.7B in 2022, heading to US$2,168.1B by 2032 [14]).</li>
+<li><strong>SAM (reachable, budget-capable):</strong> the ~1,200 large international airports [13]; the ~47,000 U.S. senior-care facilities (≈15,000 nursing homes plus 32,000+ assisted-living/residential communities, ~1.2 million beds) [14]; the ~61% of museums concentrated in Western Europe and North America [15]; plus the ~16,566 UK care homes housing ~441,000 residents [80].</li>
+<li><strong>SOM (near-term beachhead):</strong> a lighthouse subset of high-footfall, mandate-driven, reference-able sites — international airports and large care-home groups first (see §11).</li>
+</ul>
+
+<h2>4. Competitive Landscape</h2>
+<p>The landscape splits into two groups. The overwhelming majority of blind-navigation products are <strong>audio-only</strong> — smartphone apps or an open standard that announce turn-by-turn directions over BLE beacons, coded tags or LiDAR, but leave the user to walk unaided with a cane. Only a very small, emerging category actually <strong>physically leads</strong> the user, and Sam &amp; the Guides' specific three-robot escort architecture has essentially no shipping precedent.</p>
+<div style="overflow-x:auto">
+<table>
+<thead>
+<tr><th>Product / approach</th><th>Type</th><th>Physically leads user?</th><th>Price</th><th>Notes &amp; source</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Glidance "Glide"</strong></td><td>Single self-guided wheeled robot with telescoping handle</td><td><strong>Yes</strong> (one user, hand-held)</td><td>$1,500 ($1,799 w/ annual sub) + $30/mo</td><td>Closest direct competitor; preorders sold out Dec 2024, shipping expected Spring 2026; subscription-locked [17]</td></tr>
+<tr><td><strong>Academic quadruped "robot guide dogs"</strong></td><td>Research prototypes (leash/handle)</td><td>Yes (research only)</td><td>Non-commercial</td><td>Motivated by ~$40,000 guide-dog training cost; single-robot, not productized [25]</td></tr>
+<tr><td>WeWALK Smart Cane V2</td><td>Smart cane (ultrasonic + voice)</td><td>No — user sweeps &amp; walks</td><td>~$999</td><td>Detects head/chest-height obstacles a cane misses; warns/instructs only [18]</td></tr>
+<tr><td>BlindSquare</td><td>Audio GPS app + BLE beacons</td><td>No</td><td>$39.99 (iOS)</td><td>"World's most widely used" accessible GPS app; announces POIs/junctures [19]</td></tr>
+<tr><td>GoodMaps Explore</td><td>Audio app, LiDAR/camera positioning</td><td>No — user holds phone</td><td>Free to user (venue pays)</td><td>Accurate "down to the foot"; deployed in airports, hospitals, museums, transit [20]</td></tr>
+<tr><td>NaviLens</td><td>Coded-tag app (scan fixed signs)</td><td>No</td><td>Free app</td><td>~6,000 signs at VIA (San Antonio); Keolis/MBTA Boston pilot; discrete points, not continuous [21]</td></tr>
+<tr><td>Evelity (Okeenea)</td><td>BLE-beacon audio wayfinding app</td><td>No</td><td>Venue-deployed</td><td>Lyon/Marseille metro, NYC Jay St–MetroTech; step-by-step audio/haptic [22]</td></tr>
+<tr><td>Lazarillo</td><td>Free audio GPS app + beacons/LiDAR</td><td>No</td><td>Free</td><td>Reports 300,000+ users worldwide; spoken guidance only [23]</td></tr>
+<tr><td>Wayfindr</td><td>ITU-approved open standard (ITU-T F.921)</td><td>No</td><td>Standard, not a product</td><td>Codifies BLE-beacon audio wayfinding; confirms the industry default is audio-only [24]</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Interpretation.</strong> The established industry approach — reinforced by an ITU standard [24] — is spoken navigation that never touches the user. The only players that physically guide are Glidance (a single subscription-locked handle-held device not yet shipping [17]) and non-commercial research quadrupeds [25]. Sam &amp; the Guides' differentiator is a <em>low-cost, camera-free, coordinated multi-robot escort</em>; its risk is that this exact architecture is unproven at market.</p>
+
+<h2>5. The Incumbent Alternatives: Guide Dogs &amp; White Canes</h2>
+<h3>Guide dogs: scarce and expensive by construction</h3>
+<p>Guide dogs are the closest existing "physical guidance" solution, and their economics define the gap the product addresses:</p>
+<div style="overflow-x:auto">
+<table>
+<thead><tr><th>Metric</th><th>Figure</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>Cost to train one dog</td><td>~$45,000–$60,000 over ~2 years (up to ~$50,000 investment)</td><td>Dogster [27]</td></tr>
+<tr><td>Share of blind people who use one</td><td>~2% (broader estimates 2–8%)</td><td>Guiding Eyes [28]</td></tr>
+<tr><td>Working guide dogs worldwide</td><td>18,978 (Dec 2025) — declining from 19,557 (2023)</td><td>IGDF [29]</td></tr>
+<tr><td>U.S. / UK working teams</td><td>~10,000 (US); ~5,000 (UK)</td><td>Guide Dogs for the Blind [30]</td></tr>
+<tr><td>Training success rate</td><td>~60% (fell to ~47% during Covid)</td><td>Guide Dogs UK [31]</td></tr>
+<tr><td>Working life</td><td>~5–7 years (starts ~age 2, retires 8–10)</td><td>Guiding Eyes [32]</td></tr>
+<tr><td>Waiting times</td><td>~6 months to 5 years; ~9,000 clients on ADI waiting lists (2022)</td><td>Yahoo/PA [33]</td></tr>
+</tbody>
+</table>
+</div>
+<p>Costs are borne almost entirely by charities, and a dog that washes out mid-programme still represents a loss of more than $12,000 [27]. Roughly 65–77% of failures are behavioural rather than health-related [31]. The result is a tiny, shrinking, expensive-to-replenish pool against a blind population in the tens of millions — a supply wall the incumbent model cannot scale past.</p>
+
+<h3>The white cane: cheap but fundamentally limited</h3>
+<p>The white cane, used by the overwhelming majority, detects hazards only by physical contact, below waist level, within a reach of just ~1.2–1.5 m — giving no advance warning and no ability to detect head-height or overhead obstacles [34]. It also cannot tell the user where a destination is or route them there; it only reveals what the tip already touches [34]. In a survey of 300 visually impaired people, over 40% reported head-level accidents at least once a month, and 23% of those incidents had medical consequences [35]. This is precisely the failure mode a mapped, actively-guiding system can address.</p>
+
+<h2>6. Technology &amp; Feasibility (Why Camera-Free / Low-Cost Works)</h2>
+<p>The camera-free indoor-guidance stack the concept depends on is mature, cheap and — importantly — commercially off-the-shelf.</p>
+<ul>
+<li><strong>Precise robot-to-robot spacing (UWB).</strong> Ultra-wideband delivers 10–30 cm indoor positioning via true time-of-flight, versus 3–5 m for signal-strength BLE, with high multipath resistance in complex spaces like hospitals and airports — precise enough to hold fixed spacing and speed without a camera [36].</li>
+<li><strong>Cheap zone localization (BLE beacons).</strong> BLE beacons cost roughly $5–$35 each, run 2–8 years on a coin cell, and use existing phones/tablets as readers, cutting deployment cost by ~60%. RSSI gives ~3–5 m zone accuracy; Bluetooth 5.1 Angle-of-Arrival tightens this to 0.3–0.5 m — enough to place each robot in the correct corridor along a pre-mapped, no-internet route [37].</li>
+<li><strong>Obstacle/spacing sensing (ultrasonic).</strong> The HC-SR04 sensor measures 2 cm–400 cm at ~±3 mm within a 30° cone, works regardless of lighting or matte-black surfaces, and costs ~$1–3 in bulk [38].</li>
+<li><strong>The follow primitive already ships.</strong> Commercial UWB "follow-me" anchor/tag modules (e.g. Weston Robot) let a robot track and follow a person or another robot to within a few centimetres at ranges up to 50 m — essentially the exact primitive the concept needs [39].</li>
+<li><strong>Proven control theory.</strong> Leader-follower is the foundational multi-robot formation-control method, valued because it is "simple and easy to implement," but it assumes reliable localization and high-frequency communication [40] — which is exactly why fixed pre-mapped routes plus UWB/BLE anchors matter.</li>
+</ul>
+<h3>The key technical risk: drift</h3>
+<p>Pedestrian/inertial dead-reckoning from smartphone MEMS IMUs suffers error that accumulates with time, so accurate systems must correct it with short-range radio anchors or map-matching rather than IMU alone [41]. The peer-reviewed consensus is that hybrid designs pairing dead-reckoning with BLE/UWB fixed points and pre-mapped route matching produce a "drift-free" path — validating the beacon-anchored, pre-mapped-route architecture and flagging IMU-only navigation as unsafe [41].</p>
+<h3>Camera-free is a compliance advantage, not just a cost choice</h3>
+<p>Video surveillance faces explicit privacy, dignity and HIPAA barriers in the exact target venues; guidance for care homes tells operators to weigh "whether less privacy intrusive solutions could achieve the same objectives" [42]. A camera-free guidance robot avoids this entire consent/compliance burden — a concrete adoption advantage over camera-based guide robots for institutional buyers.</p>
+<h3>Cost feasibility and a cheap fallback</h3>
+<p>Guide-dog scarcity and cost are the market gap, and researchers estimate a robotic guide could fall below $2,000 [26]; peer-reviewed work (RDog, CHI 2024) shows physical guidance plus voice cues produces faster, smoother navigation with fewer collisions and lower cognitive load for blind users [43]. For fixed corridors, magnetic-tape/line-following AGV guidance is "often more cost-effective than other types of AGVs," and line-following robot kits sell for $150–$300 — a proven, low-cost routing fallback that complements radio positioning at turns and stops [44].</p>
+
+<h2>7. Academic &amp; Industry Precedents</h2>
+<p>The precedent base is deep and credible — and carries two hard lessons.</p>
+<ul>
+<li><strong>CMU/IBM "AI Suitcase" (CaBot).</strong> Led by blind IBM Fellow Chieko Asakawa since 2017, it has run field trials in a shopping mall, museum and airport involving ~2,200 participants (about a quarter visually impaired) as of Sept 2024; in the original 2019 study, blind testers rated it favourably against a guide dog or sighted guide [45]. It entered permanent daily operation at Japan's Miraikan museum in April 2024, and 83% of blind participants were "very satisfied" or "satisfied" [73]. It is now backed by a four-company consortium (Alps Alpine, OMRON, Shimizu, IBM Japan) and demonstrated daily at Expo 2025 Osaka [47].</li>
+<li><strong>The unsolved-problem flag.</strong> Despite ~8 years of development, the AI Suitcase has <em>not</em> been commercialized, blocked by outdoor position measurement and complex/dynamic obstacles such as crowds [46] — the very conditions in the airports and stations the concept targets. Its latest model still relies on a built-in camera and generative AI [47], the opposite of the no-camera/no-internet premise.</li>
+<li><strong>Academic quadrupeds.</strong> RDog (CHI 2024, Unitree Go1 EDU with five fisheye stereo-camera sets plus ultrasonics) measurably outperformed cane baselines on speed, collisions and cognitive load [43]. Binghamton University fitted a Unitree Go2 with GPT-4 and tested it with 7 legally blind participants [50]; the University of Glasgow's "RoboGuide" partnered with RNIB Scotland and was demonstrated in 2024 [51]. These validate the physical-guidance thesis but depend on multi-camera perception and involve tiny sample sizes (often &lt;10 users), i.e. proof-of-concept, not clinical validation.</li>
+<li><strong>Hardware cost benchmark.</strong> The dominant research platform, Unitree's Go2, sells for ~$1,600 (Air) to $2,800 (Pro), with research-grade EDU units quote-only at roughly $3,800–$16,000+ [49]. Off-the-shelf legged platforms are already near the target price, implying the concept's differentiation must come from multi-robot coordination and the app, not raw hardware cost.</li>
+</ul>
+<p><strong>Net.</strong> Autonomous physical guidance of blind users indoors is demonstrably achievable and increasingly funded by major industrial players. But every technically successful system leans on cameras, LiDAR and heavy compute; the field's most mature project is still stuck on dense dynamic crowds; and the only shipping consumer product is a single self-guided device [17][48], not a multi-robot swarm — so the three-robot architecture is both novel and unproven.</p>
+
+<h2>8. Regulatory &amp; Accessibility Drivers</h2>
+<p>A dense, tightening web of accessibility mandates now obliges exactly the institutions that would buy the product to remove barriers for disabled visitors — with real fines and litigation since mid-2025. Regulation is not merely compliance overhead; analysts explicitly attribute accelerating procurement in this segment to the EAA and WCAG-based rules [9].</p>
+<div style="overflow-x:auto">
+<table>
+<thead><tr><th>Instrument</th><th>What it requires</th><th>Relevance</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td><strong>European Accessibility Act</strong> (Dir. 2019/882)</td><td>Enforceable 28 June 2025; accessibility of ticketing/check-in machines, transport passenger-information, banking, e-commerce, devices</td><td>Directly covers airport/station/ticketing environments; micro-enterprises exempt</td><td>Covington [52]</td></tr>
+<tr><td>EAA penalties (national)</td><td>France €5,000–250,000; Germany up to €100,000/violation; Italy up to 5% of revenue; injunctions already filed Nov 2025</td><td>Non-compliance now carries real financial/legal risk</td><td>Level Access [53]</td></tr>
+<tr><td><strong>UN CRPD</strong> (Art. 9)</td><td>186 States Parties obliged to ensure access to the physical environment, transport and public facilities</td><td>Cascades into national laws and procurement budget lines</td><td>UN Enable [55]</td></tr>
+<tr><td>US ADA Title II (2024 rule)</td><td>State/local govt web &amp; apps to WCAG 2.1 AA; deadlines Apr 2026/2027</td><td>Signals trajectory of public-sector obligations for public universities, transit, hospitals</td><td>ABA [56]</td></tr>
+<tr><td>US DOT air-travel rule (Dec 2024)</td><td>Airlines to provide "safe and dignified" assistance to disabled passengers in terminals</td><td>Explicit federal obligation matching the guided-navigation use case (some sub-provisions paused Sept 2025)</td><td>Federal Register [57]</td></tr>
+<tr><td>Section 508 (US) / EN 301 549 (EU)</td><td>Accessibility requirements for ICT procurement</td><td>The mechanism that converts accessibility law into purchase orders</td><td>Section508.gov [58]</td></tr>
+<tr><td>EU Reg. 1300/2014 (TSI-PRM)</td><td>Obstacle-free routes ≥160 cm wide, step-free access, accessible audible/visual info in rail stations</td><td>Regulates the built environment of target stations and creates wheeled-device-friendly corridors</td><td>ERA [59]</td></tr>
+</tbody>
+</table>
+</div>
+<p>The demand base underpinning these rules is vast: WHO estimates 1.3 billion people — 16% of the world, or 1 in 6 — experience significant disability [54], and 2.2 billion have a vision impairment [1]. One caveat for go-to-market: most rules mandate an accessibility <em>outcome</em> ("must provide effective assistance"), not a specific device — so procurement is pulled by the obligation, and the vendor must still win the specification.</p>
+
+<h2>9. Business Model &amp; Pricing</h2>
+<p>Pricing anchors exist on every side. The incumbent (a guide dog) costs $45,000–$60,000 to produce but is charity-funded and free to the user [27], leaving enormous cost-advantage headroom. The closest robot comparable validates a hardware-plus-SaaS split. And — most relevant for the stated institutional buyers — the strongest precedent is <strong>venue-sponsored / per-site</strong> models, not consumer sales.</p>
+<div style="overflow-x:auto">
+<table>
+<thead><tr><th>Comparable</th><th>Pricing</th><th>Model</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>Guide dog (incumbent)</td><td>$45,000–$60,000 to produce; free to recipient (~$180–$220/mo care)</td><td>Charity-funded</td><td>Dogster [27]</td></tr>
+<tr><td>Glidance "Glide"</td><td>$1,499 hardware + mandatory ~$30/mo; $1.5M seed raised</td><td>Hardware + SaaS (D2C)</td><td>Double Tap [60]</td></tr>
+<tr><td>WeWALK smart cane</td><td>~$1,150 device + £3.99/mo; Affirm financing</td><td>Hardware + low-cost SaaS</td><td>WeWALK [61]</td></tr>
+<tr><td>Aira (visual interpreting)</td><td>$65–$132/mo personal; free at sponsoring venues (airports, hospitals)</td><td>B2B2C "Access Network"</td><td>Aira [62]</td></tr>
+<tr><td>GoodMaps</td><td>Free to user; venue pays</td><td>Per-site licensed SaaS (e.g. Nashville, Bradley, Ford Intl airports)</td><td>flynashville [63]</td></tr>
+<tr><td>Service robots (general)</td><td>~$450–$1,200 per robot / month</td><td>Robots-as-a-Service (RaaS)</td><td>commercialrobotvacuums [64]</td></tr>
+</tbody>
+</table>
+</div>
+<h3>Recommended structure</h3>
+<ul>
+<li><strong>Lead with per-site institutional sale/lease.</strong> Aira and GoodMaps are already paid for by institutions and free to blind end-users [62][63] — the template for airports, hospitals and museums. At RaaS rates of ~$450–$1,200/robot/month [64], a full three-robot kit could plausibly lease for ~$1,350–$3,600/month per site before software, converting capex into recurring revenue and lowering the adoption barrier.</li>
+<li><strong>Optional D2C tier.</strong> If sold to individuals, follow the validated hardware-plus-SaaS split: a low device price (~$1,000–$1,500) plus a modest subscription — Glidance sets the high end at ~$30/mo [60] and WeWALK the low end at ~$4/mo [61].</li>
+<li><strong>Lean on existing funding rails.</strong> U.S. assistive tech for blind/low-vision users is routinely funded through Vocational Rehabilitation, VA services (VIST/BROS) and community grants such as Lions Clubs — rarely paid fully out of pocket [67], supporting a "get funded, then buy" motion. The WHO/UNICEF Global Report on Assistive Technology found affordability is the top barrier and that access can be as low as 3% of need in low-income settings [66] — reinforcing that low-cost, offline design and subsidized/institutional pricing address the market's core constraint.</li>
+</ul>
+
+<h2>10. Risks, Ethics &amp; Safety</h2>
+<ul>
+<li><strong>Safety certification is non-negotiable.</strong> A robot that physically leads a human is a "personal care robot" under <strong>ISO 13482:2014</strong> (currently being revised), which mandates hazard identification, protective stops, and speed/force limits. Certification against it is effectively the entry ticket for selling into hospitals, care homes and airports [68].</li>
+<li><strong>Liability is legally unsettled.</strong> Fault for an autonomous-robot accident may lie with the manufacturer, programmer, integrator or operator; an EU Parliament proposal (2017) for a manufacturer-funded compensation fund was never enacted [69]. For a device guiding a vulnerable user, contracts and insurance must allocate this explicitly before deployment — buyers' insurers will probe it.</li>
+<li><strong>Abandonment is the dominant adoption risk — and it is human, not technical.</strong> Roughly 29.3% of assistive devices are abandoned outright, with 25–75% abandoned within three years, and mobility aids abandoned most often [70]. The predictors are lack of user involvement in selection, poor performance, changing needs and undiscriminating procurement [70] — making co-design with blind users, demonstrable reliability and a non-stigmatizing form factor core requirements, not marketing.</li>
+<li><strong>Trust is measurable and fragile.</strong> HRI research on guide robots formally measured user trust and found blind users demand explainability, gradual turns, semantic communication and a rigid handle before relying on the robot; trust collapses on jerky motion or silent failures [43]. The voice-direction channel and predictable spacing/speed control are therefore trust-and-safety features that determine whether the device is used at all.</li>
+<li><strong>Camera-free is an ethical and compliance asset.</strong> Both blind users and sighted bystanders share documented privacy concerns about camera-based aids [71]. A no-camera, no-internet design removes the bystander-surveillance objection and cloud-breach surface entirely, and materially simplifies GDPR / EU AI Act obligations — the AI Act bans systems that exploit disability-based vulnerabilities and treats biometric analytics as high-risk, triggers a camera-free design sidesteps [72].</li>
+<li><strong>Distributive-justice risk.</strong> 90%+ of vision loss is in low/middle-income regions [1], so a genuinely low-cost offline device has an equity advantage — but pricing and support that reach only wealthy institutions would undercut the product's stated social mission.</li>
+</ul>
+
+<h2>11. Go-to-Market Strategy</h2>
+<p>The strongest beachhead is high-footfall institutions that already procure accessibility infrastructure and are legally motivated to do so. Adoption should follow proven B2B/B2B2C accessibility precedents (Aira, GoodMaps) rather than consumer retail.</p>
+<h3>Beachhead sequencing</h3>
+<ul>
+<li><strong>Airports first (best-proven).</strong> In 2024, 5.5 million passengers (~1.9%) requested special assistance at UK airports, up from 0.9% in 2010, and 75% of airports now use digital tools to coordinate assistance [74] — rising volumes straining human assistants, a direct labour-augmentation pitch. GoodMaps' indoor-navigation platform is now live in <strong>35 airports across 8 countries</strong>, having quadrupled its footprint since January 2025 [75] — direct proof that airports procure and deploy blind-navigation tech at scale and speed.</li>
+<li><strong>Care homes (concentrated, repeatable).</strong> The UK alone has ~16,566 care homes with ~441,000 residents and an estimated 144,000 additional beds needed over the next decade [80]; fixed indoor routes (room–dining room–garden), a captive vision-impaired-and-elderly population, and central procurement favour per-site fleet sales.</li>
+<li><strong>Museums &amp; universities (reference-able lighthouses).</strong> Institutions already buy indoor navigation for blind visitors: the University of Guelph deployed ~400 BlindSquare points campus-wide, the NC Museum of Natural Sciences installed 30 Bluetooth beacons, and the Smithsonian offers Aira free across its DC museums [77] — proven secondary beachheads with accessibility budgets and mission-driven procurement rationale.</li>
+</ul>
+<h3>The institutional ROI narrative</h3>
+<p>Analogous B2B robot adoption already justifies autonomous mobile robots on staff-time-saved grounds: professional service-robot sales reached ~200,000 units in 2024 (+9%), the hospital delivery/logistics robot market was ~US$9.4B in 2024, hospitals see ROI in 12–18 months, and Diligent Robotics' Moxi frees nurses ~30 minutes per shift [79]. The same logic — freeing PRM assistants and care staff — anchors the guiding-robot pitch. Partnerships with disability charities (e.g. RNIB, already engaged with the Glasgow RoboGuide project [51]) provide a credible channel into the care-home/university buyers.</p>
+
+<h2>12. Social Impact</h2>
+<p>The unmet need is the core impact story: more than 2.5 billion people need at least one assistive product, yet nearly 1 billion are denied access — a figure rising to 3.5 billion by 2050, with access as low as 3% of need in some low/middle-income countries [66]. A low-cost, camera-free, internet-free device targeting institutions is designed precisely around affordability, the most-cited barrier [66].</p>
+<p>The impact can be quantified with accepted methods. Disability-independence and eye-care interventions are commonly evaluated with Social Return on Investment (SROI): a Deloitte study found every $1 invested in community eye care generated $7.30 in social value in India and $5.02 in Nepal, while a visually-impaired education project returned RM4.48 per RM1 [78] — establishing a ~$4–7 social-value-per-$1 benchmark a grant or impact-investor pitch can use to value restored independence, employment and wellbeing. The downstream harms the product targets are large and measurable: ~44% employment versus 79% [5], ~25% depression prevalence [6], and pronounced social isolation [6]. Restoring independent indoor mobility is therefore a lever on employment, mental health and dignity — and, deployed equitably, on global access rather than only wealthy-institution convenience.</p>
+
+<h2>13. Conclusion</h2>
+<p>The evidence supports a clear thesis: there is a large, ageing, under-served population [1][2]; independent indoor mobility is its sharpest unmet need [3][4]; the incumbent physical-guidance solution (guide dogs) is structurally unable to scale [27][28][29]; the white cane cannot route or protect the user above the waist [34][35]; the enabling camera-free technology is mature, cheap and partly off-the-shelf [36][37][38][39]; the market is real and growing under a strengthening regulatory tailwind [9][52]; and validated business models exist for selling accessibility navigation to the exact institutional buyers targeted [62][63].</p>
+<p>Three risks temper the opportunity and should shape the roadmap. First, <strong>architecture</strong>: no shipping product uses a coordinated multi-robot escort, so the three-robot design is genuinely novel and genuinely unproven [17][48]. Second, <strong>operations</strong>: even the field's most advanced project remains uncommercialized after eight years because of dense, dynamic crowds — the target environments [46]. Third, <strong>human factors</strong>: assistive devices are abandoned at high rates absent co-design, reliability and trust [70][43]. A disciplined path — camera-free by design for compliance advantage [42][71][72], safety-certified to ISO 13482 [68], sold per-site to mandate-driven institutions with an ROI narrative [64][79], and co-designed with blind users from day one [70] — directly addresses each. On balance, "Sam &amp; the Guides" occupies a real and defensible gap: low-cost physical guidance, camera-free, for institutions that are increasingly obliged to provide it.</p>
+
+<h2>14. References</h2>
+<ol>
+<li><a href="https://www.who.int/news-room/fact-sheets/detail/blindness-and-visual-impairment">WHO — Blindness and vision impairment (fact sheet)</a></li>
+<li><a href="https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(20)30425-3/fulltext">Trends in prevalence of blindness and vision impairment over 30 years — GBD Study, The Lancet Global Health</a></li>
+<li><a href="https://committees.parliament.uk/writtenevidence/132366/html/">Written evidence submitted by RNIB (ASC0032) — UK Parliament</a></li>
+<li><a href="https://eprints.soton.ac.uk/427172/1/indoor_navigation_problems.pdf">Indoor Navigation by Blind People: Behaviours and Challenges — University of Southampton</a></li>
+<li><a href="https://afb.org/research-and-initiatives/statistics/employment-bvi">Employment Statistics for People who are Blind or Visually Impaired — American Foundation for the Blind</a></li>
+<li><a href="https://www.hcplive.com/view/vision-impairment-associated-symptoms-depression-anxiety">Vision Impairment Associated with Symptoms of Depression, Anxiety — HCPLive</a></li>
+<li><a href="https://www.nei.nih.gov/research-and-training/research-news/visual-impairment-blindness-cases-us-expected-double-2050">Visual impairment, blindness cases in U.S. expected to double by 2050 — National Eye Institute</a></li>
+<li><a href="https://umaine.edu/vemi/publication/indoor-airport-wayfinding-blind-visually-impaired-travelers/">Indoor Airport Wayfinding for Blind and Visually Impaired Travelers — VEMI Lab, University of Maine</a></li>
+<li><a href="https://www.mordorintelligence.com/industry-reports/assistive-technologies-for-visually-impaired-market">Assistive Technologies for Visually Impaired Market — Mordor Intelligence</a></li>
+<li><a href="https://www.zionmarketresearch.com/report/assistive-technologies-for-visually-impaired-market">Assistive Technologies For Visually Impaired Market — Zion Market Research</a></li>
+<li><a href="https://www.marketsandmarkets.com/Market-Reports/assistive-robotics-market-37247851.html">Assistive Robotics Market — MarketsandMarkets</a></li>
+<li><a href="https://www.grandviewresearch.com/industry-analysis/elder-care-assistive-robots-market-report">Elder Care Assistive Robots Market — Grand View Research</a></li>
+<li><a href="https://worldpopulationreview.com/country-rankings/airports-by-country">Airports by Country — World Population Review</a></li>
+<li><a href="https://www.cdc.gov/nchs/fastats/nursing-home-care.htm">Nursing Home Care — CDC FastStats</a></li>
+<li><a href="https://www.unesco.org/en/museums">Museums — UNESCO</a></li>
+<li><a href="https://www.strategicrevenueinsights.com/industry/low-vision-and-blind-aids-products-market">Low Vision And Blind Aids Products Market — Strategic Revenue Insights</a></li>
+<li><a href="https://glidance.io/frequently-asked-questions/">Frequently Asked Questions — Glidance (Glide)</a></li>
+<li><a href="https://lssproducts.com/wewalk-smart-cane-v2/">WeWALK Smart Cane V2 — LS&amp;S</a></li>
+<li><a href="https://www.blindsquare.com/indoor/">BlindSquare QRS / Indoor — BlindSquare</a></li>
+<li><a href="https://goodmaps.com/how-it-works/">How It Works — GoodMaps</a></li>
+<li><a href="https://news.keolisna.com/keolis-and-mbta-launch-navilens-pilot-to-help-blind-and-low-vision-riders-navigate-stations">Keolis and MBTA Launch NaviLens Pilot to Help Blind and Low Vision Riders Navigate Stations</a></li>
+<li><a href="https://innovation.keolis.com/en/projects-news-insights/evelity-a-smartphone-voice-guide-to-encourage-accessible-transit/">Evelity — a smartphone voice guide to encourage accessible transit — Keolis Innovation</a></li>
+<li><a href="https://lazarillo.app/">Lazarillo — Inclusive Navigation and Accessible Mapping</a></li>
+<li><a href="https://www.wayfindr.net/">Wayfindr — Accessible Indoor Audio Navigation</a></li>
+<li><a href="https://arxiv.org/abs/2501.04594">Understanding Expectations for a Robotic Guide Dog for Visually Impaired People (arXiv 2501.04594)</a></li>
+<li><a href="https://cacm.acm.org/news/guide-dogs-are-expensive-and-scarce-could-robots-do-their-job/">Guide Dogs are Expensive and Scarce. Could Robots Do Their Job? — Communications of the ACM</a></li>
+<li><a href="https://www.dogster.com/lifestyle/guide-dog-cost">How Much Is a Guide Dog? 2026 Price Guide — Dogster</a></li>
+<li><a href="https://www.guidingeyes.org/guide-dogs-101/">Guide Dogs 101 — Guiding Eyes for the Blind</a></li>
+<li><a href="https://www.igdf.org.uk/about-us/facts-and-figures/">Facts and Figures — International Guide Dog Federation</a></li>
+<li><a href="https://www.guidedogs.com/resources/faqs">Frequently Asked Questions — Guide Dogs for the Blind</a></li>
+<li><a href="https://www.guidedogs.org.uk/blog/our-recovery">Our recovery — an update on progress — Guide Dogs UK</a></li>
+<li><a href="https://www.guidingeyes.org/graduate-center/a-guide-to-dog-retirement/">A Guide to Dog Retirement — Guiding Eyes for the Blind</a></li>
+<li><a href="https://www.yahoo.com/news/shortage-assistance-dogs-leading-people-162143612.html">Shortage of assistance dogs leading people to train their own pets — Yahoo/PA</a></li>
+<li><a href="https://link.springer.com/article/10.1007/s10209-020-00712-z">Are electronic white canes better than traditional canes? — Universal Access in the Information Society (Springer)</a></li>
+<li><a href="https://doi.org/10.3390/technologies13090407">User Evaluation of Head-Level Obstacle Detector for Visually Impaired — Technologies (MDPI), citing Manduchi &amp; Kurniawan 2011</a></li>
+<li><a href="https://navigine.com/blog/uwb-technology-features-examples-of-application/">UWB Technology Guide — Accurate Tracking &amp; Indoor Positioning — Navigine</a></li>
+<li><a href="https://www.blueiot.com/blog/uwb-vs-ble-vs-wifi-vs-rfid.html">UWB vs BLE vs Wi-Fi vs RFID: Indoor Positioning Accuracy Compared — BlueIOT</a></li>
+<li><a href="https://howtomechatronics.com/tutorials/arduino/ultrasonic-sensor-hc-sr04/">Ultrasonic Sensor HC-SR04 and Arduino — Complete Guide — HowToMechatronics</a></li>
+<li><a href="https://www.westonrobot.com/uwb-follow-me">UWB Follow-Me Anchor and Tag — Weston Robot</a></li>
+<li><a href="https://www.nature.com/articles/s41598-025-30254-4">Robot navigation and formation control using panel and leader-follower methods — Nature Scientific Reports (2025)</a></li>
+<li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5982656/">Robust Pedestrian Dead Reckoning Based on MEMS-IMU for Smartphones — PMC/Sensors</a></li>
+<li><a href="https://www.weightmans.com/insights/the-use-of-cctv-in-care-homes-the-legal-issues/">The use of CCTV in care homes: the legal issues — Weightmans</a></li>
+<li><a href="https://dl.acm.org/doi/10.1145/3613904.3642227">Navigating Real-World Challenges: A Quadruped Robot Guiding System for Visually Impaired People — ACM CHI 2024</a></li>
+<li><a href="https://mightylinetape.com/a/blog/automated-guided-vehicles-and-agv-floor-tape-101">Automated Guided Vehicles and AGV Floor Tape 101 — Mighty Line Tape</a></li>
+<li><a href="https://mobility21.cmu.edu/robot-suitcase-uses-ai-to-help-visually-impaired-travelers/">Robot suitcase uses AI to help visually impaired travelers — CMU Mobility21</a></li>
+<li><a href="https://jstories.media/article/ai-navigation-robot">An AI Suitcase 'guide dog' for people with visual disabilities — JSTORIES</a></li>
+<li><a href="https://www.omron.com/global/en/media/2025/04/c0411.html">Reservation now open for Autonomous Navigation Robot 'AI Suitcase' Demonstration at Osaka-Kansai Expo — OMRON Global</a></li>
+<li><a href="https://www.therobotreport.com/glidance-raises-15m-develop-robots-for-visually-impaired/">How Glide's AI Navigation Aid For Blind &amp; Low Vision Works — Glidance / The Robot Report</a></li>
+<li><a href="https://spectrum.ieee.org/quadruped-robot-unitree-go2">Unitree's New Go2 Is One Dynamic Quadruped — IEEE Spectrum</a></li>
+<li><a href="https://newatlas.com/robotics/robot-guide-dog/">AI robot guide dogs talk to help people who are blind — New Atlas</a></li>
+<li><a href="https://www.gla.ac.uk/schools/engineering/international/uestc/newsletter-spring-24/headline_1046424_en.html">Robot guide dog — University of Glasgow, James Watt School of Engineering</a></li>
+<li><a href="https://www.insideglobaltech.com/2025/06/10/european-accessibility-act-june-2025-deadline-has-arrived/">European Accessibility Act: June 2025 deadline has arrived — Inside Global Tech (Covington)</a></li>
+<li><a href="https://www.levelaccess.com/blog/penalties-for-eaa-non-compliance/">EAA Penalties: Fines for Non-Compliance — Level Access</a></li>
+<li><a href="https://www.who.int/news-room/fact-sheets/detail/disability-and-health">Disability — Fact sheet — World Health Organization</a></li>
+<li><a href="https://social.desa.un.org/issues/disability/crpd/convention-on-the-rights-of-persons-with-disabilities-crpd">Convention on the Rights of Persons with Disabilities — UN Enable</a></li>
+<li><a href="https://www.americanbar.org/groups/business_law/resources/business-law-today/2025-august/digital-accessibility-under-title-iii-ada/">Digital Accessibility Under Title III of the ADA — American Bar Association</a></li>
+<li><a href="https://www.federalregister.gov/documents/2024/12/17/2024-29731/ensuring-safe-accommodations-for-air-travelers-with-disabilities-using-wheelchairs">Ensuring Safe Accommodations for Air Travelers With Disabilities Using Wheelchairs — Federal Register</a></li>
+<li><a href="https://www.section508.gov/manage/laws-and-policies/section-508-law/">Section 508 of the Rehabilitation Act, as amended — Section508.gov</a></li>
+<li><a href="https://www.era.europa.eu/domains/technical-specifications-interoperability/persons-disabilities-and-reduced-mobility-tsi_en">Persons with Disabilities and Reduced Mobility TSI — European Union Agency for Railways</a></li>
+<li><a href="https://doubletaponair.com/glidance-offers-a-self-guided-mobility-aid-for-blind-people/">Glidance offers a self-guided mobility aid for blind people — Double Tap</a></li>
+<li><a href="https://wewalk.io/en/">WeWALK Smart Cane — Product / Subscription</a></li>
+<li><a href="https://aira.io/subscriptions/">Aira — Personal Subscriptions</a></li>
+<li><a href="https://flynashville.com/news/press-releases/bna-launches-goodmaps-to-elevate-accessibility-and-set-a-new-standard-in-airport-navigation">Nashville International Airport Launches GoodMaps — flynashville.com</a></li>
+<li><a href="https://commercialrobotvacuums.com/real-cost-of-commercial-robotic-floor-cleaners/">The Real Cost of Robot Cleaners: 2026 Pricing, RaaS, and Hidden Fees — commercialrobotvacuums.com</a></li>
+<li><a href="https://www.nextmsc.com/report/blind-assistive-technology-market-3858">Blind Assistive Technology Market Share Analysis 2025-2030 — NextMSC</a></li>
+<li><a href="https://www.who.int/news-room/fact-sheets/detail/assistive-technology">Assistive technology — WHO fact sheet</a></li>
+<li><a href="https://www.atia.org/home/at-resources/what-is-at/resources-funding-guide/">AT Resources Funding Guide — Assistive Technology Industry Association (ATIA)</a></li>
+<li><a href="https://www.iso.org/standard/53820.html">ISO 13482:2014 Robots and robotic devices — Safety requirements for personal care robots</a></li>
+<li><a href="https://robotechvision.com/who-is-responsible-if-there-occurs-an-accident-with-an-autonomous-robot-a-lawyer-answers/">Who is responsible for an autonomous robot accident? — RoboTech Vision</a></li>
+<li><a href="https://pubmed.ncbi.nlm.nih.gov/10171664/">Predictors of Assistive Technology Abandonment (Phillips &amp; Zhao) — PubMed</a></li>
+<li><a href="https://dl.acm.org/doi/10.1145/3506857">Shared Privacy Concerns of the Visually Impaired and Sighted Bystanders with Camera-Based Assistive Technologies — ACM TACCESS</a></li>
+<li><a href="https://artificialintelligenceact.eu/high-level-summary/">High-level summary of the AI Act — EU Artificial Intelligence Act</a></li>
+<li><a href="https://dl.acm.org/doi/10.1145/3706599.3706663">Field Trials of Autonomous Navigation Robot for Visually Impaired People — CHI 2025 (ACM)</a></li>
+<li><a href="https://airport.buzz/bulletin/new-survey-results-shed-light-on-airports-readiness-to-welcome-passengers-with-reduced-mobility/">Survey on airports' readiness for passengers with reduced mobility — Airport.buzz</a></li>
+<li><a href="https://www.futuretravelexperience.com/2025/10/nashville-international-airport-launches-goodmaps-to-elevate-accessibility-and-airport-navigation/">Nashville International Airport launches GoodMaps — Future Travel Experience</a></li>
+<li><a href="https://www.dogster.com/statistics/service-dog-statistics">Service Dog Statistics 2026 — Dogster</a></li>
+<li><a href="https://news.uoguelph.ca/2022/05/wayfinding-system-helps-blind-visually-impaired-community-members-navigate-campus/">Wayfinding system for visually impaired community expands — University of Guelph News</a></li>
+<li><a href="https://cureblindness.org/news/sroi-study-community-eye-care">Every $1 in eye care generates up to $7.30 in social value — CureBlindness</a></li>
+<li><a href="https://robotic.blog/can-robots-save-hospitals-money-the-roi-of-healthcare-robotics/">Can Robots Save Hospitals Money? The ROI of Healthcare Robotics — Robotic.blog</a></li>
+<li><a href="https://www.carehome.co.uk/advice/care-home-stats-number-of-settings-population-workforce">Care home facts &amp; statistics — Carehome.co.uk</a></li>
+</ol></body></html>
