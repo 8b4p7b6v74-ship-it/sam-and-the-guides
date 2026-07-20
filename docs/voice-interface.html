@@ -138,10 +138,10 @@
       <span id="micLabel">Tap and speak</span>
     </button>
     <div class="chips">
-      <button data-dest="store"><span class="em">🏪</span> Store</button>
-      <button data-dest="school"><span class="em">🏫</span> School</button>
-      <button data-dest="park"><span class="em">🌳</span> Park</button>
-      <button data-dest="plaza"><span class="em">⛲</span> Plaza</button>
+      <button data-dest="whitehouse"><span class="em">🏛️</span> White House</button>
+      <button data-dest="eiffel"><span class="em">🗼</span> Eiffel Tower</button>
+      <button data-dest="doe"><span class="em">📚</span> Doe Library</button>
+      <button data-dest="home"><span class="em">🏠</span> Home</button>
     </div>
     <button class="stop" id="stop" aria-label="Stop the robots now">■ STOP</button>
   </div>
@@ -172,11 +172,10 @@
 if(new URLSearchParams(location.search).get("frame")==="phone") document.body.classList.add("frame");
 const $=s=>document.querySelector(s);
 const DEST={
-  store:{name:"the store",keys:["store","shop","market"]},
-  school:{name:"the school",keys:["school","class","classroom"]},
-  park:{name:"the park",keys:["park","garden","trees"]},
-  plaza:{name:"the plaza",keys:["plaza","square","center","centre"]},
-  home:{name:"home",keys:["home","house","back"]}
+  whitehouse:{name:"the White House",keys:["white house","white","president"]},
+  eiffel:{name:"the Eiffel Tower",keys:["eiffel","tower","paris"]},
+  doe:{name:"Doe Library",keys:["library","doe","books","study"]},
+  home:{name:"home",keys:["home","back"]}
 };
 const GLOW={ready:"rgba(77,141,255,.35)",go:"rgba(77,141,255,.35)",listen:"rgba(255,176,32,.32)",alert:"rgba(255,91,91,.38)",done:"rgba(61,220,132,.34)"};
 const ACC={ready:"#4d8dff",go:"#4d8dff",listen:"#ffb020",alert:"#ff5b5b",done:"#3ddc84"};

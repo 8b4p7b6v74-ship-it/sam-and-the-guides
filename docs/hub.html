@@ -175,10 +175,9 @@ const bc=("BroadcastChannel" in window)?new BroadcastChannel("companion"):null;
 
 // ---------------- city model ----------------
 let CITY={home:"home",
-  nodes:[{id:"home",name:"Home",x:0,y:0},{id:"plaza",name:"Plaza",x:120,y:0},
-    {id:"store",name:"Store",x:120,y:100},{id:"school",name:"School",x:240,y:0},
-    {id:"park",name:"Park",x:240,y:100}],
-  edges:[["home","plaza"],["plaza","store"],["plaza","school"],["store","park"],["school","park"]]};
+  nodes:[{id:"home",name:"Home",x:0,y:0},{id:"whitehouse",name:"White House",x:150,y:0},
+    {id:"eiffel",name:"Eiffel Tower",x:0,y:110},{id:"doe",name:"Doe Library",x:150,y:110}],
+  edges:[["home","whitehouse"],["home","eiffel"],["whitehouse","doe"],["eiffel","doe"]]};
 let cur=CITY.home, plan=null, selDest=null, MODE="PATH";
 
 const N=id=>CITY.nodes.find(n=>n.id===id);
