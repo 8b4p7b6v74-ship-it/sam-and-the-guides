@@ -372,7 +372,9 @@ function stopAll(){sendAll("STOP");log("alert","STOP ALL");say("Stopping now. Yo
 
 // ---------------- trips ----------------
 function dispatchTrip(){
-  if(!selDest){log("info","Pick a destination first");return;}
+  if(!selDest){log("alert","Pick a destination first (tap a city chip)");return;}
+  const on=slots.filter(s=>s&&s.connected).length;
+  if(on<3)log("alert",on===0?"No robots connected — click Connect on Opener, Sam and Closer first":"Only "+on+"/3 robots connected");
   const via=$("#via").value||null;
   const p=makePlan(cur,selDest,via); if(!p){log("alert","No route found");return;}
   plan=p;
