@@ -257,7 +257,10 @@ function stopAll(){ clearJourney(); busy=false; if(robot) send(" "); if(bc) bc.p
 const NUS="6e400001-b5a3-f393-e0a9-e50e24dcca9e",RX="6e400002-b5a3-f393-e0a9-e50e24dcca9e",TX="6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 async function connectRobot(){
   if(!navigator.bluetooth){ announce("Bluetooth isn't available here. Staying in demo mode.","Demo mode","ready"); return; }
-  try{ const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[NUS]});
+  try{ let dev;
+    try{ dev=await navigator.bluetooth.requestDevice({filters:[{namePrefix:"XRP"},{services:[NUS]}],optionalServices:[NUS]}); }
+    catch(err){ if(err.name!=="NotFoundError")throw err;
+      dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[NUS]}); }
     const s=await dev.gatt.connect(),svc=await s.getPrimaryService(NUS);
     robot={rx:await svc.getCharacteristic(RX),tx:await svc.getCharacteristic(TX)}; await robot.tx.startNotifications();
     const buf={s:""}; robot.tx.addEventListener("characteristicvaluechanged",e=>{ buf.s+=new TextDecoder().decode(e.target.value); let k; while((k=buf.s.indexOf("\n"))>=0){const ln=buf.s.slice(0,k).trim();buf.s=buf.s.slice(k+1); if(ln)onRobot(ln);} });

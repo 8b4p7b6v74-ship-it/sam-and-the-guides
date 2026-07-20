@@ -253,7 +253,11 @@ function renderFleet(){
 }
 async function conn(i){
   if(!navigator.bluetooth){$("#btWarn").style.display="block";return;}
-  try{const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[NUS]});
+  try{let dev;
+    try{dev=await navigator.bluetooth.requestDevice({filters:[{namePrefix:"XRP"},{services:[NUS]}],optionalServices:[NUS]});}
+    catch(err){if(err.name!=="NotFoundError")throw err;
+      log("info","No XRP in the list — showing all devices");
+      dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[NUS]});}
     const srv=await dev.gatt.connect(),svc=await srv.getPrimaryService(NUS);
     const rx=await svc.getCharacteristic(RXU),tx=await svc.getCharacteristic(TXU);
     await tx.startNotifications();const buf={s:""};
