@@ -156,6 +156,12 @@
           Closer <input id="dClo" type="number" value="2400"> ms ·
           speed <input id="spd" type="number" value="0.45" step="0.05">
         </div>
+        <div class="row" style="margin-top:11px">
+          <button class="ghost" id="reconnBtn" onclick="reconnectKnown()">↻ Reconnect known</button>
+          <button class="ghost" id="flashBtn" onclick="flashAll()">⚡ Install main.py on all</button>
+        </div>
+        <div class="plan" id="flashStatus"></div>
+        <div id="dbg" style="display:none"></div>
       </div>
       <div class="card">
         <h2>Activity</h2>
@@ -245,11 +251,33 @@ function renderFleet(){
     host.innerHTML+=`<div class="bot ${on?(s.alert?'alert':'on'):''}">
       <span class="avatar">${RMETA[i].em}</span>
       <div class="who"><div class="role">${ROLES[i]}</div><div class="desc">${RMETA[i].desc}</div></div>
-      <div class="live" id="lv${i}">${on?'<b>'+(s.state||'—')+'</b><br>—':'offline'}</div>
+      <div class="live" id="lv${i}">${on?('<b>'+(s.state||'—')+'</b><br>'+(s.front!=null&&s.front<900?'F '+Math.round(s.front):'F —')+(i===0?(s.rear!=null&&s.rear<900?' · R '+Math.round(s.rear):''):'')):'offline'}</div>
       <button onclick="${on?`disc(${i})`:`conn(${i})`}">${on?"✕":"Connect"}</button></div>`;}
   const n=slots.filter(s=>s&&s.connected).length;
   $("#online").textContent=n+(n===1?" robot":" robots");
   $("#fleetLed").className="led "+(slots.some(s=>s&&s.alert)?"alert":(n?"on":""));
+}
+const dec=new TextDecoder();
+let DBG="";
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function dbgAdd(i,t){DBG+=t;if(DBG.length>9000)DBG=DBG.slice(-9000);const d=document.getElementById("dbg");if(d)d.textContent=DBG;}
+function st(t){const e=document.getElementById("flashStatus");if(e)e.textContent=t;}
+async function attach(i,dev){
+  const srv=await dev.gatt.connect(),svc=await srv.getPrimaryService(NUS);
+  const rx=await svc.getCharacteristic(RXU),tx=await svc.getCharacteristic(TXU);
+  await tx.startNotifications();const buf={s:""};
+  tx.addEventListener("characteristicvaluechanged",e=>{const t=dec.decode(e.target.value);dbgAdd(i,t);buf.s+=t;let k;while((k=buf.s.indexOf("\n"))>=0){const ln=buf.s.slice(0,k).trim();buf.s=buf.s.slice(k+1);if(ln)parse(i,ln);}});
+  dev.addEventListener("gattserverdisconnected",()=>{if(slots[i])slots[i].connected=false;renderFleet();log("info",ROLES[i]+" disconnected");});
+  slots[i]={dev,rx,connected:true,state:"",front:null,rear:null,alert:false,_lastT:0,_flashed:false};
+  send(i,"ROLE "+ROLES[i]);renderFleet();log("ok",ROLES[i]+" connected ("+(dev.name||"XRP")+")");
+  const s=slots[i];
+  setTimeout(async()=>{
+    if(!s.connected)return;
+    if(s._lastT){log("ok",ROLES[i]+" firmware already running");return;}
+    if(s._flashed)return; s._flashed=true;
+    log("info",ROLES[i]+": no telemetry — auto-installing firmware…");
+    try{await flashOne(i);}catch(e){st(ROLES[i]+": flash error "+e.message);log("alert",ROLES[i]+" flash failed");}
+  },2600);
 }
 async function conn(i){
   if(!navigator.bluetooth){$("#btWarn").style.display="block";return;}
@@ -258,14 +286,68 @@ async function conn(i){
     catch(err){if(err.name!=="NotFoundError")throw err;
       log("info","No XRP in the list — showing all devices");
       dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[NUS]});}
-    const srv=await dev.gatt.connect(),svc=await srv.getPrimaryService(NUS);
-    const rx=await svc.getCharacteristic(RXU),tx=await svc.getCharacteristic(TXU);
-    await tx.startNotifications();const buf={s:""};
-    tx.addEventListener("characteristicvaluechanged",e=>{buf.s+=new TextDecoder().decode(e.target.value);let k;while((k=buf.s.indexOf("\n"))>=0){const ln=buf.s.slice(0,k).trim();buf.s=buf.s.slice(k+1);if(ln)parse(i,ln);}});
-    dev.addEventListener("gattserverdisconnected",()=>{if(slots[i])slots[i].connected=false;renderFleet();log("info",ROLES[i]+" disconnected");});
-    slots[i]={dev,rx,connected:true,state:"",front:null,rear:null,alert:false};
-    send(i,"ROLE "+ROLES[i]);renderFleet();log("ok",ROLES[i]+" connected");
+    await attach(i,dev);
   }catch(e){log("info","Connect cancelled");}
+}
+async function reconnectKnown(){
+  if(!navigator.bluetooth||!navigator.bluetooth.getDevices){st("getDevices unavailable — use Connect buttons");return;}
+  const devs=(await navigator.bluetooth.getDevices()).filter(d=>(d.name||"").toUpperCase().includes("XRP"));
+  st("known XRP devices: "+devs.length);
+  let slot=0;
+  for(const d of devs){
+    while(slot<3&&slots[slot]&&slots[slot].connected)slot++;
+    if(slot>2)break;
+    let ok=false;
+    for(let a=1;a<=3&&!ok;a++){
+      try{st("connecting "+(d.name||"XRP")+" → "+ROLES[slot]+" (try "+a+"/3)");await attach(slot,d);ok=true;}
+      catch(e){st(ROLES[slot]+" failed: "+e.message);await sleep(1400);}
+    }
+    if(ok)slot++;
+  }
+  st("reconnect done — "+slots.filter(s=>s&&s.connected).length+" online");
+}
+async function txRaw(i,str){
+  const s=slots[i];if(!s||!s.connected)throw new Error("not connected");
+  const bytes=new TextEncoder().encode(str);
+  for(let o=0;o<bytes.length;o+=20){
+    const c=bytes.slice(o,o+20);
+    await (s.rx.writeValueWithoutResponse?s.rx.writeValueWithoutResponse(c):s.rx.writeValue(c));
+    await sleep(12);
+  }
+}
+async function execRaw(i,code){await txRaw(i,code);await txRaw(i,"\x04");await sleep(170);}
+async function flashOne(i){
+  const s=slots[i];
+  if(!s||!s.connected){st(ROLES[i]+": offline — skipped");return false;}
+  if(Date.now()-(s._lastT||0)<3000){st(ROLES[i]+": firmware already running — skipped");return true;}
+  st(ROLES[i]+": fetching firmware…");
+  const src=await (await fetch("../src/firmware.py?ts="+Date.now())).text();
+  const b64=btoa(unescape(encodeURIComponent(src)));
+  st(ROLES[i]+": entering REPL…");
+  await txRaw(i,"\r\x03");await sleep(220);await txRaw(i,"\x03");await sleep(220);await txRaw(i,"\x01");await sleep(260);
+  await execRaw(i,"import binascii");
+  await execRaw(i,"f=open('main.py','wb')");
+  const CH=240;
+  for(let o=0;o<b64.length;o+=CH){
+    await execRaw(i,"f.write(binascii.a2b_base64('"+b64.slice(o,o+CH)+"'))");
+    if((o/CH)%5===0)st(ROLES[i]+": writing "+Math.round(100*o/b64.length)+"%");
+  }
+  await execRaw(i,"f.close()");
+  st(ROLES[i]+": rebooting…");
+  await txRaw(i,"\x02");await sleep(220);await txRaw(i,"\x04");
+  await sleep(2600);
+  if(!s.connected){
+    st(ROLES[i]+": reconnecting after reboot…");
+    try{await attach(i,s.dev);}catch(e){st(ROLES[i]+": reconnect failed — use ↻");}
+  }
+  st(ROLES[i]+": flashed ✓");return true;
+}
+async function flashAll(){
+  for(let i=0;i<3;i++){
+    try{await flashOne(i);}catch(e){st(ROLES[i]+": ERROR "+e.message);}
+    await sleep(700);
+  }
+  st("flash complete — watch the fleet cards for live telemetry");
 }
 function disc(i){try{slots[i]&&slots[i].dev.gatt.disconnect();}catch(e){}if(slots[i])slots[i].connected=false;renderFleet();}
 function send(i,str){const s=slots[i];if(!s||!s.connected)return;try{const d=new TextEncoder().encode(str+"\n");(s.rx.writeValueWithoutResponse?s.rx.writeValueWithoutResponse(d):s.rx.writeValue(d));}catch(e){}}
@@ -304,7 +386,7 @@ function samSpeed(rear){
 // ---------------- telemetry ----------------
 function parse(i,line){
   const p=line.split("|");const s=slots[i];if(!s)return;
-  if(p[0]==="T"){s.front=parseFloat(p[3]);s.rear=parseFloat(p[4]);s.state=p[8]||p[7];s.alert=(s.state==="ALERT");
+  if(p[0]==="T"){s._lastT=Date.now();s.front=parseFloat(p[3]);s.rear=parseFloat(p[4]);s.state=p[8]||p[7];s.alert=(s.state==="ALERT");
     const lv=document.getElementById("lv"+i);
     if(lv)lv.innerHTML="<b>"+(s.state||"—")+"</b><br>"+(s.front<900?"F "+s.front.toFixed(0):"F —")+(i===0?(s.rear<900?" · R "+s.rear.toFixed(0):" · R —"):"");
     if(i===0)samSpeed(s.rear<900?s.rear:null);
