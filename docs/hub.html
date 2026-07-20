@@ -5,180 +5,252 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sam & the Guides — City Hub</title>
 <style>
-  :root{--bg:#0a0c10;--panel:#12161d;--panel2:#161b23;--line:#20262f;--line2:#2a3240;
-    --ink:#e9edf4;--muted:#7d8798;--accent:#4d8dff;--ok:#3ddc84;--warn:#ffb020;--bad:#ff5b5b;
-    --f:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,Menlo,monospace;}
-  @media(prefers-color-scheme:light){:root{--bg:#f5f7fa;--panel:#fff;--panel2:#f1f4f8;--line:#e3e8ef;--line2:#d5dce6;--ink:#1b2430;--muted:#5a6675;}}
-  *{box-sizing:border-box}html,body{margin:0}
+  :root{
+    --bg:#070a10; --panel:rgba(255,255,255,.045); --panel2:rgba(255,255,255,.07);
+    --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.16);
+    --ink:#eef2f8; --muted:#8592a6; --faint:#5a6578;
+    --accent:#4d8dff; --accent2:#7ab0ff; --ok:#3ddc84; --warn:#ffb020; --bad:#ff5b5b;
+    --glow:rgba(77,141,255,.35);
+    --f:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
   body{background:var(--bg);color:var(--ink);font-family:var(--f);min-height:100vh}
-  header{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);
-    display:flex;align-items:center;gap:12px;padding:12px 20px}
-  .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(150deg,var(--accent),#2a5cc0);display:grid;place-items:center}
-  .mark svg{width:19px;height:19px}
-  h1{font-size:15px;margin:0;font-weight:700}.sub{color:var(--muted);font-size:11px}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(110% 70% at 50% -12%, var(--glow), transparent 60%);opacity:.8}
+  .shell{position:relative;z-index:1;max-width:1220px;margin:0 auto;padding:18px 22px 40px}
+
+  header{display:flex;align-items:center;gap:13px;padding:6px 0 18px}
+  .logo{width:40px;height:40px;border-radius:12px;flex:none;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--accent),#2a5cc0);box-shadow:0 10px 26px -10px var(--accent)}
+  .logo svg{width:22px;height:22px}
+  header .name{font-weight:750;font-size:17px;letter-spacing:-.01em}
+  header .tag{color:var(--muted);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
   .spacer{flex:1}
-  button{font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--line2);
-    background:var(--panel2);color:var(--ink);border-radius:10px;padding:8px 12px;transition:.15s}
-  button:hover{border-color:var(--accent)}
-  .stopb{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:800}
-  .primary{background:var(--accent);border-color:var(--accent);color:#fff}
-  .wrap{max-width:1200px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
-  @media(max-width:940px){.wrap{grid-template-columns:1fr}}
-  .panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:15px}
-  .panel h2{font-size:12px;margin:0 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-  .st{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
-  .st.on{color:var(--ok);border-color:rgba(61,220,132,.3)}.st.alert{color:var(--bad);border-color:rgba(255,91,91,.35)}
-  .led{width:8px;height:8px;border-radius:50%;background:currentColor}
-  #map{width:100%;height:auto;display:block;background:var(--panel2);border:1px solid var(--line);border-radius:12px}
-  .mrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
-  select,input{font-family:var(--f);font-size:13px;padding:8px 10px;border:1px solid var(--line2);border-radius:9px;background:var(--panel2);color:var(--ink)}
-  .robots{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
-  .rc{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:10px}
-  .rc .role{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em}
-  .rc .mv{font-family:var(--mono);font-size:13px;font-weight:700;margin-top:3px}
-  .rc .k{font-size:10px;color:var(--muted)}
-  .rc button{width:100%;margin-top:7px;padding:6px;font-size:11.5px}
-  .feed{max-height:230px;overflow:auto}
-  .fi{display:flex;gap:9px;padding:7px 2px;border-bottom:1px solid var(--line);font-size:12.5px}
-  .fi:last-child{border:none}.fi .t{font-family:var(--mono);color:var(--muted);font-size:10.5px}
-  .fdot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex:none;background:var(--muted)}
-  .fdot.alert{background:var(--bad)}.fdot.ok{background:var(--ok)}.fdot.turn{background:var(--warn)}
-  textarea{width:100%;min-height:110px;background:var(--panel2);border:1px solid var(--line2);color:var(--ink);
-    border-radius:10px;padding:10px;font-family:var(--mono);font-size:11.5px}
-  .banner{background:rgba(255,176,32,.1);border:1px solid rgba(255,176,32,.3);border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:12px;display:none}
-  .tag{font-family:var(--mono);font-size:11px;color:var(--accent)}
-  details summary{cursor:pointer;color:var(--muted);font-size:12px;margin-bottom:8px}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:650;color:var(--muted);
+    background:var(--panel);border:1px solid var(--line);padding:8px 14px;border-radius:999px}
+  .pill b{color:var(--ink);font-weight:700}
+  .led{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+  .led.on{background:var(--ok);box-shadow:0 0 10px var(--ok);animation:breathe 2s infinite}
+  .led.alert{background:var(--bad);box-shadow:0 0 10px var(--bad)}
+  @keyframes breathe{50%{opacity:.45}}
+  .estop{border:none;border-radius:14px;padding:12px 20px;font-size:14px;font-weight:800;cursor:pointer;
+    background:linear-gradient(180deg,#ff6b57,#e0402c);color:#fff;letter-spacing:.02em;
+    box-shadow:0 12px 30px -12px rgba(255,91,91,.55);transition:.15s}
+  .estop:hover{filter:brightness(1.07);transform:translateY(-1px)}
+
+  .grid{display:grid;grid-template-columns:1.35fr .9fr;gap:16px}
+  @media(max-width:960px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;
+    backdrop-filter:blur(8px);animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+  .card:nth-child(2){animation-delay:.06s}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .card h2{font-size:11px;margin:0 0 13px;color:var(--muted);text-transform:uppercase;letter-spacing:.16em;font-weight:700}
+  .card h2 .note{color:var(--faint);text-transform:none;letter-spacing:0;font-weight:500;margin-left:8px}
+
+  #map{width:100%;height:auto;display:block;border-radius:14px;background:#0a0e15;border:1px solid var(--line)}
+  .flow{stroke-dasharray:3 12;animation:flow 1.4s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-15}}
+  .pulse{animation:pulse 1.8s ease-out infinite;transform-origin:center;transform-box:fill-box}
+  @keyframes pulse{0%{opacity:.55;transform:scale(.6)}80%{opacity:0;transform:scale(1.7)}100%{opacity:0}}
+
+  .chips{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+  .chips button{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);border-radius:13px;
+    padding:12px 16px;font-size:14.5px;font-weight:650;cursor:pointer;font-family:var(--f);
+    display:flex;align-items:center;gap:8px;transition:.16s}
+  .chips button:hover{border-color:var(--accent);box-shadow:0 0 0 1px var(--glow),0 10px 26px -14px var(--glow);transform:translateY(-1px)}
+  .chips button.sel{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 10px 30px -12px var(--glow)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:13px}
+  .row .lbl{color:var(--muted);font-size:12.5px;font-weight:600}
+  select,input{font-family:var(--f);font-size:13.5px;padding:9px 12px;border:1px solid var(--line2);
+    border-radius:11px;background:#0d121b;color:var(--ink)}
+  select:focus,input:focus{outline:none;border-color:var(--accent)}
+  .seg{display:inline-flex;background:#0d121b;border:1px solid var(--line2);border-radius:11px;padding:3px}
+  .seg button{border:none;background:transparent;color:var(--muted);font-family:var(--f);font-size:12.5px;
+    font-weight:650;padding:8px 13px;border-radius:8px;cursor:pointer;transition:.15s}
+  .seg button.sel{background:var(--accent);color:#fff}
+  .go{border:none;border-radius:13px;padding:12px 26px;font-size:15px;font-weight:750;cursor:pointer;
+    background:var(--accent);color:#fff;box-shadow:0 14px 34px -14px var(--glow);transition:.15s}
+  .go:hover{filter:brightness(1.07);transform:translateY(-1px)}
+  .ghost{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);border-radius:13px;
+    padding:12px 16px;font-size:13.5px;font-weight:650;cursor:pointer;font-family:var(--f);transition:.15s}
+  .ghost:hover{border-color:var(--accent)}
+  .plan{margin-top:13px;font-size:12.5px;color:var(--muted);font-family:var(--mono);min-height:16px}
+
+  .fleet{display:flex;flex-direction:column;gap:10px}
+  .bot{display:flex;align-items:center;gap:13px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:15px;padding:12px 14px;transition:border-color .2s}
+  .bot.on{border-color:rgba(61,220,132,.25)}
+  .bot.alert{border-color:rgba(255,91,91,.4)}
+  .avatar{width:42px;height:42px;border-radius:12px;flex:none;display:grid;place-items:center;font-size:19px;
+    background:#0d121b;border:1px solid var(--line2)}
+  .bot .who{flex:1;min-width:0}
+  .bot .role{font-size:13.5px;font-weight:700}
+  .bot .desc{font-size:11px;color:var(--muted);margin-top:1px}
+  .bot .live{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;line-height:1.5}
+  .bot .live b{color:var(--ink);font-weight:600}
+  .bot button{background:transparent;border:1px solid var(--line2);color:var(--ink);border-radius:10px;
+    padding:7px 12px;font-size:12px;font-weight:650;cursor:pointer;font-family:var(--f);transition:.15s}
+  .bot button:hover{border-color:var(--accent)}
+  .tune{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px;font-size:12px;color:var(--muted)}
+  .tune input{width:66px;padding:7px 9px;font-family:var(--mono);font-size:12px}
+
+  .feed{max-height:250px;overflow:auto;display:flex;flex-direction:column}
+  .fi{display:flex;gap:11px;padding:8px 2px;border-bottom:1px solid var(--line);font-size:13px}
+  .fi:last-child{border:none}
+  .fi .t{font-family:var(--mono);color:var(--faint);font-size:10.5px;margin-top:2px}
+  .fdot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none;background:var(--faint)}
+  .fdot.alert{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+  .fdot.ok{background:var(--ok)}.fdot.turn{background:var(--warn)}
+  .banner{background:rgba(255,176,32,.09);border:1px solid rgba(255,176,32,.3);border-radius:13px;
+    padding:11px 14px;font-size:13px;margin-bottom:14px;display:none}
+  textarea{width:100%;min-height:110px;background:#0d121b;border:1px solid var(--line2);color:var(--ink);
+    border-radius:12px;padding:11px;font-family:var(--mono);font-size:11.5px}
+  details summary{cursor:pointer;color:var(--muted);font-size:12.5px;font-weight:600}
+  details{margin-top:14px}
 </style>
 </head>
 <body>
-<header>
-  <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3.4" r="1.2" fill="#fff" stroke="none"/><path d="M8.5 13h.01M15.5 13h.01"/><path d="M9.5 16.2c1.4.9 3.6.9 5 0"/></svg></div>
-  <div><h1>City Hub</h1><div class="sub">Sam &amp; the Guides · map, routing &amp; fleet</div></div>
-  <span class="spacer"></span>
-  <span class="st" id="pos">📍 at Home</span>
-  <span class="st" id="fleetSt"><span class="led"></span><span id="online">0 online</span></span>
-  <button class="stopb" onclick="stopAll()">■ STOP ALL</button>
-</header>
+<div class="shell">
+  <header>
+    <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3.4" r="1.2" fill="#fff" stroke="none"/><path d="M8.5 13h.01M15.5 13h.01"/><path d="M9.5 16.2c1.4.9 3.6.9 5 0"/></svg></span>
+    <div><div class="name">City Hub</div><div class="tag">Sam &amp; the Guides</div></div>
+    <span class="spacer"></span>
+    <span class="pill">📍 <b id="pos">Home</b></span>
+    <span class="pill"><span class="led" id="fleetLed"></span><span id="online">0 robots</span></span>
+    <button class="estop" onclick="stopAll()">■ STOP</button>
+  </header>
 
-<div class="wrap">
-  <div>
-    <div class="banner" id="btWarn">⚠️ Web Bluetooth unavailable — use desktop Chrome on localhost/https.</div>
-    <div class="panel">
-      <h2>City map <span class="tag" id="modeTag"></span></h2>
-      <svg id="map" viewBox="0 0 560 330"></svg>
-      <div class="mrow">
-        <span class="sub">Go to</span>
-        <select id="dest"></select>
-        <span class="sub">via</span>
+  <div class="banner" id="btWarn">⚠️ Web Bluetooth unavailable — use desktop Chrome (https or localhost).</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>City <span class="note" id="cityNote">example city — we'll load the real one from Monday's photo</span></h2>
+      <svg id="map" viewBox="0 0 620 350"></svg>
+      <div class="chips" id="destChips"></div>
+      <div class="row">
+        <span class="lbl">via</span>
         <select id="via"><option value="">— direct —</option></select>
-        <select id="navmode"><option value="LINE">line + markers</option><option value="PATH">no line (encoders)</option></select>
-        <button class="primary" onclick="dispatchTrip()">▶ Go</button>
-        <button onclick="goHome()">⌂ Return home</button>
+        <span class="seg" id="modeSeg">
+          <button data-m="PATH" class="sel">Invisible map</button>
+          <button data-m="LINE">Taped line</button>
+        </span>
+        <button class="go" onclick="dispatchTrip()">▶ Go</button>
+        <button class="ghost" onclick="goHome()">⌂ Home</button>
       </div>
-      <div class="mrow"><span class="sub" id="planTxt">—</span></div>
-    </div>
-    <div class="panel" style="margin-top:14px">
-      <details><summary>City editor — paste Monday's real city here (JSON) · cm coordinates</summary>
+      <div class="plan" id="planTxt"></div>
+      <details><summary>City editor — paste the real city (JSON, cm coordinates)</summary>
         <textarea id="cityjson" spellcheck="false"></textarea>
-        <div class="mrow"><button onclick="loadCity()">Load city</button><span class="sub">nodes: id, name, x, y (cm, y = north) · edges: pairs of ids · home: start node</span></div>
+        <div class="row"><button class="ghost" onclick="loadCity()">Load city</button>
+          <span class="lbl">nodes: id·name·x·y (cm) — edges: id pairs — home: start</span></div>
       </details>
     </div>
-  </div>
 
-  <div>
-    <div class="panel">
-      <h2>Fleet</h2>
-      <div class="robots" id="robots"></div>
-      <div class="mrow">
-        <span class="sub">Sam turn delay</span><input id="dSam" type="number" value="1200" style="width:70px"> ms
-        <span class="sub">Closer</span><input id="dClo" type="number" value="2400" style="width:70px"> ms
-        <span class="sub">speed</span><input id="spd" type="number" value="0.45" step="0.05" style="width:64px">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <h2>Fleet</h2>
+        <div class="fleet" id="fleet"></div>
+        <div class="tune">
+          delay Sam <input id="dSam" type="number" value="1200"> ms ·
+          Closer <input id="dClo" type="number" value="2400"> ms ·
+          speed <input id="spd" type="number" value="0.45" step="0.05">
+        </div>
+      </div>
+      <div class="card">
+        <h2>Activity</h2>
+        <div class="feed" id="feed"></div>
       </div>
     </div>
-    <div class="panel" style="margin-top:14px"><h2>Activity</h2><div class="feed" id="feed"></div></div>
   </div>
 </div>
 
 <script>
 const NUS="6e400001-b5a3-f393-e0a9-e50e24dcca9e",RXU="6e400002-b5a3-f393-e0a9-e50e24dcca9e",TXU="6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 const ROLES=["OPENER","SAM","CLOSER"];
+const RMETA=[{em:"🧭",desc:"leads · front & rear sonar"},{em:"🕶️",desc:"blind · hub-driven"},{em:"🛡️",desc:"follows · constant gap"}];
 const $=s=>document.querySelector(s);
 const nowStr=()=>new Date().toLocaleTimeString("en-GB",{hour12:false});
 const bc=("BroadcastChannel" in window)?new BroadcastChannel("companion"):null;
 
 // ---------------- city model ----------------
-let CITY={
-  home:"home",
+let CITY={home:"home",
   nodes:[{id:"home",name:"Home",x:0,y:0},{id:"plaza",name:"Plaza",x:120,y:0},
     {id:"store",name:"Store",x:120,y:100},{id:"school",name:"School",x:240,y:0},
     {id:"park",name:"Park",x:240,y:100}],
-  edges:[["home","plaza"],["plaza","store"],["plaza","school"],["store","park"],["school","park"]]
-};
-let cur=CITY.home, plan=null;   // plan={path:[ids], route:"..", pathCmd:"..", dest, prog}
+  edges:[["home","plaza"],["plaza","store"],["plaza","school"],["store","park"],["school","park"]]};
+let cur=CITY.home, plan=null, selDest=null, MODE="PATH";
 
 const N=id=>CITY.nodes.find(n=>n.id===id);
 function nbrs(id){const o=[];CITY.edges.forEach(([a,b])=>{if(a===id)o.push(b);if(b===id)o.push(a);});return o;}
 function bfs(a,b){if(a===b)return[a];const prev={[a]:null},q=[a];while(q.length){const u=q.shift();for(const v of nbrs(u))if(!(v in prev)){prev[v]=u;if(v===b){const p=[b];let c=b;while(prev[c]){c=prev[c];p.unshift(c);}return p;}q.push(v);}}return null;}
 const hd=(a,b)=>Math.atan2(N(b).y-N(a).y,N(b).x-N(a).x)*180/Math.PI;
 function turnOf(i,o){let r=o-i;while(r>180)r-=360;while(r<-180)r+=360;return Math.abs(r)<30?"S":(r>0?"L":"R");}
-function segLen(a,b){return Math.hypot(N(b).x-N(a).x,N(b).y-N(a).y);}
-
+const segLen=(a,b)=>Math.hypot(N(b).x-N(a).x,N(b).y-N(a).y);
 function makePlan(from,dest,via){
-  let p1=bfs(from,via||dest); if(!p1)return null;
-  let path=p1;
+  let p1=bfs(from,via||dest); if(!p1)return null; let path=p1;
   if(via){const p2=bfs(via,dest); if(!p2)return null; path=p1.concat(p2.slice(1));}
   let route="",cmds=[];
   for(let i=0;i<path.length-1;i++){
     const h=hd(path[i],path[i+1]);
-    if(i>0){const t=turnOf(hd(path[i-1],path[i]),h); route+=(t==="S"?"S":t); if(t!=="S")cmds.push(t+"90");}
-    cmds.push("D"+Math.round(segLen(path[i],path[i+1])));
-  }
+    if(i>0){const t=turnOf(hd(path[i-1],path[i]),h); route+=t; if(t!=="S")cmds.push(t+"90");}
+    cmds.push("D"+Math.round(segLen(path[i],path[i+1])));}
   route+="A"; cmds.push("A");
   return {path,route,pathCmd:cmds.join(","),dest,prog:0};
 }
 
-// ---------------- map drawing ----------------
+// ---------------- map ----------------
+let sx=x=>x, sy=y=>y;
 function drawMap(){
-  const svg=$("#map"); const pad=45;
+  const svg=$("#map"),pad=52,W=620,H=350;
   const xs=CITY.nodes.map(n=>n.x),ys=CITY.nodes.map(n=>n.y);
   const mnx=Math.min(...xs),mxx=Math.max(...xs),mny=Math.min(...ys),mxy=Math.max(...ys);
-  const W=560,H=330;
-  const sx=x=>pad+(x-mnx)*(W-2*pad)/Math.max(1,mxx-mnx);
-  const sy=y=>H-pad-(y-mny)*(H-2*pad)/Math.max(1,mxy-mny);
+  sx=x=>pad+(x-mnx)*(W-2*pad)/Math.max(1,mxx-mnx);
+  sy=y=>H-pad-(y-mny)*(H-2*pad)/Math.max(1,mxy-mny);
   let s="";
   const onPath=(a,b)=>plan&&plan.path.some((id,i)=>i<plan.path.length-1&&((plan.path[i]===a&&plan.path[i+1]===b)||(plan.path[i]===b&&plan.path[i+1]===a)));
-  CITY.edges.forEach(([a,b])=>{s+=`<line x1="${sx(N(a).x)}" y1="${sy(N(a).y)}" x2="${sx(N(b).x)}" y2="${sy(N(b).y)}" stroke="${onPath(a,b)?'var(--accent)':'var(--line2)'}" stroke-width="${onPath(a,b)?5:3}" stroke-linecap="round"/>`;});
+  CITY.edges.forEach(([a,b])=>{s+=`<line x1="${sx(N(a).x)}" y1="${sy(N(a).y)}" x2="${sx(N(b).x)}" y2="${sy(N(b).y)}" stroke="rgba(255,255,255,.08)" stroke-width="12" stroke-linecap="round"/>`;});
+  CITY.edges.forEach(([a,b])=>{if(onPath(a,b)){
+    s+=`<line x1="${sx(N(a).x)}" y1="${sy(N(a).y)}" x2="${sx(N(b).x)}" y2="${sy(N(b).y)}" stroke="rgba(77,141,255,.35)" stroke-width="12" stroke-linecap="round"/>`;
+    s+=`<line class="flow" x1="${sx(N(a).x)}" y1="${sy(N(a).y)}" x2="${sx(N(b).x)}" y2="${sy(N(b).y)}" stroke="#7ab0ff" stroke-width="3" stroke-linecap="round"/>`;}});
   CITY.nodes.forEach(n=>{
-    const here=n.id===cur, dest=plan&&n.id===plan.dest;
-    s+=`<circle cx="${sx(n.x)}" cy="${sy(n.y)}" r="${here?13:9}" fill="${here?'var(--ok)':dest?'var(--warn)':'var(--panel)'}" stroke="${dest?'var(--warn)':'var(--line2)'}" stroke-width="2" style="cursor:pointer" onclick="quickGo('${n.id}')"/>`;
-    s+=`<text x="${sx(n.x)}" y="${sy(n.y)-18}" text-anchor="middle" fill="var(--ink)" font-size="13" font-weight="600" font-family="var(--f)">${n.name}</text>`;
-    if(here)s+=`<text x="${sx(n.x)}" y="${sy(n.y)+4}" text-anchor="middle" font-size="11">🤖</text>`;
-  });
+    const here=n.id===cur,dest=plan&&n.id===plan.dest,sel=selDest===n.id&&!plan;
+    if(here)s+=`<circle class="pulse" cx="${sx(n.x)}" cy="${sy(n.y)}" r="14" fill="none" stroke="var(--ok)" stroke-width="2"/>`;
+    if(dest||sel)s+=`<circle class="pulse" cx="${sx(n.x)}" cy="${sy(n.y)}" r="14" fill="none" stroke="var(--warn)" stroke-width="2"/>`;
+    s+=`<circle cx="${sx(n.x)}" cy="${sy(n.y)}" r="9" fill="${here?'var(--ok)':dest||sel?'var(--warn)':'#131a26'}" stroke="${here?'var(--ok)':dest||sel?'var(--warn)':'rgba(255,255,255,.25)'}" stroke-width="2" style="cursor:pointer" onclick="pick('${n.id}')"/>`;
+    s+=`<text x="${sx(n.x)}" y="${sy(n.y)-19}" text-anchor="middle" fill="${here?'var(--ok)':'#eef2f8'}" font-size="13" font-weight="650" font-family="var(--f)" style="cursor:pointer" onclick="pick('${n.id}')">${n.name}</text>`;});
+  s+=`<g id="convoy" style="transition:transform 1.1s cubic-bezier(.4,0,.2,1)" transform="translate(${sx(N(cur).x)},${sy(N(cur).y)})"><circle r="5" fill="#fff"/></g>`;
   svg.innerHTML=s;
-  $("#pos").textContent="📍 at "+(N(cur)?N(cur).name:cur);
+  $("#pos").textContent=N(cur)?N(cur).name:cur;
 }
-function fillSelects(){
-  $("#dest").innerHTML=CITY.nodes.filter(n=>n.id!==cur).map(n=>`<option value="${n.id}">${n.name}</option>`).join("");
-  $("#via").innerHTML='<option value="">— direct —</option>'+CITY.nodes.filter(n=>n.id!==cur).map(n=>`<option value="${n.id}">${n.name}</option>`).join("");
+function moveConvoy(id){const g=document.getElementById("convoy");if(g&&N(id))g.setAttribute("transform",`translate(${sx(N(id).x)},${sy(N(id).y)})`);}
+function pick(id){if(id===cur)return;selDest=id;renderChips();drawMap();}
+function renderChips(){
+  $("#destChips").innerHTML=CITY.nodes.filter(n=>n.id!==cur).map(n=>
+    `<button class="${selDest===n.id?'sel':''}" onclick="pick('${n.id}')">${n.name}</button>`).join("");
+  $("#via").innerHTML='<option value="">— direct —</option>'+CITY.nodes.filter(n=>n.id!==cur&&n.id!==selDest).map(n=>`<option value="${n.id}">${n.name}</option>`).join("");
 }
 function loadCity(){
-  try{const c=JSON.parse($("#cityjson").value);if(!c.nodes||!c.edges)throw 0;CITY=c;cur=c.home||c.nodes[0].id;plan=null;fillSelects();drawMap();log("ok","City loaded — "+CITY.nodes.length+" places");}
+  try{const c=JSON.parse($("#cityjson").value);if(!c.nodes||!c.edges)throw 0;CITY=c;cur=c.home||c.nodes[0].id;
+    plan=null;selDest=null;renderChips();drawMap();$("#cityNote").textContent="custom city loaded";log("ok","City loaded — "+CITY.nodes.length+" places");}
   catch(e){log("alert","Invalid city JSON");}
 }
-function quickGo(id){ if(id!==cur){$("#dest").value=id;dispatchTrip();} }
+document.querySelectorAll("#modeSeg button").forEach(b=>b.onclick=()=>{MODE=b.dataset.m;
+  document.querySelectorAll("#modeSeg button").forEach(x=>x.classList.toggle("sel",x===b));});
 
-// ---------------- fleet (BLE) ----------------
+// ---------------- fleet ----------------
 const slots=[null,null,null];
-function renderRobots(){
-  const host=$("#robots");host.innerHTML="";
+function renderFleet(){
+  const host=$("#fleet");host.innerHTML="";
   for(let i=0;i<3;i++){const s=slots[i],on=s&&s.connected;
-    host.innerHTML+=`<div class="rc"><div class="role">${ROLES[i]}</div>
-      <div class="mv" id="mv${i}">${on?(s.state||"—"):"offline"}</div>
-      <div class="k" id="mk${i}">front — · rear —</div>
-      <button onclick="${on?`disc(${i})`:`conn(${i})`}">${on?"Disconnect":"Connect"}</button></div>`;}
+    host.innerHTML+=`<div class="bot ${on?(s.alert?'alert':'on'):''}">
+      <span class="avatar">${RMETA[i].em}</span>
+      <div class="who"><div class="role">${ROLES[i]}</div><div class="desc">${RMETA[i].desc}</div></div>
+      <div class="live" id="lv${i}">${on?'<b>'+(s.state||'—')+'</b><br>—':'offline'}</div>
+      <button onclick="${on?`disc(${i})`:`conn(${i})`}">${on?"✕":"Connect"}</button></div>`;}
   const n=slots.filter(s=>s&&s.connected).length;
-  $("#online").textContent=n+" online";
-  $("#fleetSt").className="st "+(slots.some(s=>s&&s.alert)?"alert":(n?"on":""));
+  $("#online").textContent=n+(n===1?" robot":" robots");
+  $("#fleetLed").className="led "+(slots.some(s=>s&&s.alert)?"alert":(n?"on":""));
 }
 async function conn(i){
   if(!navigator.bluetooth){$("#btWarn").style.display="block";return;}
@@ -187,81 +259,76 @@ async function conn(i){
     const rx=await svc.getCharacteristic(RXU),tx=await svc.getCharacteristic(TXU);
     await tx.startNotifications();const buf={s:""};
     tx.addEventListener("characteristicvaluechanged",e=>{buf.s+=new TextDecoder().decode(e.target.value);let k;while((k=buf.s.indexOf("\n"))>=0){const ln=buf.s.slice(0,k).trim();buf.s=buf.s.slice(k+1);if(ln)parse(i,ln);}});
-    dev.addEventListener("gattserverdisconnected",()=>{if(slots[i])slots[i].connected=false;renderRobots();log("info",ROLES[i]+" disconnected");});
+    dev.addEventListener("gattserverdisconnected",()=>{if(slots[i])slots[i].connected=false;renderFleet();log("info",ROLES[i]+" disconnected");});
     slots[i]={dev,rx,connected:true,state:"",front:null,rear:null,alert:false};
-    send(i,"ROLE "+ROLES[i]);renderRobots();log("ok",ROLES[i]+" connected");
+    send(i,"ROLE "+ROLES[i]);renderFleet();log("ok",ROLES[i]+" connected");
   }catch(e){log("info","Connect cancelled");}
 }
-function disc(i){try{slots[i]&&slots[i].dev.gatt.disconnect();}catch(e){}if(slots[i])slots[i].connected=false;renderRobots();}
+function disc(i){try{slots[i]&&slots[i].dev.gatt.disconnect();}catch(e){}if(slots[i])slots[i].connected=false;renderFleet();}
 function send(i,str){const s=slots[i];if(!s||!s.connected)return;try{const d=new TextEncoder().encode(str+"\n");(s.rx.writeValueWithoutResponse?s.rx.writeValueWithoutResponse(d):s.rx.writeValue(d));}catch(e){}}
 function sendAll(str){for(let i=0;i<3;i++)send(i,str);}
 function stopAll(){sendAll("STOP");log("alert","STOP ALL");say("Stopping now. You are safe.","alert");}
 
 // ---------------- trips ----------------
 function dispatchTrip(){
-  const dest=$("#dest").value,via=$("#via").value||null,mode=$("#navmode").value;
-  const p=makePlan(cur,dest,via); if(!p){log("alert","No route found");return;}
-  plan=p;$("#modeTag").textContent=mode==="LINE"?"· line mode":"· no-line mode";
-  $("#planTxt").textContent="Route: "+p.path.map(id=>N(id).name).join(" → ")+"   ·   markers "+p.route+"   ·   path "+p.pathCmd;
+  if(!selDest){log("info","Pick a destination first");return;}
+  const via=$("#via").value||null;
+  const p=makePlan(cur,selDest,via); if(!p){log("alert","No route found");return;}
+  plan=p;
+  $("#planTxt").textContent=p.path.map(id=>N(id).name).join(" → ")+"   ·   "+(MODE==="LINE"?("markers "+p.route):("path "+p.pathCmd));
   const spd=parseFloat($("#spd").value)||0.45;
   sendAll("SPD "+spd);
-  if(mode==="LINE")send(0,"ROUTE "+p.route); else send(0,"PATH "+p.pathCmd);
+  if(MODE==="LINE")send(0,"ROUTE "+p.route); else send(0,"PATH "+p.pathCmd);
   sendAll("GO");
   drawMap();
-  log("ok","→ "+N(dest).name+(via?" via "+N(via).name:"")+"  ["+mode+"]");
-  say("Okay — taking you to "+N(dest).name+(via?", passing by "+N(via).name:"")+". The guides are leading.","go");
+  log("ok","→ "+N(selDest).name+(via?" via "+N(via).name:"")+"  ["+MODE+"]");
+  say("Okay — taking you to "+N(selDest).name+(via?", passing by "+N(via).name:"")+". The guides are leading.","go");
 }
-function goHome(){ if(cur===CITY.home){log("info","Already home");return;} $("#dest").value=CITY.home;$("#via").value="";dispatchTrip(); }
+function goHome(){if(cur===CITY.home){log("info","Already home");return;}selDest=CITY.home;$("#via").value="";renderChips();dispatchTrip();}
 
-// mirrored turns for the blind members
 function mirror(cmd){
   const dS=parseInt($("#dSam").value)||1200,dC=parseInt($("#dClo").value)||2400;
-  setTimeout(()=>send(1,cmd),dS);
-  setTimeout(()=>send(2,cmd),dC);
+  setTimeout(()=>send(1,cmd),dS);setTimeout(()=>send(2,cmd),dC);
 }
-
-// Sam speed control from the opener's rear eye
 let lastSpd=0,lastSent=0;
 function samSpeed(rear){
   if(rear==null||rear>200)return;
   const target=30,base=parseFloat($("#spd").value)||0.45;
-  let v=base+(rear-target)*0.008; v=Math.max(0.15,Math.min(0.65,v));
+  let v=Math.max(0.15,Math.min(0.65,base+(rear-target)*0.008));
   if(Math.abs(v-lastSpd)>0.04&&Date.now()-lastSent>500){lastSpd=v;lastSent=Date.now();send(1,"SPD "+v.toFixed(2));}
 }
 
-// ---------------- telemetry / events ----------------
+// ---------------- telemetry ----------------
 function parse(i,line){
   const p=line.split("|");const s=slots[i];if(!s)return;
   if(p[0]==="T"){s.front=parseFloat(p[3]);s.rear=parseFloat(p[4]);s.state=p[8]||p[7];s.alert=(s.state==="ALERT");
-    const mv=document.getElementById("mv"+i),mk=document.getElementById("mk"+i);
-    if(mv)mv.textContent=s.state||"—";
-    if(mk)mk.textContent="front "+(s.front<900?s.front.toFixed(0)+"cm":"—")+" · rear "+(s.rear<900?s.rear.toFixed(0)+"cm":"—");
+    const lv=document.getElementById("lv"+i);
+    if(lv)lv.innerHTML="<b>"+(s.state||"—")+"</b><br>"+(s.front<900?"F "+s.front.toFixed(0):"F —")+(i===0?(s.rear<900?" · R "+s.rear.toFixed(0):" · R —"):"");
     if(i===0)samSpeed(s.rear<900?s.rear:null);
-    renderFleetState();}
+    renderFleet();}
   else if(p[0]==="E"){const t=p[1],m=p[2]||"";
     if(t==="ALERT"){log("alert","⚠ Obstacle — stopping fleet");sendAll("STOP");say("Obstacle ahead. Stopping.","alert");}
-    else if(t==="LOST"){log("alert","Opener lost sight of Sam — waiting");say("Please keep up — waiting for you.","alert");}
+    else if(t==="LOST"){log("alert","Opener can't see Sam — waiting");say("Please keep up — waiting for you.","alert");}
     else if(t==="TURN"){log("turn","Turn "+m);mirror(m==="left"?"TURNL":"TURNR");say("Turning "+m+".","turn");}
-    else if(t==="MARK"||t==="STEP"){if(plan){plan.prog=parseInt(m)||plan.prog+1;const idx=Math.min(plan.prog,plan.path.length-1);cur=plan.path[idx];drawMap();}log("info",(t==="MARK"?"Marker ":"Step ")+m);}
-    else if(t==="ARRIVE"&&i===0){if(plan){cur=plan.dest;plan=null;}fillSelects();drawMap();log("ok","Arrived");say("You have arrived. "+ (N(cur)?N(cur).name:"")+".","ok");setTimeout(()=>sendAll("STOP"),1500);}
+    else if(t==="MARK"||t==="STEP"){if(plan){plan.prog=parseInt(m)||plan.prog+1;const idx=Math.min(plan.prog,plan.path.length-1);cur=plan.path[idx];moveConvoy(cur);$("#pos").textContent=N(cur).name;}log("info",(t==="MARK"?"Marker ":"Step ")+m);}
+    else if(t==="ARRIVE"&&i===0){if(plan){cur=plan.dest;plan=null;}selDest=null;renderChips();drawMap();log("ok","Arrived at "+N(cur).name);say("You have arrived at "+N(cur).name+".","ok");setTimeout(()=>sendAll("STOP"),1500);}
     else if(t==="READY")log("ok",ROLES[i]+" firmware ready ["+m+"]");
     else if(t==="ROLE")log("info",ROLES[i]+" role set");}
 }
-function renderFleetState(){const n=slots.filter(s=>s&&s.connected).length;$("#fleetSt").className="st "+(slots.some(s=>s&&s.alert)?"alert":(n?"on":""));}
 
-// ---------------- log / voice bridge ----------------
+// ---------------- log / voice ----------------
 const FEED=[];
 function log(kind,text){FEED.unshift({t:nowStr(),kind,text});if(FEED.length>150)FEED.pop();
   $("#feed").innerHTML=FEED.slice(0,60).map(e=>`<div class="fi"><span class="fdot ${e.kind}"></span><div>${e.text}<div class="t">${e.t}</div></div></div>`).join("");}
 function say(text,tone){if(bc)bc.postMessage({kind:"say",text,tone});}
 if(bc)bc.onmessage=ev=>{const d=ev.data;
   if(d&&d.kind==="mission"&&d.dest){const n=CITY.nodes.find(x=>x.id===d.dest||x.name.toLowerCase()===d.dest.toLowerCase());
-    if(n&&n.id!==cur){bc.postMessage({kind:"ack"});$("#dest").value=n.id;$("#via").value="";dispatchTrip();}}
+    if(n&&n.id!==cur){bc.postMessage({kind:"ack"});selDest=n.id;$("#via").value="";renderChips();dispatchTrip();}}
   if(d&&d.kind==="stop")stopAll();};
 
 // ---------------- boot ----------------
 $("#cityjson").value=JSON.stringify(CITY,null,1);
-fillSelects();drawMap();renderRobots();
+renderChips();drawMap();renderFleet();
 if(!navigator.bluetooth)$("#btWarn").style.display="block";
 </script>
 </body>
