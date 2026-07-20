@@ -311,7 +311,7 @@ async function txRaw(i,str){
   const bytes=new TextEncoder().encode(str);
   for(let o=0;o<bytes.length;o+=20){
     const c=bytes.slice(o,o+20);
-    await (s.rx.writeValueWithoutResponse?s.rx.writeValueWithoutResponse(c):s.rx.writeValue(c));
+    await ((s.rx.properties&&s.rx.properties.writeWithoutResponse)?s.rx.writeValueWithoutResponse(c):s.rx.writeValue(c));
     await sleep(12);
   }
 }
@@ -350,7 +350,7 @@ async function flashAll(){
   st("flash complete — watch the fleet cards for live telemetry");
 }
 function disc(i){try{slots[i]&&slots[i].dev.gatt.disconnect();}catch(e){}if(slots[i])slots[i].connected=false;renderFleet();}
-function send(i,str){const s=slots[i];if(!s||!s.connected)return;try{const d=new TextEncoder().encode(str+"\n");(s.rx.writeValueWithoutResponse?s.rx.writeValueWithoutResponse(d):s.rx.writeValue(d));}catch(e){}}
+function send(i,str){const s=slots[i];if(!s||!s.connected)return;try{const d=new TextEncoder().encode(str+"\n");const p=(s.rx.properties&&s.rx.properties.writeWithoutResponse)?s.rx.writeValueWithoutResponse(d):s.rx.writeValue(d);if(p&&p.catch)p.catch(function(){});}catch(e){}}
 function sendAll(str){for(let i=0;i<3;i++)send(i,str);}
 function stopAll(){sendAll("STOP");log("alert","STOP ALL");say("Stopping now. You are safe.","alert");}
 
@@ -386,7 +386,9 @@ function samSpeed(rear){
 // ---------------- telemetry ----------------
 function parse(i,line){
   const p=line.split("|");const s=slots[i];if(!s)return;
-  if(p[0]==="T"){s._lastT=Date.now();s.front=parseFloat(p[3]);s.rear=parseFloat(p[4]);s.state=p[8]||p[7];s.alert=(s.state==="ALERT");
+  if(p[0]==="T"){s._lastT=Date.now();
+    if(p[1]&&p[1]!==ROLES[i]&&Date.now()-(s._roleT||0)>1500){s._roleT=Date.now();send(i,"ROLE "+ROLES[i]);}
+    s.front=parseFloat(p[3]);s.rear=parseFloat(p[4]);s.state=p[8]||p[7];s.alert=(s.state==="ALERT");
     const lv=document.getElementById("lv"+i);
     if(lv)lv.innerHTML="<b>"+(s.state||"—")+"</b><br>"+(s.front<900?"F "+s.front.toFixed(0):"F —")+(i===0?(s.rear<900?" · R "+s.rear.toFixed(0):" · R —"):"");
     if(i===0)samSpeed(s.rear<900?s.rear:null);

@@ -35,9 +35,10 @@ import select
 import time
 
 try:
-    from XRPLib.rangefinder import Rangefinder
+    from machine import Pin, time_pulse_us
 except Exception:
-    Rangefinder = None
+    Pin = None
+    time_pulse_us = None
 
 # ---------------------------------------------------------------- config
 CFG = {
@@ -58,9 +59,10 @@ CFG = {
     "gap":          25.0,     # follower gap to the robot ahead
     "gap_band":     6.0,
     "sam_lost_cm":  60.0,     # opener rear: Sam farther than this = lost
-    # rear sonar pins (OPENER only) -- set to your wiring, e.g. 16, 17
-    "rear_trig":    None,
-    "rear_echo":    None,
+    # rear sonar (OPENER) -- HC-SR04 on the XRP "Qwiic 0" port = GPIO4 / GPIO5.
+    # If it reads nothing, swap these two (wiring of Trig/Echo to SDA/SCL).
+    "rear_trig":    5,
+    "rear_echo":    4,
     # dead-reckoning (no-line mode)
     "wheel_circ":   18.85,    # cm per wheel revolution (XRP 6 cm wheel)
     "turn_tol":     4.0,      # deg
@@ -81,7 +83,10 @@ PROG = 0                      # markers crossed / path step index
 
 HW = {"drive": False, "front": False, "rear": False, "line": False,
       "imu": False, "enc": False, "servo": False, "led": False}
-_rear = None
+_rtrig = None
+_recho = None
+_rear_val = 999.0
+_rear_t = 0
 
 # ---------------------------------------------------------------- utils
 def clamp(v, lo=-1.0, hi=1.0):
@@ -130,7 +135,7 @@ def _heading():
 
 
 def probe():
-    global _rear
+    global _rtrig, _recho
     for name, fn in (
         ("drive", lambda: drivetrain.stop()),
         ("front", lambda: rangefinder.distance()),
@@ -144,12 +149,13 @@ def probe():
             fn(); HW[name] = True
         except Exception:
             pass
-    if Rangefinder and CFG["rear_trig"] is not None:
+    if Pin and CFG["rear_trig"] is not None:
         try:
-            _rear = Rangefinder(CFG["rear_trig"], CFG["rear_echo"])
-            _rear.distance(); HW["rear"] = True
+            _rtrig = Pin(CFG["rear_trig"], Pin.OUT)
+            _recho = Pin(CFG["rear_echo"], Pin.IN)
+            _rtrig.low(); HW["rear"] = True
         except Exception:
-            _rear = None
+            _rtrig = None
 
 
 def front_cm():
@@ -163,13 +169,20 @@ def front_cm():
 
 
 def rear_cm():
-    if _rear is None:
+    global _rear_val, _rear_t
+    if _rtrig is None:
         return 999.0
+    if since(_rear_t) < 90:              # cache: never block the control loop
+        return _rear_val
+    _rear_t = now()
     try:
-        d = _rear.distance()
-        return 999.0 if (d is None or d <= 0) else d
+        _rtrig.low(); time.sleep_us(3)
+        _rtrig.high(); time.sleep_us(10); _rtrig.low()
+        us = time_pulse_us(_recho, 1, 30000)
+        _rear_val = (us / 58.0) if us > 0 else 999.0
     except Exception:
-        return 999.0
+        _rear_val = 999.0
+    return _rear_val
 
 
 def line_lr():
@@ -386,7 +399,7 @@ def step_opener():
     if front_cm() < CFG["stop_cm"]:
         STATE = "ALERT"; led(True); SD.brake(); emit("ALERT", "obstacle")
         return
-    if HW["rear"] and rear_cm() > CFG["sam_lost_cm"]:
+    if HW["rear"] and CFG["sam_lost_cm"] < rear_cm() < 500:  # 999 = no echo -> ignore
         STATE = "WAIT_SAM"; SD.brake(); emit("LOST", "sam")
         return
     led(False)

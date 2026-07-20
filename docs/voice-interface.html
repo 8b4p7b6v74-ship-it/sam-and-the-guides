@@ -268,7 +268,7 @@ async function connectRobot(){
     announce("Robot connected. Where would you like to go?","Ready","ready");
   }catch(e){ announce("Could not connect. Staying in demo mode.","Demo mode","ready"); }
 }
-function send(ch){ if(!robot)return; try{ const d=new TextEncoder().encode(ch); (robot.rx.writeValueWithoutResponse?robot.rx.writeValueWithoutResponse(d):robot.rx.writeValue(d)); }catch(e){} }
+function send(ch){ if(!robot)return; try{ const d=new TextEncoder().encode(ch); const p=(robot.rx.properties&&robot.rx.properties.writeWithoutResponse)?robot.rx.writeValueWithoutResponse(d):robot.rx.writeValue(d); if(p&&p.catch)p.catch(function(){}); }catch(e){} }
 function onRobot(line){ const p=line.split("|");
   if(p[0]==="E"){ if(p[1]==="ALERT")announce("Obstacle ahead. Stopping.","Stopped","alert");
     else if(p[1]==="MARK")announce("Turning.","Turning","go");
