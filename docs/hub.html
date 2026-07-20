@@ -180,18 +180,22 @@ const nowStr=()=>new Date().toLocaleTimeString("en-GB",{hour12:false});
 const bc=("BroadcastChannel" in window)?new BroadcastChannel("companion"):null;
 
 // ---------------- city model ----------------
-let CITY={home:"home",nodes:[
+// All segments strictly horizontal/vertical (robots only turn 90°).
+// Note: the sketch's right column said 30"+18"=48" but the loop closes at 55" (34"+21");
+// the missing 7" is split proportionally -> Eiffel sits 20.6" above the bottom corner.
+let CITY={home:"home",start:"start",nodes:[
+  {id:"start",name:"Start",x:-61,y:0},
   {id:"home",name:"Home",x:0,y:0,place:true},
   {id:"whitehouse",name:"White House",x:97.8,y:139.7,place:true},
-  {id:"eiffel",name:"Eiffel Tower",x:217.2,y:63.5,place:true},
+  {id:"eiffel",name:"Eiffel Tower",x:217.2,y:52.4,place:true},
   {id:"library",name:"Doe Library",x:129.5,y:50.8,place:true},
-  {id:"restaurant",name:"Restaurant",x:102.9,y:-72.4,place:true},
-  {id:"j2",name:"",x:76.2,y:0},{id:"j3",name:"",x:129.5,y:0},{id:"br",name:"",x:217.2,y:17.8},
+  {id:"restaurant",name:"Restaurant",x:129.5,y:-72.4,place:true},
+  {id:"j2",name:"",x:76.2,y:0},{id:"j3",name:"",x:129.5,y:0},{id:"br",name:"",x:217.2,y:0},
   {id:"htop",name:"",x:0,y:86.4},{id:"c",name:"",x:76.2,y:86.4},{id:"whbase",name:"",x:97.8,y:86.4},
   {id:"tr",name:"",x:217.2,y:139.7},{id:"ltl",name:"",x:76.2,y:50.8},
-  {id:"rstbl",name:"",x:76.2,y:-72.4},{id:"rstbr",name:"",x:129.5,y:-72.4}],
-  edges:[["home","j2"],["j2","j3"],["j3","br"],["home","htop"],["htop","c"],["c","whbase"],["whbase","whitehouse"],["whitehouse","tr"],["tr","eiffel"],["eiffel","br"],["c","ltl"],["ltl","library"],["ltl","j2"],["library","j3"],["j2","rstbl"],["rstbl","restaurant"],["restaurant","rstbr"],["rstbr","j3"]]};
-let cur=CITY.home, plan=null, selDest=null, MODE="PATH";
+  {id:"rstbl",name:"",x:76.2,y:-72.4}],
+  edges:[["start","home"],["home","j2"],["j2","j3"],["j3","br"],["home","htop"],["htop","c"],["c","whbase"],["whbase","whitehouse"],["whitehouse","tr"],["tr","eiffel"],["eiffel","br"],["c","ltl"],["ltl","library"],["ltl","j2"],["library","j3"],["j2","rstbl"],["rstbl","restaurant"],["restaurant","j3"]]};
+let cur=CITY.start||CITY.home, plan=null, selDest=null, MODE="PATH";
 
 const N=id=>CITY.nodes.find(n=>n.id===id);
 function nbrs(id){const o=[];CITY.edges.forEach(([a,b])=>{if(a===id)o.push(b);if(b===id)o.push(a);});return o;}
@@ -199,14 +203,14 @@ function bfs(a,b){if(a===b)return[a];const prev={[a]:null},q=[a];while(q.length)
 const hd=(a,b)=>Math.atan2(N(b).y-N(a).y,N(b).x-N(a).x)*180/Math.PI;
 function turnOf(i,o){let r=o-i;while(r>180)r-=360;while(r<-180)r+=360;return Math.abs(r)<30?"S":(r>0?"L":"R");}
 const segLen=(a,b)=>Math.hypot(N(b).x-N(a).x,N(b).y-N(a).y);
-const START_HEAD=90;   // the convoy starts facing +y (up the map)
+let curHead=0;   // convoy heading in deg (east=0, north=90) — starts in the Start zone facing Home
 function makePlan(from,dest,via){
   let p1=bfs(from,via||dest); if(!p1)return null; let path=p1;
   if(via){const p2=bfs(via,dest); if(!p2)return null; path=p1.concat(p2.slice(1));}
   let route="",cmds=[];
   for(let i=0;i<path.length-1;i++){
     const h=hd(path[i],path[i+1]);
-    const prev=i>0?hd(path[i-1],path[i]):START_HEAD;
+    const prev=i>0?hd(path[i-1],path[i]):curHead;
     const t=turnOf(prev,h);
     if(i>0)route+=t;
     if(t!=="S")cmds.push(t+"90");
@@ -231,6 +235,7 @@ function drawMap(){
     s+=`<line class="flow" x1="${sx(N(a).x)}" y1="${sy(N(a).y)}" x2="${sx(N(b).x)}" y2="${sy(N(b).y)}" stroke="#7ab0ff" stroke-width="3" stroke-linecap="round"/>`;}});
   CITY.nodes.forEach(n=>{
     const here=n.id===cur,dest=plan&&n.id===plan.dest,sel=selDest===n.id&&!plan;
+    if(n.id==="start")s+=`<rect x="${sx(n.x)-18}" y="${sy(n.y)-18}" width="36" height="36" rx="9" fill="none" stroke="rgba(122,176,255,.55)" stroke-width="1.6" stroke-dasharray="5 4"/>`;
     if(here)s+=`<circle class="pulse" cx="${sx(n.x)}" cy="${sy(n.y)}" r="14" fill="none" stroke="var(--ok)" stroke-width="2"/>`;
     if(dest||sel)s+=`<circle class="pulse" cx="${sx(n.x)}" cy="${sy(n.y)}" r="14" fill="none" stroke="var(--warn)" stroke-width="2"/>`;
     s+=`<circle cx="${sx(n.x)}" cy="${sy(n.y)}" r="9" fill="${here?'var(--ok)':dest||sel?'var(--warn)':'#131a26'}" stroke="${here?'var(--ok)':dest||sel?'var(--warn)':'rgba(255,255,255,.25)'}" stroke-width="2" style="cursor:pointer" onclick="pick('${n.id}')"/>`;
@@ -247,7 +252,7 @@ function renderChips(){
   $("#via").innerHTML='<option value="">— direct —</option>'+CITY.nodes.filter(n=>n.place&&n.id!==cur&&n.id!==selDest).map(n=>`<option value="${n.id}">${n.name}</option>`).join("");
 }
 function loadCity(){
-  try{const c=JSON.parse($("#cityjson").value);if(!c.nodes||!c.edges)throw 0;CITY=c;cur=c.home||c.nodes[0].id;
+  try{const c=JSON.parse($("#cityjson").value);if(!c.nodes||!c.edges)throw 0;CITY=c;cur=c.start||c.home||c.nodes[0].id;
     plan=null;selDest=null;renderChips();drawMap();$("#cityNote").textContent="custom city loaded";log("ok","City loaded — "+CITY.nodes.length+" places");}
   catch(e){log("alert","Invalid city JSON");}
 }
@@ -408,8 +413,8 @@ function parse(i,line){
     if(t==="ALERT"){log("alert","⚠ Obstacle — stopping fleet");sendAll("STOP");say("Obstacle ahead. Stopping.","alert");}
     else if(t==="LOST"){log("alert","Opener can't see Sam — waiting");say("Please keep up — waiting for you.","alert");}
     else if(t==="TURN"){log("turn","Turn "+m);mirror(m==="left"?"TURNL":"TURNR");say("Turning "+m+".","turn");}
-    else if(t==="MARK"||t==="STEP"){if(plan){plan.prog=parseInt(m)||plan.prog+1;const idx=Math.min(plan.prog,plan.path.length-1);cur=plan.path[idx];moveConvoy(cur);$("#pos").textContent=N(cur).name;}log("info",(t==="MARK"?"Marker ":"Step ")+m);}
-    else if(t==="ARRIVE"&&i===0){if(plan){cur=plan.dest;plan=null;}selDest=null;renderChips();drawMap();log("ok","Arrived at "+N(cur).name);say("You have arrived at "+N(cur).name+".","ok");setTimeout(()=>sendAll("STOP"),1500);}
+    else if(t==="MARK"||t==="STEP"){if(plan){plan.prog=parseInt(m)||plan.prog+1;const idx=Math.min(plan.prog,plan.path.length-1);cur=plan.path[idx];if(idx>0)curHead=hd(plan.path[idx-1],plan.path[idx]);moveConvoy(cur);$("#pos").textContent=N(cur).name;}log("info",(t==="MARK"?"Marker ":"Step ")+m);}
+    else if(t==="ARRIVE"&&i===0){if(plan){if(plan.path.length>1)curHead=hd(plan.path[plan.path.length-2],plan.path[plan.path.length-1]);cur=plan.dest;plan=null;}selDest=null;renderChips();drawMap();log("ok","Arrived at "+N(cur).name);say("You have arrived at "+N(cur).name+".","ok");setTimeout(()=>sendAll("STOP"),1500);}
     else if(t==="READY")log("ok",ROLES[i]+" firmware ready ["+m+"]");
     else if(t==="ROLE")log("info",ROLES[i]+" role set");}
 }
