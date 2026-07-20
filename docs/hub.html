@@ -180,10 +180,17 @@ const nowStr=()=>new Date().toLocaleTimeString("en-GB",{hour12:false});
 const bc=("BroadcastChannel" in window)?new BroadcastChannel("companion"):null;
 
 // ---------------- city model ----------------
-let CITY={home:"home",
-  nodes:[{id:"home",name:"Home",x:0,y:0},{id:"whitehouse",name:"White House",x:150,y:0},
-    {id:"eiffel",name:"Eiffel Tower",x:0,y:110},{id:"doe",name:"Doe Library",x:150,y:110}],
-  edges:[["home","whitehouse"],["home","eiffel"],["whitehouse","doe"],["eiffel","doe"]]};
+let CITY={home:"home",nodes:[
+  {id:"home",name:"Home",x:0,y:0,place:true},
+  {id:"whitehouse",name:"White House",x:97.8,y:139.7,place:true},
+  {id:"eiffel",name:"Eiffel Tower",x:217.2,y:63.5,place:true},
+  {id:"library",name:"Doe Library",x:129.5,y:50.8,place:true},
+  {id:"restaurant",name:"Restaurant",x:102.9,y:-72.4,place:true},
+  {id:"j2",name:"",x:76.2,y:0},{id:"j3",name:"",x:129.5,y:0},{id:"br",name:"",x:217.2,y:17.8},
+  {id:"htop",name:"",x:0,y:86.4},{id:"c",name:"",x:76.2,y:86.4},{id:"whbase",name:"",x:97.8,y:86.4},
+  {id:"tr",name:"",x:217.2,y:139.7},{id:"ltl",name:"",x:76.2,y:50.8},
+  {id:"rstbl",name:"",x:76.2,y:-72.4},{id:"rstbr",name:"",x:129.5,y:-72.4}],
+  edges:[["home","j2"],["j2","j3"],["j3","br"],["home","htop"],["htop","c"],["c","whbase"],["whbase","whitehouse"],["whitehouse","tr"],["tr","eiffel"],["eiffel","br"],["c","ltl"],["ltl","library"],["ltl","j2"],["library","j3"],["j2","rstbl"],["rstbl","restaurant"],["restaurant","rstbr"],["rstbr","j3"]]};
 let cur=CITY.home, plan=null, selDest=null, MODE="PATH";
 
 const N=id=>CITY.nodes.find(n=>n.id===id);
@@ -192,13 +199,17 @@ function bfs(a,b){if(a===b)return[a];const prev={[a]:null},q=[a];while(q.length)
 const hd=(a,b)=>Math.atan2(N(b).y-N(a).y,N(b).x-N(a).x)*180/Math.PI;
 function turnOf(i,o){let r=o-i;while(r>180)r-=360;while(r<-180)r+=360;return Math.abs(r)<30?"S":(r>0?"L":"R");}
 const segLen=(a,b)=>Math.hypot(N(b).x-N(a).x,N(b).y-N(a).y);
+const START_HEAD=90;   // the convoy starts facing +y (up the map)
 function makePlan(from,dest,via){
   let p1=bfs(from,via||dest); if(!p1)return null; let path=p1;
   if(via){const p2=bfs(via,dest); if(!p2)return null; path=p1.concat(p2.slice(1));}
   let route="",cmds=[];
   for(let i=0;i<path.length-1;i++){
     const h=hd(path[i],path[i+1]);
-    if(i>0){const t=turnOf(hd(path[i-1],path[i]),h); route+=t; if(t!=="S")cmds.push(t+"90");}
+    const prev=i>0?hd(path[i-1],path[i]):START_HEAD;
+    const t=turnOf(prev,h);
+    if(i>0)route+=t;
+    if(t!=="S")cmds.push(t+"90");
     cmds.push("D"+Math.round(segLen(path[i],path[i+1])));}
   route+="A"; cmds.push("A");
   return {path,route,pathCmd:cmds.join(","),dest,prog:0};
@@ -231,9 +242,9 @@ function drawMap(){
 function moveConvoy(id){const g=document.getElementById("convoy");if(g&&N(id))g.setAttribute("transform",`translate(${sx(N(id).x)},${sy(N(id).y)})`);}
 function pick(id){if(id===cur)return;selDest=id;renderChips();drawMap();}
 function renderChips(){
-  $("#destChips").innerHTML=CITY.nodes.filter(n=>n.id!==cur).map(n=>
+  $("#destChips").innerHTML=CITY.nodes.filter(n=>n.place&&n.id!==cur).map(n=>
     `<button class="${selDest===n.id?'sel':''}" onclick="pick('${n.id}')">${n.name}</button>`).join("");
-  $("#via").innerHTML='<option value="">— direct —</option>'+CITY.nodes.filter(n=>n.id!==cur&&n.id!==selDest).map(n=>`<option value="${n.id}">${n.name}</option>`).join("");
+  $("#via").innerHTML='<option value="">— direct —</option>'+CITY.nodes.filter(n=>n.place&&n.id!==cur&&n.id!==selDest).map(n=>`<option value="${n.id}">${n.name}</option>`).join("");
 }
 function loadCity(){
   try{const c=JSON.parse($("#cityjson").value);if(!c.nodes||!c.edges)throw 0;CITY=c;cur=c.home||c.nodes[0].id;
