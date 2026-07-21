@@ -401,12 +401,13 @@ function simCmd(b,line){b.cmds.push(line);const up=line.toUpperCase();
   else if(up==="TURNL"||up==="TURNR"){b.turnDir=up==="TURNL"?1:-1;b.turnLeft=900;}}
 function simMove(b,d){const r=b.hd*Math.PI/180;b.x+=Math.cos(r)*d;b.y+=Math.sin(r)*d;}
 function simTick(){
-  if(!SIM)return;const dt=0.1;
+  if(!SIM)return;
+  const nw=Date.now(),dt=Math.min(1.5,(nw-(SIM.last||nw))/1000)||0.1;SIM.last=nw;   // real elapsed time (browser throttles background tabs)
   for(const b of SIM.bots){
-    if(Date.now()-b.lastT>500){b.lastT=Date.now();
+    if(nw-b.lastT>500){b.lastT=nw;
       parse(b.i,"T|"+b.role+"|"+b.mission+"|"+(b.i===1?999:b.front)+"|999|0|0|"+b.prog+"|"+(b.mission==="RUN"?(b.turnLeft>0?"TURN":"DRIVE"):b.mission));}
     if(b.mission!=="RUN")continue;
-    if(b.turnLeft>0){b.turnLeft-=100;if(b.turnLeft<=0)b.hd=((b.hd+90*b.turnDir)%360+360)%360;continue;}
+    if(b.turnLeft>0){b.turnLeft-=dt*1000;if(b.turnLeft<=0)b.hd=((b.hd+90*b.turnDir)%360+360)%360;continue;}
     if(b.i===0){
       if(b.front<18){parse(0,"E|ALERT|obstacle");continue;}
       if(b.prog>=b.path.length)continue;
