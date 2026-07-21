@@ -208,16 +208,16 @@ let curHead=0;   // convoy heading in deg (east=0, north=90) — starts in the S
 function makePlan(from,dest,via){
   let p1=bfs(from,via||dest); if(!p1)return null; let path=p1;
   if(via){const p2=bfs(via,dest); if(!p2)return null; path=p1.concat(p2.slice(1));}
-  let route="",cmds=[];
+  let route="",cmds=[],nodeOf=[];   // nodeOf[k] = path index reached when command k completes
   for(let i=0;i<path.length-1;i++){
     const h=hd(path[i],path[i+1]);
     const prev=i>0?hd(path[i-1],path[i]):curHead;
     const t=turnOf(prev,h);
     if(i>0)route+=t;
-    if(t!=="S")cmds.push(t+"90");
-    cmds.push("D"+Math.round(segLen(path[i],path[i+1])));}
-  route+="A"; cmds.push("A");
-  return {path,route,pathCmd:cmds.join(","),dest,prog:0};
+    if(t!=="S"){cmds.push(t+"90");nodeOf.push(i);}
+    cmds.push("D"+Math.round(segLen(path[i],path[i+1])));nodeOf.push(i+1);}
+  route+="A"; cmds.push("A"); nodeOf.push(path.length-1);
+  return {path,route,pathCmd:cmds.join(","),nodeOf,dest,prog:0};
 }
 
 // ---------------- map ----------------
@@ -484,8 +484,10 @@ function parse(i,line){
     if(t==="ALERT"){log("alert","⚠ Obstacle — stopping fleet");sendAll("STOP");say("Obstacle ahead. Stopping.","alert");}
     else if(t==="LOST"){log("alert","Opener can't see Sam — waiting");say("Please keep up — waiting for you.","alert");}
     else if(t==="TURN"){log("turn","Turn "+m);mirror(m==="left"?"TURNL":"TURNR");say("Turning "+m+".","turn");}
-    else if(t==="MARK"||t==="STEP"){if(plan){plan.prog=parseInt(m)||plan.prog+1;const idx=Math.min(plan.prog,plan.path.length-1);cur=plan.path[idx];if(idx>0)curHead=hd(plan.path[idx-1],plan.path[idx]);moveConvoy(cur);$("#pos").textContent=N(cur).name;}log("info",(t==="MARK"?"Marker ":"Step ")+m);}
-    else if(t==="ARRIVE"&&i===0){if(plan){if(plan.path.length>1)curHead=hd(plan.path[plan.path.length-2],plan.path[plan.path.length-1]);cur=plan.dest;plan=null;}selDest=null;renderChips();drawMap();log("ok","Arrived at "+N(cur).name);say("You have arrived at "+N(cur).name+".","ok");setTimeout(()=>sendAll("STOP"),1500);}
+    else if(t==="MARK"||t==="STEP"){if(plan){plan.prog=parseInt(m)||plan.prog+1;
+      const idx=(t==="STEP"&&plan.nodeOf)?plan.nodeOf[Math.min(plan.prog-1,plan.nodeOf.length-1)]:Math.min(plan.prog,plan.path.length-1);
+      cur=plan.path[idx];if(idx>0)curHead=hd(plan.path[idx-1],plan.path[idx]);moveConvoy(cur);$("#pos").textContent=N(cur).name;}log("info",(t==="MARK"?"Marker ":"Step ")+m);}
+    else if(t==="ARRIVE"&&i===0){if(plan){if(plan.path.length>1)curHead=hd(plan.path[plan.path.length-2],plan.path[plan.path.length-1]);cur=plan.dest;plan=null;}selDest=null;renderChips();drawMap();log("ok","Arrived at "+N(cur).name);say("You have arrived at "+N(cur).name+".","ok");CLK(()=>sendAll("STOP"),600);}
     else if(t==="READY")log("ok",ROLES[i]+" firmware ready ["+m+"]");
     else if(t==="ROLE")log("info",ROLES[i]+" role set");}
 }
