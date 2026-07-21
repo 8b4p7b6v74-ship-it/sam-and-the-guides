@@ -159,6 +159,7 @@
         <div class="row" style="margin-top:11px">
           <button class="ghost" id="reconnBtn" onclick="reconnectKnown()">↻ Reconnect known</button>
           <button class="ghost" id="flashBtn" onclick="flashAll()">⚡ Install main.py on all</button>
+          <button class="ghost" id="simBtn" onclick="simFleet()">🧪 Sim fleet</button>
         </div>
         <div class="plan" id="flashStatus"></div>
         <div id="dbg" style="display:none"></div>
@@ -369,6 +370,64 @@ function disc(i){try{slots[i]&&slots[i].dev.gatt.disconnect();}catch(e){}if(slot
 function send(i,str){const s=slots[i];if(!s||!s.connected)return;try{const d=new TextEncoder().encode(str+"\n");const p=(s.rx.properties&&s.rx.properties.writeWithoutResponse)?s.rx.writeValueWithoutResponse(d):s.rx.writeValue(d);if(p&&p.catch)p.catch(function(){});}catch(e){}}
 function sendAll(str){for(let i=0;i<3;i++)send(i,str);}
 function stopAll(){sendAll("STOP");log("alert","STOP ALL");say("Stopping now. You are safe.","alert");}
+
+// ---------------- simulator (rehearsal / demo backup — 3 virtual robots, no BLE) ----------------
+const SIMV=66;                 // speed effort -> cm/s (0.45 ≈ 30 cm/s, same ballpark as the real XRP)
+let SIM=null;
+function simFleet(){
+  if(SIM){simEnd();return;}
+  const p0=N(cur),h=curHead*Math.PI/180;
+  SIM={bots:[],t:setInterval(simTick,100),rep:null};
+  for(let i=0;i<3;i++){
+    const b={i,role:ROLES[i],mission:"IDLE",path:[],prog:0,segDone:0,turnLeft:0,turnDir:0,
+      speed:parseFloat($("#spd").value)||0.45,front:999,cmds:[],lastT:0,
+      x:p0.x-Math.cos(h)*40*i,y:p0.y-Math.sin(h)*40*i,hd:curHead};
+    SIM.bots.push(b);
+    slots[i]={sim:true,connected:true,state:"",front:null,rear:null,alert:false,_lastT:Date.now(),
+      dev:{gatt:{disconnect(){}}},
+      rx:{properties:{writeWithoutResponse:false},writeValue:d=>{simCmd(b,new TextDecoder().decode(d).trim());return Promise.resolve();}}};
+  }
+  $("#simBtn").textContent="🧪 Sim: ON — click to end";
+  renderFleet();log("ok","SIM fleet online — 3 virtual robots (rehearsal mode, no Bluetooth)");
+}
+function simEnd(){clearInterval(SIM.t);SIM=null;for(let i=0;i<3;i++)if(slots[i]&&slots[i].sim)slots[i]=null;
+  $("#simBtn").textContent="🧪 Sim fleet";renderFleet();log("info","SIM fleet off");}
+function simCmd(b,line){b.cmds.push(line);const up=line.toUpperCase();
+  if(up.startsWith("SPD "))b.speed=parseFloat(line.slice(4))||b.speed;
+  else if(up==="GO"){b.mission="RUN";b.prog=0;b.segDone=0;}
+  else if(up==="STOP")b.mission="IDLE";
+  else if(up.startsWith("PATH "))b.path=line.slice(5).split(",").map(s=>s.trim()).filter(Boolean);
+  else if(up.startsWith("ROLE "))b.role=line.slice(5).trim();
+  else if(up==="TURNL"||up==="TURNR"){b.turnDir=up==="TURNL"?1:-1;b.turnLeft=900;}}
+function simMove(b,d){const r=b.hd*Math.PI/180;b.x+=Math.cos(r)*d;b.y+=Math.sin(r)*d;}
+function simTick(){
+  if(!SIM)return;const dt=0.1;
+  for(const b of SIM.bots){
+    if(Date.now()-b.lastT>500){b.lastT=Date.now();
+      parse(b.i,"T|"+b.role+"|"+b.mission+"|"+(b.i===1?999:b.front)+"|999|0|0|"+b.prog+"|"+(b.mission==="RUN"?(b.turnLeft>0?"TURN":"DRIVE"):b.mission));}
+    if(b.mission!=="RUN")continue;
+    if(b.turnLeft>0){b.turnLeft-=100;if(b.turnLeft<=0)b.hd=((b.hd+90*b.turnDir)%360+360)%360;continue;}
+    if(b.i===0){
+      if(b.front<18){parse(0,"E|ALERT|obstacle");continue;}
+      if(b.prog>=b.path.length)continue;
+      const c=b.path[b.prog];
+      if(c[0]==="A"){b.mission="ARRIVED";simReport();parse(0,"E|ARRIVE|");continue;}
+      if(c[0]==="L"||c[0]==="R"){b.prog++;b.turnDir=c[0]==="L"?1:-1;b.turnLeft=900;
+        parse(0,"E|STEP|"+b.prog);parse(0,"E|TURN|"+(c[0]==="L"?"left":"right"));continue;}
+      const v=parseFloat(c.slice(1))||0,st=b.speed*SIMV*dt;simMove(b,st);b.segDone+=st;
+      if(b.segDone>=v){b.prog++;b.segDone=0;parse(0,"E|STEP|"+b.prog);}
+    }else simMove(b,b.speed*SIMV*dt);
+  }
+}
+function simReport(){
+  if(!SIM||!plan)return;const d=N(plan.dest);
+  setTimeout(()=>{if(!SIM)return;const dv=b=>+Math.hypot(b.x-d.x,b.y-d.y).toFixed(1);
+    const[o,s,c]=SIM.bots;
+    SIM.rep={dest:d.id,opener:dv(o),sam:dv(s),closer:dv(c),
+      samTurns:s.cmds.filter(x=>/^TURN/.test(x)).length,
+      pos:SIM.bots.map(b=>[+b.x.toFixed(1),+b.y.toFixed(1),b.hd])};
+    log("info","SIM — final distance to "+d.name+": Opener "+SIM.rep.opener+" cm · Sam "+SIM.rep.sam+" cm · Closer "+SIM.rep.closer+" cm");},2200);
+}
 
 // ---------------- trips ----------------
 function dispatchTrip(){

@@ -140,7 +140,8 @@
     <div class="chips">
       <button data-dest="whitehouse"><span class="em">🏛️</span> White House</button>
       <button data-dest="eiffel"><span class="em">🗼</span> Eiffel Tower</button>
-      <button data-dest="doe"><span class="em">📚</span> Doe Library</button>
+      <button data-dest="library"><span class="em">📚</span> Doe Library</button>
+      <button data-dest="restaurant"><span class="em">🍽️</span> Restaurant</button>
       <button data-dest="home"><span class="em">🏠</span> Home</button>
     </div>
     <button class="stop" id="stop" aria-label="Stop the robots now">■ STOP</button>
@@ -174,7 +175,8 @@ const $=s=>document.querySelector(s);
 const DEST={
   whitehouse:{name:"the White House",keys:["white house","white","president"]},
   eiffel:{name:"the Eiffel Tower",keys:["eiffel","tower","paris"]},
-  doe:{name:"Doe Library",keys:["library","doe","books","study"]},
+  library:{name:"Doe Library",keys:["library","doe","books","study"]},
+  restaurant:{name:"the restaurant",keys:["restaurant","eat","food","lunch","dinner","hungry"]},
   home:{name:"home",keys:["home","back"]}
 };
 const GLOW={ready:"rgba(77,141,255,.35)",go:"rgba(77,141,255,.35)",listen:"rgba(255,176,32,.32)",alert:"rgba(255,91,91,.38)",done:"rgba(61,220,132,.34)"};
