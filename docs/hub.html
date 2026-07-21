@@ -396,7 +396,7 @@ function simEnd(){if(SIM.w)SIM.w.terminate();if(SIM.t)clearInterval(SIM.t);SIM=n
   $("#simBtn").textContent="🧪 Sim fleet";renderFleet();log("info","SIM fleet off");}
 function simCmd(b,line){b.cmds.push(line);const up=line.toUpperCase();
   if(up.startsWith("SPD "))b.speed=parseFloat(line.slice(4))||b.speed;
-  else if(up==="GO"){b.mission="RUN";b.prog=0;b.segDone=0;}
+  else if(up==="GO"){b.mission="RUN";b.prog=0;b.segDone=0;b.turnLeft=0;}   // firmware clears pending turns on GO too
   else if(up==="STOP")b.mission="IDLE";
   else if(up.startsWith("PATH "))b.path=line.slice(5).split(",").map(s=>s.trim()).filter(Boolean);
   else if(up.startsWith("ROLE "))b.role=line.slice(5).trim();
@@ -487,7 +487,7 @@ function parse(i,line){
     else if(t==="MARK"||t==="STEP"){if(plan){plan.prog=parseInt(m)||plan.prog+1;
       const idx=(t==="STEP"&&plan.nodeOf)?plan.nodeOf[Math.min(plan.prog-1,plan.nodeOf.length-1)]:Math.min(plan.prog,plan.path.length-1);
       cur=plan.path[idx];if(idx>0)curHead=hd(plan.path[idx-1],plan.path[idx]);moveConvoy(cur);$("#pos").textContent=N(cur).name;}log("info",(t==="MARK"?"Marker ":"Step ")+m);}
-    else if(t==="ARRIVE"&&i===0){if(plan){if(plan.path.length>1)curHead=hd(plan.path[plan.path.length-2],plan.path[plan.path.length-1]);cur=plan.dest;plan=null;}selDest=null;renderChips();drawMap();log("ok","Arrived at "+N(cur).name);say("You have arrived at "+N(cur).name+".","ok");CLK(()=>sendAll("STOP"),600);}
+    else if(t==="ARRIVE"&&i===0){if(plan){if(plan.path.length>1)curHead=hd(plan.path[plan.path.length-2],plan.path[plan.path.length-1]);cur=plan.dest;plan=null;}selDest=null;renderChips();drawMap();log("ok","Arrived at "+N(cur).name);say("You have arrived at "+N(cur).name+".","ok");CLK(()=>sendAll("STOP"),200);}
     else if(t==="READY")log("ok",ROLES[i]+" firmware ready ["+m+"]");
     else if(t==="ROLE")log("info",ROLES[i]+" role set");}
 }
