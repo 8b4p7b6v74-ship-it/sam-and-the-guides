@@ -377,7 +377,9 @@ let SIM=null;
 function simFleet(){
   if(SIM){simEnd();return;}
   const p0=N(cur),h=curHead*Math.PI/180;
-  SIM={bots:[],t:setInterval(simTick,100),rep:null};
+  SIM={bots:[],rep:null};
+  try{SIM.w=new Worker(URL.createObjectURL(new Blob(["setInterval(function(){postMessage(1)},100)"],{type:"text/javascript"})));SIM.w.onmessage=simTick;}   // workers dodge background-tab timer throttling
+  catch(e){SIM.t=setInterval(simTick,100);}
   for(let i=0;i<3;i++){
     const b={i,role:ROLES[i],mission:"IDLE",path:[],prog:0,segDone:0,turnLeft:0,turnDir:0,
       speed:parseFloat($("#spd").value)||0.45,front:999,cmds:[],lastT:0,
@@ -390,7 +392,7 @@ function simFleet(){
   $("#simBtn").textContent="🧪 Sim: ON — click to end";
   renderFleet();log("ok","SIM fleet online — 3 virtual robots (rehearsal mode, no Bluetooth)");
 }
-function simEnd(){clearInterval(SIM.t);SIM=null;for(let i=0;i<3;i++)if(slots[i]&&slots[i].sim)slots[i]=null;
+function simEnd(){if(SIM.w)SIM.w.terminate();if(SIM.t)clearInterval(SIM.t);SIM=null;for(let i=0;i<3;i++)if(slots[i]&&slots[i].sim)slots[i]=null;
   $("#simBtn").textContent="🧪 Sim fleet";renderFleet();log("info","SIM fleet off");}
 function simCmd(b,line){b.cmds.push(line);const up=line.toUpperCase();
   if(up.startsWith("SPD "))b.speed=parseFloat(line.slice(4))||b.speed;
@@ -451,9 +453,14 @@ function dispatchTrip(){
 }
 function goHome(){if(cur===CITY.home){log("info","Already home");return;}selDest=CITY.home;$("#via").value="";renderChips();dispatchTrip();}
 
+// precise delays even when the tab is backgrounded (window timers get throttled, worker timers don't)
+const CLK=(()=>{try{const w=new Worker(URL.createObjectURL(new Blob(["onmessage=function(e){setTimeout(function(){postMessage(e.data.id)},e.data.ms)}"],{type:"text/javascript"})));
+  const cbs={};let n=0;w.onmessage=e=>{const f=cbs[e.data];delete cbs[e.data];if(f)f();};
+  return (fn,ms)=>{cbs[++n]=fn;w.postMessage({id:n,ms});};}
+  catch(e){return (fn,ms)=>setTimeout(fn,ms);}})();
 function mirror(cmd){
   const dS=parseInt($("#dSam").value)||1200,dC=parseInt($("#dClo").value)||2400;
-  setTimeout(()=>send(1,cmd),dS);setTimeout(()=>send(2,cmd),dC);
+  CLK(()=>send(1,cmd),dS);CLK(()=>send(2,cmd),dC);
 }
 let lastSpd=0,lastSent=0;
 function samSpeed(rear){
