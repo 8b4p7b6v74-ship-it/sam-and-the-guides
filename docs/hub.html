@@ -415,8 +415,10 @@ function simTick(){
       if(c[0]==="A"){b.mission="ARRIVED";simReport();parse(0,"E|ARRIVE|");continue;}
       if(c[0]==="L"||c[0]==="R"){b.prog++;b.turnDir=c[0]==="L"?1:-1;b.turnLeft=900;
         parse(0,"E|STEP|"+b.prog);parse(0,"E|TURN|"+(c[0]==="L"?"left":"right"));continue;}
-      const v=parseFloat(c.slice(1))||0,st=b.speed*SIMV*dt;simMove(b,st);b.segDone+=st;
-      if(b.segDone>=v){b.prog++;b.segDone=0;parse(0,"E|STEP|"+b.prog);}
+      const v=parseFloat(c.slice(1))||0;let st=b.speed*SIMV*dt;
+      if(st>v-b.segDone)st=v-b.segDone;                    // never overshoot the corner
+      simMove(b,st);b.segDone+=st;
+      if(b.segDone>=v-0.01){b.prog++;b.segDone=0;parse(0,"E|STEP|"+b.prog);}
     }else simMove(b,b.speed*SIMV*dt);
   }
 }
