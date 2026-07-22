@@ -181,21 +181,24 @@ const nowStr=()=>new Date().toLocaleTimeString("en-GB",{hour12:false});
 const bc=("BroadcastChannel" in window)?new BroadcastChannel("companion"):null;
 
 // ---------------- city model ----------------
-// All segments strictly horizontal/vertical (robots only turn 90°).
-// Note: the sketch's right column said 30"+18"=48" but the loop closes at 55" (34"+21");
-// the missing 7" is split proportionally -> Eiffel sits 20.6" above the bottom corner.
+// Real town, corrected dims (photo "Robot Path — Town Model", inches->cm x2.54).
+// All segments strictly horizontal/vertical (90° turns only). Start zone is BELOW Home:
+// the convoy points NORTH (up) -> "straight up" = White House. Bottom edge y=0.
 let CITY={home:"home",start:"start",nodes:[
-  {id:"start",name:"Start",x:-30,y:0},
+  {id:"start",name:"Start",x:0,y:-30},
   {id:"home",name:"Home",x:0,y:0,place:true},
-  {id:"whitehouse",name:"White House",x:97.8,y:139.7,place:true},
-  {id:"eiffel",name:"Eiffel Tower",x:217.2,y:52.4,place:true},
-  {id:"library",name:"Doe Library",x:129.5,y:50.8,place:true},
-  {id:"restaurant",name:"Restaurant",x:129.5,y:-72.4,place:true},
-  {id:"j2",name:"",x:76.2,y:0},{id:"j3",name:"",x:129.5,y:0},{id:"br",name:"",x:217.2,y:0},
-  {id:"htop",name:"",x:0,y:86.4},{id:"c",name:"",x:76.2,y:86.4},{id:"whbase",name:"",x:97.8,y:86.4},
-  {id:"tr",name:"",x:217.2,y:139.7},{id:"ltl",name:"",x:76.2,y:50.8},
-  {id:"rstbl",name:"",x:76.2,y:-72.4}],
-  edges:[["start","home"],["home","j2"],["j2","j3"],["j3","br"],["home","htop"],["htop","c"],["c","whbase"],["whbase","whitehouse"],["whitehouse","tr"],["tr","eiffel"],["eiffel","br"],["c","ltl"],["ltl","library"],["ltl","j2"],["library","j3"],["j2","rstbl"],["rstbl","restaurant"],["restaurant","j3"]]};
+  {id:"tl",name:"",x:0,y:86.4},
+  {id:"a",name:"",x:78.7,y:0},{id:"b",name:"",x:133.4,y:0},{id:"c",name:"",x:221,y:0},
+  {id:"eiffel",name:"Eiffel Tower",x:221,y:50.8,place:true},
+  {id:"tr",name:"",x:221,y:139.7},
+  {id:"whitehouse",name:"White House",x:101.6,y:139.7,place:true},
+  {id:"c2",name:"",x:101.6,y:86.4},{id:"c1",name:"",x:78.7,y:86.4},
+  {id:"mtl",name:"",x:78.7,y:52.1},
+  {id:"library",name:"Doe Library",x:133.4,y:52.1,place:true},
+  {id:"rbl",name:"",x:78.7,y:-73.7},
+  {id:"restaurant",name:"Restaurant",x:106,y:-73.7,place:true},
+  {id:"rbr",name:"",x:133.4,y:-73.7}],
+  edges:[["start","home"],["home","tl"],["home","a"],["a","b"],["b","c"],["c","eiffel"],["eiffel","tr"],["tr","whitehouse"],["whitehouse","c2"],["c2","c1"],["c1","tl"],["c1","mtl"],["mtl","a"],["mtl","library"],["library","b"],["a","rbl"],["rbl","restaurant"],["restaurant","rbr"],["rbr","b"]]};
 let cur=CITY.start||CITY.home, plan=null, selDest=null, MODE="PATH";
 
 const N=id=>CITY.nodes.find(n=>n.id===id);
@@ -204,7 +207,7 @@ function bfs(a,b){if(a===b)return[a];const prev={[a]:null},q=[a];while(q.length)
 const hd=(a,b)=>Math.atan2(N(b).y-N(a).y,N(b).x-N(a).x)*180/Math.PI;
 function turnOf(i,o){let r=o-i;while(r>180)r-=360;while(r<-180)r+=360;return Math.abs(r)<30?"S":(r>0?"L":"R");}
 const segLen=(a,b)=>Math.hypot(N(b).x-N(a).x,N(b).y-N(a).y);
-let curHead=0;   // convoy heading in deg (east=0, north=90) — starts in the Start zone facing Home
+let curHead=90;   // convoy heading in deg (east=0, north=90) — starts below Home facing NORTH (up into town)
 function makePlan(from,dest,via){
   let p1=bfs(from,via||dest); if(!p1)return null; let path=p1;
   if(via){const p2=bfs(via,dest); if(!p2)return null; path=p1.concat(p2.slice(1));}
