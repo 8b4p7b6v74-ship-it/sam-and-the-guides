@@ -163,9 +163,12 @@ def front_cm():
         return 999.0
     try:
         d = rangefinder.distance()
-        return 999.0 if (d is None or d <= 0) else d
     except Exception:
         return 999.0
+    # reject noise & sensor-timeout: <3cm spikes and 0xFFFF(65535)/>4m out-of-range
+    if d is None or d < 3.0 or d > 400.0:
+        return 999.0
+    return d
 
 
 def rear_cm():
@@ -216,15 +219,20 @@ def arm_tap():
     emit("ARM", "tap")
 
 
+_enc_last = 0.0
 def enc_cm():
-    """Average wheel travel in cm since boot (signed)."""
+    """Average wheel travel in cm since boot (signed). Caches the last good
+    read so a transient encoder error can't poison a segment's start distance
+    (a spurious 0.0 was making short PATH steps 'complete' instantly)."""
+    global _enc_last
     if not HW["enc"]:
-        return 0.0
+        return _enc_last
     try:
-        return (left_motor.get_position() + right_motor.get_position()) \
+        _enc_last = (left_motor.get_position() + right_motor.get_position()) \
             * 0.5 * CFG["wheel_circ"]
     except Exception:
-        return 0.0
+        pass
+    return _enc_last
 
 
 # ---------------------------------------------------------------- drive
@@ -262,6 +270,7 @@ class Drive:
 SD = Drive()
 
 LAST = {"err": 0.0, "sign": 1, "mark_t": 0, "head": 0.0}
+OBST = {"t": 0}               # obstacle debounce: first time front went sub-threshold
 MANU = {"fwd": 0.0, "turn": 0.0}
 TURN = {"on": False, "target": 0.0, "dirn": 1, "end": 0}
 SEG = {"start_cm": 0.0}
@@ -378,6 +387,7 @@ def start_mission():
     if HW["imu"]:
         LAST["head"] = _heading()
     SEG["start_cm"] = enc_cm()
+    OBST["t"] = 0
     TURN["on"] = False; led(False); emit("GO", ROLE)
 
 
@@ -396,9 +406,15 @@ def arrive():
 # ---------- OPENER
 def step_opener():
     global STATE, PROG
+    # obstacle must PERSIST (>300ms) to trigger — the ultrasonic flickers low
     if front_cm() < CFG["stop_cm"]:
-        STATE = "ALERT"; led(True); SD.brake(); emit("ALERT", "obstacle")
-        return
+        if OBST["t"] == 0:
+            OBST["t"] = now()
+        elif since(OBST["t"]) > 300:
+            STATE = "ALERT"; led(True); SD.brake(); emit("ALERT", "obstacle")
+            return
+    else:
+        OBST["t"] = 0
     if HW["rear"] and CFG["sam_lost_cm"] < rear_cm() < 500:  # 999 = no echo -> ignore
         STATE = "WAIT_SAM"; SD.brake(); emit("LOST", "sam")
         return
