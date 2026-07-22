@@ -498,6 +498,7 @@ def manual(k):
     }.get(k, (0.0, 0.0))
 
 
+_seen_ids = []                       # recent command ids, for at-most-once execution
 def handle(line):
     u = line.strip()
     if not u:
@@ -508,7 +509,12 @@ def handle(line):
     if u[0] == "#":
         sp = u.find(" ")
         cid = u[1:sp] if sp > 0 else u[1:]
-        print("A|%s" % cid)          # ACK on receipt
+        print("A|%s" % cid)          # ACK on receipt (ALWAYS, so the hub stops retrying)
+        if cid in _seen_ids:         # duplicate (retry whose original already landed) -> ACK but DON'T re-run
+            return
+        _seen_ids.append(cid)
+        if len(_seen_ids) > 24:
+            _seen_ids.pop(0)
         if sp < 0:
             return
         u = u[sp + 1:].strip()

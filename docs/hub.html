@@ -526,7 +526,12 @@ function simRx(b,i,str){
   if(Math.random()<SIM_LOSS)return;                 // packet dropped: no ack, no exec -> hub retries
   let cmd=str,id=null;
   if(str[0]==="#"){const sp=str.indexOf(" ");id=sp>0?str.slice(1,sp):str.slice(1);cmd=sp>0?str.slice(sp+1):"";}
-  if(id!=null)setTimeout(()=>{if(slots[i])parse(i,"A|"+id);},15+Math.random()*30);   // ACK with small latency
+  if(id!=null){
+    setTimeout(()=>{if(slots[i])parse(i,"A|"+id);},15+Math.random()*30);   // ALWAYS ACK (even a duplicate)
+    b._seen=b._seen||[];
+    if(b._seen.indexOf(id)>=0)return;               // duplicate -> don't re-execute (at-most-once)
+    b._seen.push(id);if(b._seen.length>24)b._seen.shift();
+  }
   if(cmd)simCmd(b,cmd);
 }
 function simCmd(b,line){b.cmds.push(line);const up=line.toUpperCase();
