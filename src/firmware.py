@@ -502,6 +502,18 @@ def handle(line):
     u = line.strip()
     if not u:
         return
+    # Reliable command envelope: "#<id> <cmd>" -> acknowledge receipt IMMEDIATELY
+    # (before executing) so the hub can confirm all robots got it, then run <cmd>.
+    # Commands without a "#<id>" prefix still work (backward compatible).
+    if u[0] == "#":
+        sp = u.find(" ")
+        cid = u[1:sp] if sp > 0 else u[1:]
+        print("A|%s" % cid)          # ACK on receipt
+        if sp < 0:
+            return
+        u = u[sp + 1:].strip()
+        if not u:
+            return
     up = u.upper()
     if up == "STOP" or u == " ":
         stop_mission()
