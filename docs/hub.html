@@ -512,7 +512,7 @@ function dispatchTrip(){
   sendAll("GO");
   drawMap();
   log("ok","→ "+N(selDest).name+(via?" via "+N(via).name:"")+"  ["+MODE+"]");
-  say("Okay — taking you to "+N(selDest).name+(via?", passing by "+N(via).name:"")+". The guides are leading.","go");
+  say("Sure — taking you to "+N(selDest).name+(via?", passing by "+N(via).name:"")+". Stay close to me, I'll guide you the whole way.","go");
 }
 function goHome(){if(cur===CITY.home){log("info","Already home");return;}selDest=CITY.home;$("#via").value="";renderChips();dispatchTrip();}
 
@@ -546,7 +546,7 @@ function parse(i,line){
   else if(p[0]==="E"){const t=p[1],m=p[2]||"";
     if(t==="ALERT"){log("alert","⚠ Obstacle — stopping fleet");sendAll("STOP");say("Obstacle ahead. Stopping.","alert");}
     else if(t==="LOST"){log("alert","Opener can't see Sam — waiting");say("Please keep up — waiting for you.","alert");}
-    else if(t==="TURN"){log("turn","Turn "+m);mirror(m==="left"?"TURNL":"TURNR");say("Turning "+m+".","turn");}
+    else if(t==="TURN"){log("turn","Turn "+m);mirror(m==="left"?"TURNL":"TURNR");say("Turning "+m+" now. I've got you — watch your step.","turn");}
     else if(t==="MARK"||t==="STEP"){if(plan){plan.prog=parseInt(m)||plan.prog+1;
       const idx=(t==="STEP"&&plan.nodeOf)?plan.nodeOf[Math.min(plan.prog-1,plan.nodeOf.length-1)]:Math.min(plan.prog,plan.path.length-1);
       cur=plan.path[idx];if(idx>0)curHead=hd(plan.path[idx-1],plan.path[idx]);moveConvoy(cur);$("#pos").textContent=N(cur).name;}log("info",(t==="MARK"?"Marker ":"Step ")+m);}

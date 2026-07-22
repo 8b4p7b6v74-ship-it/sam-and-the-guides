@@ -239,20 +239,22 @@ async function listen(){
   try{ rec.start(); }catch(e){}
 }
 function matchDest(t){ for(const k in DEST){ if(DEST[k].keys.some(w=>t.includes(w))){ go(k); return; } }
-  announce("Sorry, I didn't catch a place. You can say the store, the bathroom, reception, or the dining room.","Try again","ready"); }
+  announce("Sorry, I didn't catch that. You can say: the White House, the Eiffel Tower, Doe Library, the restaurant, or home.","Try again","ready"); }
 
 // journey
 function clearJourney(){ timers.forEach(clearTimeout); timers=[]; }
 function go(key){ const d=DEST[key]; if(!d) return; clearJourney(); busy=true;
-  announce("Okay — taking you to "+d.name+". The guide robots are leading the way. Stay with the companion beside you.","On the way","go");
+  announce("Sure — taking you to "+d.name+". Stay close to me, I'll guide you the whole way.","On the way","go");
   if(bc) bc.postMessage({kind:"mission",dest:key});
   if(robot){ send("G"); robot._dest=d; }
   else { timers.push(setTimeout(()=>{ if(Date.now()-lastHub>1200) demoJourney(d); },1600)); } }
 function demoJourney(d){
-  const steps=[[3600,"On the way.","On the way","go"],[6600,"Turning right.","Turning","go"],
-    [10000,"Obstacle ahead. Stopping.","Stopped","alert"],[13000,"The path is clear. Continuing.","On the way","go"],
-    [16500,"Almost there.","Arriving","go"],[19500,"You have arrived at "+d.name+".","Arrived","done"]];
-  steps.forEach(([ms,t,s,tone])=>timers.push(setTimeout(()=>{ announce(t,s,tone); if(s==="Arrived"){busy=false; setTimeout(()=>announce("Where would you like to go?","Ready","ready"),4000);} },ms))); }
+  const steps=[[3800,"We're setting off. Walking straight ahead.","On the way","go"],
+    [7800,"Turning left now. I've got you.","Turning","go"],
+    [11800,"Careful — watch your step here.","Watch your step","go"],
+    [15300,"Almost there. A few more steps.","Arriving","go"],
+    [18800,"You have arrived at "+d.name+".","Arrived","done"]];
+  steps.forEach(([ms,t,s,tone])=>timers.push(setTimeout(()=>{ announce(t,s,tone); if(s==="Arrived"){busy=false; setTimeout(()=>announce("Where would you like to go next?","Ready","ready"),4000);} },ms))); }
 function stopAll(){ clearJourney(); busy=false; if(robot) send(" "); if(bc) bc.postMessage({kind:"stop"}); announce("Stopping now. You are safe.","Stopped","alert"); setTimeout(()=>announce("Where would you like to go?","Ready","ready"),3200); }
 
 // optional robot
