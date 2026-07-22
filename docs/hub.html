@@ -161,6 +161,11 @@
           <button class="ghost" id="flashBtn" onclick="flashAll()">⚡ Install main.py on all</button>
           <button class="ghost" id="simBtn" onclick="simFleet()">🧪 Sim fleet</button>
         </div>
+        <div class="row" style="margin-top:9px">
+          <button class="ghost" id="calBtn" onclick="calibrate()">🎯 Test 40 cm (Opener)</button>
+          <button class="ghost" onclick="send(0,'STOP')">■ Stop Opener</button>
+        </div>
+        <div class="plan" id="calStatus"></div>
         <div class="plan" id="flashStatus"></div>
         <div id="dbg" style="display:none"></div>
       </div>
@@ -373,6 +378,17 @@ function disc(i){try{slots[i]&&slots[i].dev.gatt.disconnect();}catch(e){}if(slot
 function send(i,str){const s=slots[i];if(!s||!s.connected)return;try{const d=new TextEncoder().encode(str+"\n");const p=(s.rx.properties&&s.rx.properties.writeWithoutResponse)?s.rx.writeValueWithoutResponse(d):s.rx.writeValue(d);if(p&&p.catch)p.catch(function(){});}catch(e){}}
 function sendAll(str){for(let i=0;i<3;i++)send(i,str);}
 function stopAll(){sendAll("STOP");log("alert","STOP ALL");say("Stopping now. You are safe.","alert");}
+
+// Calibration: drive ONLY the Opener a known distance, so you can measure real vs commanded.
+function calibrate(cm){
+  cm=cm||40;
+  const s=slots[0];
+  if(!(s&&s.connected)){log("alert","Connect the Opener first");return;}
+  const st=document.getElementById("calStatus");
+  send(0,"ROLE OPENER");send(0,"SPD 0.35");send(0,"PATH D"+cm+",A");send(0,"GO");
+  if(st)st.textContent="Opener driving "+cm+" cm… measure the real distance, then tell Gabriel.";
+  log("ok","🎯 Calibration: Opener commanded "+cm+" cm (Sam & Closer stay put)");
+}
 
 // ---------------- simulator (rehearsal / demo backup — 3 virtual robots, no BLE) ----------------
 const SIMV=66;                 // speed effort -> cm/s (0.45 ≈ 30 cm/s, same ballpark as the real XRP)
