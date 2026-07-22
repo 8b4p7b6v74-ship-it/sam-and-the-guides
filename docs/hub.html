@@ -458,7 +458,8 @@ function sendAllReliable(cmd,opts){
   const ps=[];for(let i=0;i<3;i++){if(slots[i]&&slots[i].connected)ps.push(sendReliable(i,cmd,opts).then(ok=>({i,ok,role:ROLES[i]})));}
   return Promise.all(ps);
 }
-function stopAll(){DEMO=false;sendAll("STOP");log("alert","STOP ALL");say("Stopping now. You are safe.","alert");}
+// safety STOP: fast + redundant (fire 3× immediately, no ACK wait), then one confirmed STOP
+function stopAll(){DEMO=false;for(let k=0;k<3;k++)sendAll("STOP");sendAllReliable("STOP");log("alert","STOP ALL");say("Stopping now. You are safe.","alert");}
 
 // ---------------- one-click auto demo (sim) ----------------
 let DEMO=false;
