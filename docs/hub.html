@@ -166,6 +166,7 @@
           <button class="ghost" id="calBtn" onclick="calibrate()">🎯 Test 40 cm (Opener)</button>
           <button class="ghost" onclick="send(0,'STOP')">■ Stop Opener</button>
         </div>
+        <div class="plan" id="kbHint">⌨️ Manual: hold W A S D on a connected robot</div>
         <div class="plan" id="calStatus"></div>
         <div class="plan" id="flashStatus"></div>
         <div id="dbg" style="display:none"></div>
@@ -567,6 +568,24 @@ if(bc)bc.onmessage=ev=>{const d=ev.data;
   if(d&&d.kind==="mission"&&d.dest){const n=CITY.nodes.find(x=>x.id===d.dest||x.name.toLowerCase()===d.dest.toLowerCase());
     if(n&&n.id!==cur){bc.postMessage({kind:"ack"});selDest=n.id;$("#via").value="";renderChips();dispatchTrip();}}
   if(d&&d.kind==="stop")stopAll();};
+
+// ---------------- manual keyboard drive (live demo: hold W/A/S/D to drive a real robot) ----------------
+// W forward · S back · A/D pivot left/right · Q/E forward-arc · release = stop.
+const _held=new Set();
+function _firstReal(){for(let i=0;i<3;i++){const s=slots[i];if(s&&s.connected&&!s.sim)return i;}return -1;}
+document.addEventListener("keydown",e=>{
+  const t=e.target.tagName;if(t==="INPUT"||t==="SELECT"||t==="TEXTAREA")return;
+  const k=e.key.toLowerCase();if(!"wasdqe".includes(k)||k.length!==1)return;
+  e.preventDefault();if(_held.has(k))return;_held.add(k);
+  const i=_firstReal();if(i<0){log("info","Manual: no real robot connected");return;}
+  send(i,"SPD "+(parseFloat($("#spd").value)||0.7));send(i,k);
+  const hint=document.getElementById("kbHint");if(hint)hint.textContent="▶ driving "+ROLES[i]+" ("+k.toUpperCase()+")";
+});
+document.addEventListener("keyup",e=>{
+  const k=e.key.toLowerCase();if(!"wasdqe".includes(k)||k.length!==1)return;
+  _held.delete(k);const i=_firstReal();if(i>=0)send(i,"STOP");
+  const hint=document.getElementById("kbHint");if(hint&&_held.size===0)hint.textContent="Manual: hold W A S D on a connected robot";
+});
 
 // ---------------- boot ----------------
 $("#cityjson").value=JSON.stringify(CITY,null,1);
