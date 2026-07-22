@@ -182,10 +182,10 @@ const bc=("BroadcastChannel" in window)?new BroadcastChannel("companion"):null;
 
 // ---------------- city model ----------------
 // Real town, corrected dims (photo "Robot Path — Town Model", inches->cm x2.54).
-// All segments strictly horizontal/vertical (90° turns only). Start zone is BELOW Home:
-// the convoy points NORTH (up) -> "straight up" = White House. Bottom edge y=0.
+// All segments strictly horizontal/vertical (90° turns only). Start zone is on the
+// bottom line WEST of Home (behind Home, on the Home->Eiffel line); convoy faces EAST.
 let CITY={home:"home",start:"start",nodes:[
-  {id:"start",name:"Start",x:0,y:-30},
+  {id:"start",name:"Start",x:-30,y:0},
   {id:"home",name:"Home",x:0,y:0,place:true},
   {id:"tl",name:"",x:0,y:86.4},
   {id:"a",name:"",x:78.7,y:0},{id:"b",name:"",x:133.4,y:0},{id:"c",name:"",x:221,y:0},
@@ -207,7 +207,7 @@ function bfs(a,b){if(a===b)return[a];const prev={[a]:null},q=[a];while(q.length)
 const hd=(a,b)=>Math.atan2(N(b).y-N(a).y,N(b).x-N(a).x)*180/Math.PI;
 function turnOf(i,o){let r=o-i;while(r>180)r-=360;while(r<-180)r+=360;return Math.abs(r)<30?"S":(r>0?"L":"R");}
 const segLen=(a,b)=>Math.hypot(N(b).x-N(a).x,N(b).y-N(a).y);
-let curHead=90;   // convoy heading in deg (east=0, north=90) — starts below Home facing NORTH (up into town)
+let curHead=0;   // convoy heading in deg (east=0, north=90) — starts WEST of Home facing EAST (toward Home/Eiffel)
 function makePlan(from,dest,via){
   let p1=bfs(from,via||dest); if(!p1)return null; let path=p1;
   if(via){const p2=bfs(via,dest); if(!p2)return null; path=p1.concat(p2.slice(1));}
