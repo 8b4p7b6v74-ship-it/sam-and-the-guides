@@ -367,9 +367,15 @@ async function flashOne(i,force){
     const m=/SZ=(\d+)/.exec(DBG);const got=m?parseInt(m[1]):-1;
     if(got===expSize){
       st(ROLES[i]+": verified "+got+" bytes ✓ — rebooting…");
-      await txRaw(i,"\x02");await sleep(220);await txRaw(i,"\x04");await sleep(2600);
-      if(!s.connected){st(ROLES[i]+": reconnecting…");try{await attach(i,s.dev);}catch(e){st(ROLES[i]+": reboot done — click Connect on "+ROLES[i]);}}
-      st(ROLES[i]+": flashed & verified ✓ ("+got+" B)");log("ok",ROLES[i]+" firmware flashed & verified");return true;
+      try{await txRaw(i,"\x02");await sleep(220);await txRaw(i,"\x04");}catch(e){}  // reboot drops the link mid-write; that's fine
+      await sleep(2800);
+      if(!s.connected){
+        st(ROLES[i]+": reconnecting after reboot…");
+        for(let r=1;r<=3&&!s.connected;r++){try{await attach(i,s.dev);}catch(e){await sleep(1200);}}
+      }
+      if(s.connected){st(ROLES[i]+": flashed & verified ✓ ("+got+" B)");log("ok",ROLES[i]+" firmware flashed, verified & back online");}
+      else{st(ROLES[i]+": flashed ✓ — click Connect on "+ROLES[i]);log("info",ROLES[i]+" flashed OK — reconnect it");}
+      return true;
     }
     st(ROLES[i]+": size "+got+"≠"+expSize+" (corrupt) — retrying…");log("alert",ROLES[i]+" flash corrupt, retry "+attempt);
     await sleep(400);
