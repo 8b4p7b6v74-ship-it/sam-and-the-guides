@@ -343,35 +343,44 @@ async function txRaw(i,str){
   }
 }
 async function execRaw(i,code){await txRaw(i,code);await txRaw(i,"\x04");await sleep(170);}
-async function flashOne(i){
+async function flashOne(i,force){
   const s=slots[i];
   if(!s||!s.connected){st(ROLES[i]+": offline — skipped");return false;}
-  if(Date.now()-(s._lastT||0)<3000){st(ROLES[i]+": firmware already running — skipped");return true;}
+  if(!force&&Date.now()-(s._lastT||0)<3000){st(ROLES[i]+": firmware already running — skipped");return true;}
   st(ROLES[i]+": fetching firmware…");
   const src=await (await fetch("../src/firmware.py?ts="+Date.now())).text();
+  const expSize=new TextEncoder().encode(src).length;   // exact byte length we must write
   const b64=btoa(unescape(encodeURIComponent(src)));
-  st(ROLES[i]+": entering REPL…");
-  await txRaw(i,"\r\x03");await sleep(220);await txRaw(i,"\x03");await sleep(220);await txRaw(i,"\x01");await sleep(260);
-  await execRaw(i,"import binascii");
-  await execRaw(i,"f=open('main.py','wb')");
   const CH=240;
-  for(let o=0;o<b64.length;o+=CH){
-    await execRaw(i,"f.write(binascii.a2b_base64('"+b64.slice(o,o+CH)+"'))");
-    if((o/CH)%5===0)st(ROLES[i]+": writing "+Math.round(100*o/b64.length)+"%");
+  for(let attempt=1;attempt<=3;attempt++){
+    st(ROLES[i]+": entering REPL… (try "+attempt+"/3)");
+    await txRaw(i,"\r\x03");await sleep(220);await txRaw(i,"\x03");await sleep(220);await txRaw(i,"\x01");await sleep(260);
+    await execRaw(i,"import binascii,os");
+    await execRaw(i,"f=open('main.py','wb')");
+    for(let o=0;o<b64.length;o+=CH){
+      await execRaw(i,"f.write(binascii.a2b_base64('"+b64.slice(o,o+CH)+"'))");
+      if((o/CH)%5===0)st(ROLES[i]+": writing "+Math.round(100*o/b64.length)+"% (try "+attempt+"/3)");
+    }
+    await execRaw(i,"f.close()");
+    st(ROLES[i]+": verifying…");                        // read the file size back over REPL
+    DBG="";await txRaw(i,"print('SZ='+str(os.stat('main.py')[6]))");await txRaw(i,"\x04");await sleep(600);
+    const m=/SZ=(\d+)/.exec(DBG);const got=m?parseInt(m[1]):-1;
+    if(got===expSize){
+      st(ROLES[i]+": verified "+got+" bytes ✓ — rebooting…");
+      await txRaw(i,"\x02");await sleep(220);await txRaw(i,"\x04");await sleep(2600);
+      if(!s.connected){st(ROLES[i]+": reconnecting…");try{await attach(i,s.dev);}catch(e){st(ROLES[i]+": reboot done — click Connect on "+ROLES[i]);}}
+      st(ROLES[i]+": flashed & verified ✓ ("+got+" B)");log("ok",ROLES[i]+" firmware flashed & verified");return true;
+    }
+    st(ROLES[i]+": size "+got+"≠"+expSize+" (corrupt) — retrying…");log("alert",ROLES[i]+" flash corrupt, retry "+attempt);
+    await sleep(400);
   }
-  await execRaw(i,"f.close()");
-  st(ROLES[i]+": rebooting…");
-  await txRaw(i,"\x02");await sleep(220);await txRaw(i,"\x04");
-  await sleep(2600);
-  if(!s.connected){
-    st(ROLES[i]+": reconnecting after reboot…");
-    try{await attach(i,s.dev);}catch(e){st(ROLES[i]+": reconnect failed — use ↻");}
-  }
-  st(ROLES[i]+": flashed ✓");return true;
+  st(ROLES[i]+": flash FAILED 3× — use USB/XRPCode");log("alert",ROLES[i]+" flash failed — USB needed");
+  return false;
 }
+function forceFlash(i){flashOne(i,true);}
 async function flashAll(){
   for(let i=0;i<3;i++){
-    try{await flashOne(i);}catch(e){st(ROLES[i]+": ERROR "+e.message);}
+    try{await flashOne(i,true);}catch(e){st(ROLES[i]+": ERROR "+e.message);}
     await sleep(700);
   }
   st("flash complete — watch the fleet cards for live telemetry");
