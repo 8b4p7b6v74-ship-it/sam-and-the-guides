@@ -46,7 +46,7 @@
   .slide.on .rise:nth-child(2){animation-delay:.08s}.slide.on .rise:nth-child(3){animation-delay:.17s}
   .slide.on .rise:nth-child(4){animation-delay:.26s}.slide.on .rise:nth-child(5){animation-delay:.35s}
   .slide.on .rise:nth-child(6){animation-delay:.44s}
-  @keyframes reveal{from{opacity:0;transform:translateY(26px) scale(.965);filter:blur(10px)}to{opacity:1;transform:none;filter:blur(0)}}
+  @keyframes reveal{from{opacity:0;transform:translateY(30px) rotateX(10deg) scale(.955);filter:blur(11px)}to{opacity:1;transform:none;filter:blur(0)}}
   /* children of grids cascade too */
   .slide.on .stagger>*{animation:pop .6s cubic-bezier(.2,.8,.25,1) both}
   .slide.on .stagger>*:nth-child(1){animation-delay:.30s}.slide.on .stagger>*:nth-child(2){animation-delay:.38s}
@@ -67,7 +67,7 @@
   .stop.cur{border-color:var(--cyan);background:var(--bg2);box-shadow:0 0 0 5px color-mix(in srgb,var(--cyan) 26%,transparent);animation:beat 1.8s ease-in-out infinite}
   @keyframes beat{50%{box-shadow:0 0 0 9px color-mix(in srgb,var(--cyan) 10%,transparent)}}
 
-  .body{padding:min(6vh,52px) min(5.4vw,74px);display:flex;flex-direction:column;justify-content:center;max-width:1230px;position:relative}
+  .body{padding:min(6vh,52px) min(5.4vw,74px);display:flex;flex-direction:column;justify-content:center;max-width:1230px;position:relative;perspective:1300px}
   .eyebrow{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:12px;color:var(--cyan)}
   .eyebrow::before{content:"";width:24px;height:2px;background:linear-gradient(90deg,var(--cyan),var(--violet))}
   .eyebrow .num{color:var(--faint)}
@@ -150,6 +150,18 @@
   .pill:nth-child(3){animation-delay:.3s}.pill:nth-child(4){animation-delay:.6s}.pill:nth-child(5){animation-delay:.9s}
   @keyframes sig{0%,70%,100%{box-shadow:none;border-color:var(--edge)}82%{box-shadow:0 0 14px color-mix(in srgb,var(--amber) 60%,transparent);border-color:var(--amber);color:var(--amber)}}
   @media (prefers-reduced-motion:reduce){.node.hub::after,.pill{animation:none}}
+  /* flowing data packets between hub and swarm */
+  .flowstrip{grid-column:1/3;position:relative;height:30px;border-radius:9px;border:1px solid var(--edge);background:var(--glass2);overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .flowstrip span{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);z-index:2;background:color-mix(in srgb,var(--bg2) 88%,transparent);padding:2px 14px;border-radius:20px}
+  .flowstrip::before{content:"";position:absolute;left:0;right:0;top:8px;height:5px;background:radial-gradient(circle,var(--cyan) 1.6px,transparent 2.2px);background-size:22px 5px;animation:flowr 1.6s linear infinite}
+  .flowstrip::after{content:"";position:absolute;left:0;right:0;bottom:8px;height:5px;background:radial-gradient(circle,var(--amber) 1.6px,transparent 2.2px);background-size:22px 5px;animation:flowl 2.5s linear infinite}
+  @keyframes flowr{to{background-position:22px 0}} @keyframes flowl{to{background-position:-22px 0}}
+  @media (max-width:1040px){.flowstrip{grid-column:auto}}
+  /* floating robot emojis */
+  .unit .em{display:inline-block;animation:bob 3.2s ease-in-out infinite}
+  .convoy .unit:nth-child(3) .em{animation-delay:.5s} .convoy .unit:nth-child(5) .em{animation-delay:1s}
+  @keyframes bob{50%{transform:translateY(-7px)}}
+  @media (prefers-reduced-motion:reduce){.flowstrip::before,.flowstrip::after,.unit .em{animation:none}}
 
   .repo{display:inline-flex;align-items:center;gap:12px;margin-top:18px;padding:12px 18px;border-radius:12px;background:var(--glass);border:1px solid var(--edge);font-family:var(--f-mono);font-size:15px}
   .repo b{color:var(--amber);font-weight:700} .repo .gh{font-size:20px}
@@ -186,7 +198,7 @@
       <div class="eyebrow rise"><span class="num">02</span> · Problem identification</div>
       <h2 class="rise">Independent indoor travel is still out of reach.</h2>
       <div class="findings rise stagger">
-        <div class="fcell glass"><div class="big" style="color:var(--cyan)" data-count="2.2" data-suffix="B">2.2B</div><div class="t">people live with a vision impairment; blind people rise from ~43M (2020) to ~61M by 2050.</div></div>
+        <div class="fcell glass"><div class="big" style="color:var(--cyan)" data-mb="2200">2.2B</div><div class="t">people live with a vision impairment; blind people rise from ~43M (2020) to ~61M by 2050.</div></div>
         <div class="fcell glass"><div class="big" style="color:var(--violet)" data-count="28" data-suffix="%">28%</div><div class="t">of blind &amp; partially-sighted people feel able to travel independently — even after training.</div></div>
         <div class="fcell glass"><div class="big" style="color:var(--pink)">Indoors</div><div class="t">no curbs, walls or traffic sounds as landmarks — an unfamiliar building is "too hard to attempt."</div></div>
         <div class="fcell glass"><div class="big" style="color:var(--amber)">$45–60k</div><div class="t">a guide dog: 1–5 years to train, serves only ~2% of blind people (&lt;19,000 working dogs, falling).</div></div>
@@ -258,6 +270,7 @@
         <div class="node voice"><div class="lab">Client</div><h3>🎙️ Voice interface</h3><p>Phone or laptop — listens for a destination, speaks every step of the way.</p></div>
         <div class="node cloud"><div class="lab">Cloud</div><h3>☁️ Live state &amp; journey logs</h3><p>The hub streams state to the cloud → a remote family / caregiver view, anywhere.</p></div>
         <div class="node hub"><div class="lab">The hub · the brain</div><h3>🧠 Route planning · ~5 Hz coordination loop · reliable command protocol · voice I/O</h3><p>A real, non-trivial system: a city-graph router, a swarm coordinator that balances speed &amp; spacing, and an <strong>acknowledged, retried, verified</strong> command layer — the part that made it actually work.</p></div>
+        <div class="flowstrip"><span>commands ↓ · telemetry ↑</span></div>
         <div class="node bots"><div class="lab">Swarm · Bluetooth</div><span class="pill">🧭 Opener</span><span class="pill">🦯 Sam</span><span class="pill">🛡️ Closer</span><span class="pill">↑ telemetry back</span></div>
       </div>
       <div class="repo rise"><span class="gh">⌥</span><span>Open source · <b>github.com/8b4p7b6v74-ship-it/sam-and-the-guides</b></span></div>
@@ -347,7 +360,7 @@
   const COLORS=['#22e0f0','#b28dff','#fbbf24','#fb7185','#37e0a0','#63a4ff'];
   let W,H,DPR,nodes=[];
   function resize(){DPR=Math.min(2,devicePixelRatio||1);W=cv.width=innerWidth*DPR;H=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';}
-  function seed(){nodes=[];const n=Math.round(Math.min(52,innerWidth/30));for(let k=0;k<n;k++)nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.18*DPR,vy:(Math.random()-.5)*.18*DPR,r:(1.1+Math.random()*2.4)*DPR,c:COLORS[k%COLORS.length]});}
+  function seed(){nodes=[];const n=Math.round(Math.min(74,innerWidth/22));for(let k=0;k<n;k++)nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.24*DPR,vy:(Math.random()-.5)*.24*DPR,r:(1.1+Math.random()*2.6)*DPR,c:COLORS[k%COLORS.length]});}
   function draw(step){
     ctx.clearRect(0,0,W,H);
     for(let a=0,i=0;i<nodes.length;i++){const p=nodes[i];if(step){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;}
@@ -366,16 +379,17 @@
   const slides=[...document.querySelectorAll('.slide')];const N=slides.length;let i=0;
   slides.forEach((s)=>{s.querySelector('.rail').innerHTML='<div class="spine"></div><div class="fill"></div>'+slides.map((_,k)=>'<button class="stop" data-go="'+k+'" aria-label="Slide '+(k+1)+'"></button>').join('');});
   document.getElementById('tot').textContent=String(N).padStart(2,'0');
-  function countUp(slide){
-    if(still||reduce)return;
-    slide.querySelectorAll('[data-count]').forEach(el=>{
-      const target=parseFloat(el.dataset.count), suf=el.dataset.suffix||'', dec=(el.dataset.count.indexOf('.')>=0)?1:0;
-      const t0=performance.now(), dur=1100;
-      function tick(t){const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3);
-        el.textContent=(e*target).toFixed(dec)+suf; if(p<1)requestAnimationFrame(tick);}
-      requestAnimationFrame(tick);
-    });
+  function animNum(el){
+    const mb=el.dataset.mb!==undefined;
+    const target=parseFloat(mb?el.dataset.mb:el.dataset.count), suf=el.dataset.suffix||'';
+    const dec=(!mb && (el.dataset.count||'').indexOf('.')>=0)?1:0;
+    const dur=mb?2000:1300, t0=performance.now();
+    function fmt(v){ if(mb){ return v<1000 ? Math.round(v)+'M' : (v/1000).toFixed(1)+'B'; } return v.toFixed(dec)+suf; }
+    function tick(t){const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3.2);
+      el.textContent=fmt(e*target); if(p<1)requestAnimationFrame(tick);}
+    requestAnimationFrame(tick);
   }
+  function countUp(slide){ if(still||reduce)return; slide.querySelectorAll('[data-count],[data-mb]').forEach(animNum); }
   function render(){slides.forEach((s,k)=>s.classList.toggle('on',k===i));document.getElementById('cur').textContent=String(i+1).padStart(2,'0');
     const rail=slides[i].querySelector('.rail'),stops=[...rail.querySelectorAll('.stop')];
     stops.forEach((d,k)=>{d.classList.toggle('done',k<i);d.classList.toggle('cur',k===i);});
