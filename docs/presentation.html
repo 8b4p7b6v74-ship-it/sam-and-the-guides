@@ -6,405 +6,363 @@
 <title>Navigation & Guidance of Blind and Visually-Impaired People — Capstone</title>
 <style>
   :root{
-    --fg:#0c1420; --fg-soft:#41546a; --fg-faint:#7688a0;
-    --bg:#eef1f4; --panel:#ffffff; --edge:#d3dae2;
-    --amber:#e8890a; --amber-bright:#ffb02e; --ok:#1e9e62; --alert:#e0453f; --route:#2f7fc0;
+    --bg1:#140a37; --bg2:#241058; --bg3:#3b1466;
+    --ink:#f5f2ff; --soft:#c3bce8; --faint:#8f88bd;
+    --glass:rgba(255,255,255,.055); --glass2:rgba(255,255,255,.03); --edge:rgba(255,255,255,.14);
+    --amber:#fbbf24; --cyan:#2dd4ee; --coral:#fb7185; --violet:#a78bfa; --green:#34d399; --pink:#f472b6; --blue:#60a5fa;
     --f-disp:"Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
     --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     --f-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
   }
-  @media (prefers-color-scheme:dark){
-    :root{ --fg:#eaf0f7; --fg-soft:#9fb1c6; --fg-faint:#63768e;
-      --bg:#0c1420; --panel:#111d2c; --edge:#22344a; --amber:#ffb02e; --route:#5aa9e6; --ok:#34c77b; --alert:#ff5a5f;}
-  }
-  :root[data-theme="light"]{ --fg:#0c1420; --fg-soft:#41546a; --fg-faint:#7688a0;
-    --bg:#eef1f4; --panel:#ffffff; --edge:#d3dae2; --amber:#e8890a; --route:#2f7fc0; --ok:#1e9e62; --alert:#e0453f;}
-  :root[data-theme="dark"]{ --fg:#eaf0f7; --fg-soft:#9fb1c6; --fg-faint:#63768e;
-    --bg:#0c1420; --panel:#111d2c; --edge:#22344a; --amber:#ffb02e; --route:#5aa9e6; --ok:#34c77b; --alert:#ff5a5f;}
-
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
-  body{background:var(--bg);color:var(--fg);font-family:var(--f-body);-webkit-font-smoothing:antialiased;overflow:hidden}
-  .deck{position:fixed;inset:0;display:flex;flex-direction:column}
+  body{color:var(--ink);font-family:var(--f-body);-webkit-font-smoothing:antialiased;overflow:hidden;
+    background:radial-gradient(120% 120% at 12% -10%, #4a1a7a 0%, transparent 46%),
+               radial-gradient(120% 130% at 100% 0%, #17324f 0%, transparent 50%),
+               radial-gradient(140% 120% at 90% 110%, #5a1550 0%, transparent 46%),
+               linear-gradient(160deg, var(--bg1), var(--bg2) 55%, var(--bg3))}
+  #swarm{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .deck{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1}
   .slides{position:relative;flex:1;overflow:hidden}
-  .slide{position:absolute;inset:0;display:grid;grid-template-columns:88px 1fr;opacity:0;visibility:hidden;transition:opacity .5s ease;pointer-events:none}
+  .slide{position:absolute;inset:0;display:grid;grid-template-columns:88px 1fr;opacity:0;visibility:hidden;transition:opacity .55s ease;pointer-events:none}
   .slide.on{opacity:1;visibility:visible;pointer-events:auto}
-  .slide.on .rise{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
-  .slide.on .rise:nth-child(2){animation-delay:.04s}.slide.on .rise:nth-child(3){animation-delay:.08s}
-  .slide.on .rise:nth-child(4){animation-delay:.12s}.slide.on .rise:nth-child(5){animation-delay:.16s}
-  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .slide.on .rise{animation:rise .6s cubic-bezier(.2,.75,.2,1) both}
+  .slide.on .rise:nth-child(2){animation-delay:.06s}.slide.on .rise:nth-child(3){animation-delay:.12s}
+  .slide.on .rise:nth-child(4){animation-delay:.18s}.slide.on .rise:nth-child(5){animation-delay:.24s}
+  @keyframes rise{from{opacity:0;transform:translateY(16px) scale(.99)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:reduce){.slide,.slide.on .rise{transition:none;animation:none}}
 
-  .rail{position:relative;border-right:1px solid var(--edge);display:flex;flex-direction:column;align-items:center;padding:24px 0}
-  .rail .spine{position:absolute;top:56px;bottom:56px;left:50%;width:2px;transform:translateX(-50%);background:var(--edge)}
-  .rail .fill{position:absolute;top:56px;left:50%;width:2px;transform:translateX(-50%);background:var(--amber);transition:height .5s ease}
-  .stop{position:relative;z-index:2;width:10px;height:10px;border-radius:50%;background:var(--bg);border:2px solid var(--edge);cursor:pointer;transition:.3s}
-  .stop+.stop{margin-top:calc((100vh - 220px)/10 - 10px)}
-  .stop:hover{border-color:var(--amber)} .stop.done{border-color:var(--amber);background:var(--amber)}
-  .stop.cur{border-color:var(--amber);background:var(--bg);box-shadow:0 0 0 4px color-mix(in srgb,var(--amber) 30%,transparent)}
+  /* rail */
+  .rail{position:relative;display:flex;flex-direction:column;align-items:center;padding:24px 0}
+  .rail::after{content:"";position:absolute;top:0;bottom:0;right:0;width:1px;background:linear-gradient(var(--edge),transparent)}
+  .rail .spine{position:absolute;top:56px;bottom:56px;left:50%;width:2px;transform:translateX(-50%);background:rgba(255,255,255,.1)}
+  .rail .fill{position:absolute;top:56px;left:50%;width:2px;transform:translateX(-50%);background:linear-gradient(var(--cyan),var(--violet),var(--amber));transition:height .5s ease;box-shadow:0 0 10px var(--violet)}
+  .stop{position:relative;z-index:2;width:10px;height:10px;border-radius:50%;background:var(--bg2);border:2px solid rgba(255,255,255,.22);cursor:pointer;transition:.3s}
+  .stop+.stop{margin-top:calc((100vh - 220px)/11 - 10px)}
+  .stop:hover{border-color:var(--cyan)} .stop.done{border-color:var(--violet);background:var(--violet)}
+  .stop.cur{border-color:var(--cyan);background:var(--bg2);box-shadow:0 0 0 5px color-mix(in srgb,var(--cyan) 26%,transparent)}
 
-  .body{padding:min(6.2vh,54px) min(5.4vw,72px);display:flex;flex-direction:column;justify-content:center;max-width:1220px;position:relative}
-  .eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:12px}
-  .eyebrow::before{content:"";width:24px;height:2px;background:var(--amber)}
-  .eyebrow .num{color:var(--fg-faint)}
-  h1{font-family:var(--f-disp);font-weight:800;letter-spacing:-.02em;line-height:1.03;text-wrap:balance;margin:0;font-size:clamp(30px,4.6vw,60px)}
-  h2{font-family:var(--f-disp);font-weight:800;letter-spacing:-.02em;line-height:1.05;text-wrap:balance;margin:0 0 16px;font-size:clamp(26px,3.6vw,44px)}
-  .lede{font-size:clamp(15px,1.55vw,20px);line-height:1.5;color:var(--fg-soft);max-width:74ch;margin:14px 0 0}
-  strong{color:var(--fg);font-weight:650} .amber{color:var(--amber)} .mono{font-family:var(--f-mono)}
+  .body{padding:min(6vh,52px) min(5.4vw,74px);display:flex;flex-direction:column;justify-content:center;max-width:1230px;position:relative}
+  .eyebrow{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:12px;color:var(--cyan)}
+  .eyebrow::before{content:"";width:24px;height:2px;background:linear-gradient(90deg,var(--cyan),var(--violet))}
+  .eyebrow .num{color:var(--faint)}
+  h1{font-family:var(--f-disp);font-weight:800;letter-spacing:-.025em;line-height:1.02;text-wrap:balance;margin:0;font-size:clamp(30px,4.7vw,62px)}
+  h2{font-family:var(--f-disp);font-weight:800;letter-spacing:-.02em;line-height:1.05;text-wrap:balance;margin:0 0 16px;font-size:clamp(26px,3.7vw,46px)}
+  .grad{background:linear-gradient(96deg,var(--cyan),var(--violet) 46%,var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:clamp(15px,1.55vw,20px);line-height:1.5;color:var(--soft);max-width:74ch;margin:14px 0 0}
+  strong{color:var(--ink);font-weight:650} .mono{font-family:var(--f-mono)}
+  .credits{margin-top:30px;display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;font-family:var(--f-mono);font-size:14px;color:var(--soft)}
+  .credits b{color:var(--ink);font-weight:650} .credits .sep{color:var(--violet)}
 
-  .credits{margin-top:32px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;font-family:var(--f-mono);font-size:14px;color:var(--fg-soft)}
-  .credits b{color:var(--fg);font-weight:650} .credits .sep{color:var(--amber)}
-
-  /* columns */
-  .split{display:grid;gap:18px;margin-top:6px}
+  .glass{background:var(--glass);border:1px solid var(--edge);border-radius:15px;backdrop-filter:blur(8px)}
+  .split{display:grid;gap:16px;margin-top:6px}
   .split.two{grid-template-columns:1fr 1fr} .split.three{grid-template-columns:1fr 1fr 1fr}
-  .col{background:var(--panel);border:1px solid var(--edge);border-radius:13px;padding:18px 20px}
-  .col .k{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);font-weight:700}
-  .col h3{margin:9px 0 2px;font-size:17px;font-weight:700;font-family:var(--f-disp);letter-spacing:-.01em}
+  .col{padding:18px 20px} .col .k{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
   .col ul{list-style:none;padding:0;margin:11px 0 0;display:grid;gap:8px}
-  .col li{position:relative;padding-left:17px;font-size:14px;line-height:1.4;color:var(--fg-soft)}
-  .col li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;background:var(--amber)}
-  .col li strong{color:var(--fg);font-weight:650}
-  .col.ok .k{color:var(--ok)} .col.ok li::before{background:var(--ok)}
+  .col li{position:relative;padding-left:17px;font-size:14px;line-height:1.42;color:var(--soft)}
+  .col li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;background:currentColor}
+  .col li strong{color:var(--ink);font-weight:650}
+  .c-amber .k,.c-amber li::before{color:var(--amber)} .c-cyan .k,.c-cyan li::before{color:var(--cyan)}
+  .c-coral .k,.c-coral li::before{color:var(--coral)} .c-violet .k,.c-violet li::before{color:var(--violet)}
+  .c-green .k,.c-green li::before{color:var(--green)} .c-pink .k,.c-pink li::before{color:var(--pink)}
 
-  /* research findings */
   .findings{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:4px}
-  .fcell{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:15px 17px}
-  .fcell .big{font-family:var(--f-disp);font-weight:800;font-size:clamp(23px,2.7vw,34px);letter-spacing:-.02em;line-height:1;color:var(--fg)}
-  .fcell .big.am{color:var(--amber)}
-  .fcell .t{font-size:12.5px;line-height:1.38;color:var(--fg-soft);margin-top:7px}
-
-  .callout{margin-top:15px;background:color-mix(in srgb,var(--amber) 11%,transparent);border:1px solid color-mix(in srgb,var(--amber) 34%,transparent);border-radius:12px;padding:15px 20px}
-  .callout .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);font-weight:700}
-  .callout p{margin:5px 0 0;font-size:clamp(15px,1.5vw,19px);line-height:1.38;color:var(--fg);font-weight:500}
+  .fcell{padding:15px 17px} .fcell .big{font-family:var(--f-disp);font-weight:800;font-size:clamp(23px,2.7vw,34px);letter-spacing:-.02em;line-height:1}
+  .fcell .t{font-size:12.5px;line-height:1.38;color:var(--soft);margin-top:7px}
+  .callout{margin-top:15px;padding:15px 20px;border-radius:13px;background:linear-gradient(100deg,color-mix(in srgb,var(--cyan) 16%,transparent),color-mix(in srgb,var(--violet) 16%,transparent));border:1px solid var(--edge)}
+  .callout .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-weight:700}
+  .callout p{margin:5px 0 0;font-size:clamp(15px,1.5vw,19px);line-height:1.38;color:var(--ink);font-weight:500}
 
   ul.checks{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:10px;max-width:70ch}
-  ul.checks li{position:relative;padding-left:28px;font-size:15px;line-height:1.45;color:var(--fg-soft)}
-  ul.checks li::before{content:"✓";position:absolute;left:0;top:0;color:var(--ok);font-weight:800;font-family:var(--f-mono)}
-  ul.checks li strong{color:var(--fg)}
+  ul.checks li{position:relative;padding-left:28px;font-size:15px;line-height:1.45;color:var(--soft)}
+  ul.checks li::before{content:"✓";position:absolute;left:0;top:0;color:var(--green);font-weight:800;font-family:var(--f-mono)}
+  ul.checks li strong{color:var(--ink)}
 
   .chat{display:flex;flex-direction:column;gap:11px;margin-top:8px;max-width:72ch}
   .bub{padding:13px 17px;border-radius:14px;font-size:16px;line-height:1.4;max-width:82%}
-  .bub.you{align-self:flex-end;background:var(--route);color:#fff;border-bottom-right-radius:4px;font-weight:600}
-  .bub.sys{align-self:flex-start;background:var(--panel);border:1px solid var(--edge);border-bottom-left-radius:4px;color:var(--fg-soft)}
-  .bub.sys .who{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);font-weight:700;margin-bottom:3px}
+  .bub.you{align-self:flex-end;background:linear-gradient(120deg,var(--cyan),var(--blue));color:#06121f;border-bottom-right-radius:4px;font-weight:650}
+  .bub.sys{align-self:flex-start;background:var(--glass);border:1px solid var(--edge);border-bottom-left-radius:4px;color:var(--soft)}
+  .bub.sys .who{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);font-weight:700;margin-bottom:3px}
 
-  .convoy{display:flex;align-items:stretch;gap:0;margin-top:12px;flex-wrap:nowrap}
-  .unit{flex:1;min-width:0;background:var(--panel);border:1px solid var(--edge);border-radius:13px;padding:18px}
+  .convoy{display:flex;align-items:stretch;gap:0;margin-top:12px}
+  .unit{flex:1;min-width:0;padding:18px}
   .unit .role{font-family:var(--f-mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:700}
   .unit .em{font-size:26px;line-height:1;margin-bottom:10px;display:block}
   .unit h3{margin:7px 0 5px;font-size:17px;font-family:var(--f-disp);font-weight:700}
-  .unit p{margin:0;font-size:13.5px;line-height:1.42;color:var(--fg-soft)}
-  .arrow{align-self:center;color:var(--amber);font-weight:800;font-size:22px;padding:0 8px;font-family:var(--f-mono)}
-  .u-open .role{color:var(--amber)} .u-you .role{color:var(--route)} .u-close .role{color:var(--fg-soft)}
+  .unit p{margin:0;font-size:13.5px;line-height:1.42;color:var(--soft)}
+  .arrow{align-self:center;font-size:22px;padding:0 8px;font-family:var(--f-mono);color:var(--violet)}
+  .u-open .role{color:var(--amber)} .u-you .role{color:var(--cyan)} .u-close .role{color:var(--coral)}
 
   .codes{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
-  .code{font-family:var(--f-mono);font-size:14px;font-weight:600;padding:6px 11px;border-radius:8px;background:color-mix(in srgb,var(--amber) 14%,transparent);color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent)}
-  .code.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);border-color:color-mix(in srgb,var(--ok) 35%,transparent)}
+  .code{font-family:var(--f-mono);font-size:14px;font-weight:600;padding:6px 11px;border-radius:8px;background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 36%,transparent)}
+  .code.ok{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green);border-color:color-mix(in srgb,var(--green) 38%,transparent)}
 
-  .stack{display:flex;flex-direction:column;gap:9px;margin-top:6px;max-width:820px}
-  .layer{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--edge);border-radius:11px;padding:13px 17px}
-  .layer .n{font-family:var(--f-mono);font-size:11.5px;color:var(--amber);font-weight:700;flex:0 0 28px}
-  .layer .t{font-weight:650;font-size:15px} .layer .d{color:var(--fg-soft);font-size:13px;margin-left:auto;font-family:var(--f-mono)}
-  .flowdot{color:var(--amber);text-align:center;font-family:var(--f-mono);font-size:12px;letter-spacing:.3em}
+  /* architecture diagram (software slide) */
+  .arch{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px;margin-top:8px;align-items:stretch;position:relative}
+  .node{padding:15px 18px;border-radius:13px;position:relative;overflow:hidden}
+  .node .lab{font-family:var(--f-mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:700}
+  .node h3{margin:7px 0 4px;font-size:17px;font-weight:700;font-family:var(--f-disp)}
+  .node p{margin:0;font-size:13px;line-height:1.4;color:var(--soft)}
+  .node.hub{grid-column:1/3;border:1px solid color-mix(in srgb,var(--violet) 55%,var(--edge));background:linear-gradient(110deg,color-mix(in srgb,var(--violet) 20%,transparent),var(--glass))}
+  .node.hub .lab{color:var(--violet)}
+  .node.voice{border:1px solid var(--edge);background:var(--glass)} .node.voice .lab{color:var(--cyan)}
+  .node.cloud{border:1px solid var(--edge);background:var(--glass)} .node.cloud .lab{color:var(--blue)}
+  .node.bots{grid-column:1/3;border:1px solid var(--edge);background:var(--glass);display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .node.bots .lab{color:var(--amber)}
+  .pill{font-family:var(--f-mono);font-size:12px;padding:5px 10px;border-radius:20px;border:1px solid var(--edge);color:var(--soft)}
+  .pulse{animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--violet) 40%,transparent)}50%{box-shadow:0 0 22px 2px color-mix(in srgb,var(--violet) 30%,transparent)}}
+  @media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+
+  .repo{display:inline-flex;align-items:center;gap:12px;margin-top:18px;padding:12px 18px;border-radius:12px;background:var(--glass);border:1px solid var(--edge);font-family:var(--f-mono);font-size:15px}
+  .repo b{color:var(--amber);font-weight:700} .repo .gh{font-size:20px}
 
   .topbar{position:absolute;top:18px;right:24px;display:flex;gap:8px;z-index:6}
-  .tb{width:36px;height:32px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);color:var(--fg-soft);cursor:pointer;font-size:14px;display:grid;place-items:center;transition:.2s;font-family:var(--f-mono)}
-  .tb:hover{color:var(--amber);border-color:var(--amber)}
-  .counter{position:absolute;bottom:18px;right:26px;font-family:var(--f-mono);font-size:12.5px;color:var(--fg-faint);letter-spacing:.1em;z-index:6}
-  .counter b{color:var(--amber)}
-  .hint{position:absolute;bottom:18px;left:108px;font-family:var(--f-mono);font-size:11.5px;color:var(--fg-faint);letter-spacing:.06em;z-index:6}
+  .tb{width:36px;height:32px;border-radius:9px;border:1px solid var(--edge);background:var(--glass);color:var(--soft);cursor:pointer;font-size:14px;display:grid;place-items:center;transition:.2s;font-family:var(--f-mono);backdrop-filter:blur(6px)}
+  .tb:hover{color:var(--cyan);border-color:var(--cyan)}
+  .counter{position:absolute;bottom:18px;right:26px;font-family:var(--f-mono);font-size:12.5px;color:var(--faint);letter-spacing:.1em;z-index:6}
+  .counter b{color:var(--cyan)}
+  .hint{position:absolute;bottom:18px;left:108px;font-family:var(--f-mono);font-size:11.5px;color:var(--faint);letter-spacing:.06em;z-index:6}
   .zone{position:absolute;top:0;bottom:56px;width:22%;z-index:4;cursor:pointer}
   .zone.prev{left:88px} .zone.next{right:0;width:34%}
-  .footline{margin-top:22px;font-family:var(--f-mono);font-size:11.5px;color:var(--fg-faint);letter-spacing:.07em}
-  :focus-visible{outline:2px solid var(--amber);outline-offset:3px}
-
-  @media (max-width:1040px){
-    .split.two,.split.three,.findings{grid-template-columns:1fr}
-    .convoy{flex-direction:column}.arrow{transform:rotate(90deg);padding:6px 0}
-  }
+  .footline{margin-top:20px;font-family:var(--f-mono);font-size:11.5px;color:var(--faint);letter-spacing:.07em}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+  @media (max-width:1040px){.split.two,.split.three,.findings{grid-template-columns:1fr}.convoy{flex-direction:column}.arrow{transform:rotate(90deg);padding:6px 0}.arch{grid-template-columns:1fr}.node.hub,.node.bots{grid-column:auto}}
   @media (max-width:760px){.slide{grid-template-columns:48px 1fr}.body{padding:40px 24px}.hint{display:none}}
 </style>
 </head>
 <body>
+<canvas id="swarm"></canvas>
 <div class="deck" id="deck">
   <div class="topbar">
-    <button class="tb" id="theme" title="Toggle light / dark" aria-label="Toggle theme">◐</button>
     <button class="tb" id="fs" title="Fullscreen" aria-label="Fullscreen">⛶</button>
   </div>
   <div class="slides" id="slides">
 
-    <!-- 1 · TITLE -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise">Engineering &amp; Robotics · Capstone 2026</div>
-        <h1 class="rise">Navigation &amp; Guidance of Blind and Visually-Impaired People</h1>
-        <p class="lede rise">Camera-free swarm robotics and a simple app that give blind and visually impaired people the freedom to move independently, safely, and on their own terms — guided by two or more robots following and leading them.</p>
-        <div class="credits rise">
-          <span>Presented by <b>Violet</b></span><span class="sep">·</span><span><b>Samuel</b></span><span class="sep">·</span><span><b>Gabriel</b></span>
-          <span class="sep">·</span><span>July 2026</span>
-        </div>
-      </div>
-    </section>
+    <!-- 1 TITLE -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise">Engineering &amp; Robotics · Capstone 2026</div>
+      <h1 class="rise">Navigation &amp; Guidance of <span class="grad">Blind and Visually-Impaired</span> People</h1>
+      <p class="lede rise">Camera-free swarm robotics and a cloud-connected app that give blind and visually impaired people the freedom to move independently, safely, and on their own terms — guided by two or more robots following and leading them.</p>
+      <div class="credits rise"><span>Presented by <b>Violet</b></span><span class="sep">·</span><span><b>Samuel</b></span><span class="sep">·</span><span><b>Gabriel</b></span><span class="sep">·</span><span>July 2026</span></div>
+    </div></section>
 
-    <!-- 2 · PROBLEM -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise"><span class="num">02</span> · Problem identification</div>
-        <h2 class="rise">Independent indoor travel is still out of reach.</h2>
-        <div class="findings rise">
-          <div class="fcell"><div class="big am">2.2B</div><div class="t">people live with a vision impairment; blind people rise from ~43M (2020) to ~61M by 2050.</div></div>
-          <div class="fcell"><div class="big">28%</div><div class="t">of blind &amp; partially-sighted people feel able to travel independently — even after training.</div></div>
-          <div class="fcell"><div class="big">Indoors</div><div class="t">no curbs, walls or traffic sounds as landmarks — an unfamiliar building is "too hard to attempt."</div></div>
-          <div class="fcell"><div class="big">$45–60k</div><div class="t">a guide dog: 1–5 years to train, serves only ~2% of blind people (&lt;19,000 working dogs, falling).</div></div>
-          <div class="fcell"><div class="big">40%+</div><div class="t">of white-cane users report head-level accidents monthly — the cane senses only below the waist.</div></div>
-          <div class="fcell"><div class="big">Audio-only</div><div class="t">BlindSquare, GoodMaps, Evelity, Wayfindr — every product talks; <strong>none physically leads.</strong></div></div>
-        </div>
-        <div class="callout rise"><div class="k">Problem statement</div><p>How might we help a blind person navigate an unfamiliar indoor space safely and independently — without a guide dog, a costly wait, or relying on another person?</p></div>
+    <!-- 2 PROBLEM -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">02</span> · Problem identification</div>
+      <h2 class="rise">Independent indoor travel is still out of reach.</h2>
+      <div class="findings rise">
+        <div class="fcell glass"><div class="big" style="color:var(--cyan)">2.2B</div><div class="t">people live with a vision impairment; blind people rise from ~43M (2020) to ~61M by 2050.</div></div>
+        <div class="fcell glass"><div class="big" style="color:var(--violet)">28%</div><div class="t">of blind &amp; partially-sighted people feel able to travel independently — even after training.</div></div>
+        <div class="fcell glass"><div class="big" style="color:var(--pink)">Indoors</div><div class="t">no curbs, walls or traffic sounds as landmarks — an unfamiliar building is "too hard to attempt."</div></div>
+        <div class="fcell glass"><div class="big" style="color:var(--amber)">$45–60k</div><div class="t">a guide dog: 1–5 years to train, serves only ~2% of blind people (&lt;19,000 working dogs, falling).</div></div>
+        <div class="fcell glass"><div class="big" style="color:var(--coral)">40%+</div><div class="t">of white-cane users report head-level accidents monthly — the cane senses only below the waist.</div></div>
+        <div class="fcell glass"><div class="big" style="color:var(--green)">Audio-only</div><div class="t">BlindSquare, GoodMaps, Evelity, Wayfindr all talk — <strong>none physically leads.</strong></div></div>
       </div>
-    </section>
+      <div class="callout rise"><div class="k">Problem statement</div><p>How might we help a blind person navigate an unfamiliar indoor space safely and independently — without a guide dog, a costly wait, or relying on another person?</p></div>
+    </div></section>
 
-    <!-- 3 · SOLUTION -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise"><span class="num">03</span> · Proposed solution</div>
-        <h2 class="rise">Three low-cost robots that physically lead the way.</h2>
-        <p class="lede rise">A system of three small robots plus a phone app that leads a blind traveler (Sam) along pre-mapped indoor routes. Two guide robots lead, a companion stays beside Sam, and one piece of software — the brain — coordinates all three over Bluetooth. <strong>No camera. No internet.</strong></p>
-        <div class="split three rise">
-          <div class="col"><div class="k">Ask &amp; plan</div><ul><li><strong>Voice destination</strong> — "Take me to the store."</li><li><strong>Route + ETA</strong> — "be there by 6:00 PM" and it departs on time by itself.</li></ul></div>
-          <div class="col"><div class="k">Coordinate</div><ul><li><strong>Real-time (~5 Hz)</strong> — balances speed &amp; spacing so no one is left behind.</li><li><strong>Safety</strong> — stops on obstacles, taps the arm, speaks every step; emergency stop anytime.</li></ul></div>
-          <div class="col"><div class="k">Private &amp; shared</div><ul><li><strong>Camera-free &amp; offline</strong> — private by design (hospitals, care homes).</li><li><strong>Live family view</strong> — a relative anywhere can follow the journey.</li></ul></div>
-        </div>
+    <!-- 3 SOLUTION -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">03</span> · Proposed solution</div>
+      <h2 class="rise">Three low-cost robots that <span class="grad">physically lead the way.</span></h2>
+      <p class="lede rise">A system of three small robots plus a phone app that leads a blind traveler (Sam) along pre-mapped indoor routes. Two guide robots lead, a companion stays beside Sam, and one piece of software — the brain — coordinates all three over Bluetooth. <strong>No camera. No internet needed.</strong></p>
+      <div class="split three rise">
+        <div class="col glass c-cyan"><div class="k">Ask &amp; plan</div><ul><li><strong>Voice destination</strong> — "Take me to the store."</li><li><strong>Route + ETA</strong> — "be there by 6:00 PM" and it departs on time by itself.</li></ul></div>
+        <div class="col glass c-violet"><div class="k">Coordinate</div><ul><li><strong>Real-time (~5 Hz)</strong> — balances speed &amp; spacing so no one is left behind.</li><li><strong>Safety</strong> — stops on obstacles, taps the arm, speaks every step; e-stop anytime.</li></ul></div>
+        <div class="col glass c-amber"><div class="k">Private &amp; shared</div><ul><li><strong>Camera-free &amp; offline-capable</strong> — private by design.</li><li><strong>Live family view</strong> — a relative anywhere can follow the journey.</li></ul></div>
       </div>
-    </section>
+    </div></section>
 
-    <!-- 4 · OBJECTIVES & IMPACT -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise"><span class="num">04</span> · Objectives &amp; impact</div>
-        <h2 class="rise">What it must do — and why it matters.</h2>
-        <div class="split two rise">
-          <div class="col"><div class="k">Objectives</div><ul>
-            <li>Lead a blind user from A to B along a mapped route, <strong>reliably.</strong></li>
-            <li>Hold a safe formation — the slowest member (Sam) <strong>sets the pace.</strong></li>
-            <li>Stop at obstacles and alert the user — <strong>light + arm tap + voice.</strong></li>
-            <li>Compute ETA and support <strong>scheduled departures.</strong></li>
-            <li>Stay <strong>low-cost, camera-free and offline.</strong></li>
-            <li>Provide <strong>live monitoring</strong> for family and caregivers.</li>
-          </ul></div>
-          <div class="col ok"><div class="k">Expected impact</div><ul>
-            <li>Restores <strong>independent indoor mobility</strong> for a large, ageing, under-served population.</li>
-            <li>A kit could target <strong>under $2,000</strong> — vs a $45–60k, multi-year guide dog.</li>
-            <li><strong>Physically guides</strong> the user — unlike every audio-only app.</li>
-            <li>Fits accessibility mandates (<strong>EAA, ADA</strong>) — airports, care homes, museums, hospitals.</li>
-            <li>Assistive-independence programs return <strong>$4–7 of social value per $1 (SROI)</strong> — plus dignity, employment, mental health.</li>
-          </ul></div>
-        </div>
+    <!-- 4 OBJECTIVES & IMPACT -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">04</span> · Objectives &amp; impact</div>
+      <h2 class="rise">What it must do — and why it matters.</h2>
+      <div class="split two rise">
+        <div class="col glass c-cyan"><div class="k">Objectives</div><ul>
+          <li>Lead a blind user from A to B along a mapped route, <strong>reliably.</strong></li>
+          <li>Hold a safe formation — the slowest member (Sam) <strong>sets the pace.</strong></li>
+          <li>Stop at obstacles and alert the user — <strong>light + arm tap + voice.</strong></li>
+          <li>Compute ETA and support <strong>scheduled departures.</strong></li>
+          <li>Stay <strong>low-cost, camera-free and offline-capable.</strong></li>
+          <li>Provide <strong>live monitoring</strong> for family and caregivers.</li>
+        </ul></div>
+        <div class="col glass c-green"><div class="k">Expected impact</div><ul>
+          <li>Restores <strong>independent indoor mobility</strong> for a large, ageing, under-served population.</li>
+          <li>A kit could target <strong>under $2,000</strong> — vs a $45–60k, multi-year guide dog.</li>
+          <li><strong>Physically guides</strong> the user — unlike every audio-only app.</li>
+          <li>Fits accessibility mandates (<strong>EAA, ADA</strong>) — airports, care homes, museums, hospitals.</li>
+          <li>Assistive-independence programs return <strong>$4–7 per $1 (SROI)</strong> — plus dignity, employment, mental health.</li>
+        </ul></div>
       </div>
-    </section>
+    </div></section>
 
-    <!-- 5 · DESIGN & COMPONENTS -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise"><span class="num">05</span> · Design &amp; components</div>
-        <h2 class="rise">Simple robots. One intelligent brain.</h2>
-        <div class="split two rise">
-          <div class="col"><div class="k">Hardware</div><ul>
-            <li><strong>3× XRP robots</strong> (RP2350, MicroPython) — driven wheels + encoders, IMU, two line sensors, HC-SR04 ultrasonic, servo "arm", LED.</li>
-            <li><strong>Roles:</strong> Opener (sensors) · Sam (blind, no external sensors) · Closer (follower).</li>
-            <li><strong>The hub</strong> — a phone or laptop running the app.</li>
-            <li><strong>Bluetooth</strong> (Nordic UART) links all three — no internet, ~$2,000 target kit.</li>
-          </ul></div>
-          <div class="col"><div class="k">Software</div><ul>
-            <li><strong>One identical firmware</strong> on all three — a role-based state machine: line-follow, marker &amp; dead-reckoning navigation, gap-holding.</li>
-            <li><strong>The hub app:</strong> city map + route planning + ETA, ~5 Hz coordination, voice interface.</li>
-            <li><strong>Reliable command protocol</strong> — acknowledged, retried, verified.</li>
-            <li>Camera-free and fully <strong>offline.</strong></li>
-          </ul></div>
-        </div>
+    <!-- 5 DESIGN & COMPONENTS -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">05</span> · Design &amp; components</div>
+      <h2 class="rise">Simple robots. One intelligent brain.</h2>
+      <div class="convoy rise" style="margin-bottom:16px">
+        <div class="unit glass u-open"><span class="em">🧭</span><div class="role">Opener · front</div><h3>Scouts the route</h3><p>Line + ultrasonic sensors. Leads and calls the turns.</p></div>
+        <div class="arrow">→</div>
+        <div class="unit glass u-you"><span class="em">🦯</span><div class="role">The traveler · Sam</div><h3>You, in the middle</h3><p>No external sensors — the swarm does the seeing.</p></div>
+        <div class="arrow">→</div>
+        <div class="unit glass u-close"><span class="em">🛡️</span><div class="role">Closer · rear</div><h3>Keeps you together</h3><p>Ultrasonic gap-holding so the group never breaks apart.</p></div>
       </div>
-    </section>
+      <div class="split two rise">
+        <div class="col glass c-amber"><div class="k">Hardware</div><ul>
+          <li><strong>3× XRP robots</strong> (RP2350, MicroPython) — wheels + encoders, IMU, line sensors, HC-SR04 ultrasonic, servo "arm", LED.</li>
+          <li><strong>One identical firmware</strong> on all three — roles assigned live. ~$2,000 target kit.</li>
+        </ul></div>
+        <div class="col glass c-violet"><div class="k">Software</div><ul>
+          <li><strong>The hub</strong> — a web/phone app that plans routes, coordinates the fleet, and speaks.</li>
+          <li><strong>Bluetooth</strong> to the robots · <strong>cloud sync</strong> for the live family view.</li>
+        </ul></div>
+      </div>
+    </div></section>
 
-    <!-- 6 · PROTOTYPE DEVELOPMENT -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise"><span class="num">06</span> · Prototype development</div>
-        <h2 class="rise">From three kits to a coordinated convoy.</h2>
-        <div class="split two rise">
-          <div class="col"><div class="k">Building process</div><ul>
-            <li>Assembled <strong>3 XRP kits</strong>; wrote <strong>one firmware</strong> shared by all — roles assigned live over Bluetooth.</li>
-            <li>Built a web-based <strong>Hub</strong> (Web Bluetooth) that connects the fleet, plans routes on a hand-mapped model town, and speaks each step.</li>
-            <li>Added a <strong>voice interface</strong> — spoken destination in, spoken guidance out.</li>
-          </ul></div>
-          <div class="col"><div class="k">Initial testing</div><ul>
-            <li>Verified <strong>BLE connection + role assignment</strong> and the live telemetry loop.</li>
-            <li>Confirmed <strong>motor control</strong> and per-robot state reporting.</li>
-            <li>Built a full <strong>software simulator</strong> of the 3-robot convoy to validate the coordination logic end-to-end <strong>before touching hardware.</strong></li>
-          </ul></div>
-        </div>
+    <!-- 6 THE SOFTWARE / HUB / CLOUD  (the hard part) -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">06</span> · The software — the hard part</div>
+      <h2 class="rise">The real project is the <span class="grad">brain</span>: a hub we coded from scratch.</h2>
+      <div class="arch rise">
+        <div class="node voice"><div class="lab">Client</div><h3>🎙️ Voice interface</h3><p>Phone or laptop — listens for a destination, speaks every step of the way.</p></div>
+        <div class="node cloud"><div class="lab">Cloud</div><h3>☁️ Live state &amp; journey logs</h3><p>The hub streams state to the cloud → a remote family / caregiver view, anywhere.</p></div>
+        <div class="node hub pulse"><div class="lab">The hub · the brain</div><h3>🧠 Route planning · ~5 Hz coordination loop · reliable command protocol · voice I/O</h3><p>A real, non-trivial system: a city-graph router, a swarm coordinator that balances speed &amp; spacing, and an <strong>acknowledged, retried, verified</strong> command layer — the part that made it actually work.</p></div>
+        <div class="node bots"><div class="lab">Swarm · Bluetooth</div><span class="pill">🧭 Opener</span><span class="pill">🦯 Sam</span><span class="pill">🛡️ Closer</span><span class="pill">↑ telemetry back</span></div>
       </div>
-    </section>
+      <div class="repo rise"><span class="gh">⌥</span><span>Open source · <b>github.com/8b4p7b6v74-ship-it/sam-and-the-guides</b></span></div>
+    </div></section>
 
-    <!-- 7 · TESTING & ITERATION -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise"><span class="num">07</span> · Testing &amp; iteration</div>
-        <h2 class="rise">The real challenge was wireless reliability — not the motors.</h2>
-        <div class="split three rise">
-          <div class="col"><div class="k">Environments</div><ul>
-            <li>A hand-built <strong>miniature town,</strong> measured to the centimetre.</li>
-            <li>A full <strong>simulator</strong> (virtual fleet) with <strong>injectable packet loss.</strong></li>
-          </ul></div>
-          <div class="col"><div class="k">Findings</div><ul>
-            <li>Commands could be <strong>lost, delayed, or duplicated</strong> — a robot left behind.</li>
-            <li>Sensors were noisy — <strong>ultrasonic spikes, encoder glitches.</strong></li>
-          </ul></div>
-          <div class="col ok"><div class="k">Iterations</div><ul>
-            <li>Rebuilt comms: <strong>acknowledgment, retry, synchronized start, verification.</strong></li>
-            <li>An <strong>adversarial review</strong> found &amp; fixed <strong>10 reliability defects.</strong></li>
-            <li>Hardened firmware — <strong>idempotent commands, debounced obstacle detection.</strong></li>
-          </ul></div>
-        </div>
-        <div class="codes rise"><span class="code ok">✓ Delivery holds at 40% simulated packet loss → still 3/3</span></div>
+    <!-- 7 PROTOTYPE -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">07</span> · Prototype development</div>
+      <h2 class="rise">From three kits to a coordinated convoy.</h2>
+      <div class="split two rise">
+        <div class="col glass c-cyan"><div class="k">Building process</div><ul>
+          <li>Assembled <strong>3 XRP kits</strong>; wrote <strong>one firmware</strong> shared by all — roles assigned live over Bluetooth.</li>
+          <li>Built the web-based <strong>Hub</strong> (Web Bluetooth) that connects the fleet, plans routes on a hand-mapped model town, speaks each step, and syncs to the cloud.</li>
+          <li>Added a <strong>voice interface</strong> — spoken destination in, spoken guidance out.</li>
+        </ul></div>
+        <div class="col glass c-violet"><div class="k">Initial testing</div><ul>
+          <li>Verified <strong>BLE connection + role assignment</strong> and the live telemetry loop.</li>
+          <li>Confirmed <strong>motor control</strong> and per-robot state reporting.</li>
+          <li>Built a full <strong>software simulator</strong> of the 3-robot convoy to validate coordination end-to-end <strong>before touching hardware.</strong></li>
+        </ul></div>
       </div>
-    </section>
+    </div></section>
 
-    <!-- 8 · RESULTS & IMPACT -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise"><span class="num">08</span> · Results &amp; impact</div>
-        <h2 class="rise">A swarm you can trust to move together.</h2>
-        <div class="split three rise">
-          <div class="col ok"><div class="k">Success metrics</div><ul>
-            <li>Commands <strong>confirmed by all 3</strong> — even at 40% simulated packet loss.</li>
-            <li><strong>Deterministic:</strong> the fleet starts in sync, or safely aborts.</li>
-            <li>Full <strong>voice → coordinate → guide → arrive</strong> validated in simulation.</li>
-          </ul></div>
-          <div class="col"><div class="k">User-centred design</div><ul>
-            <li>Camera-free &amp; offline — answers the <strong>privacy</strong> concern head-on.</li>
-            <li>The user <strong>sets the pace</strong> — the system adapts to them, not the reverse.</li>
-            <li>Spoken guidance + arm tap for a <strong>non-visual</strong> experience.</li>
-          </ul></div>
-          <div class="col"><div class="k">Challenges overcome</div><ul>
-            <li><strong>BLE reliability</strong> — a verifiable, retrying protocol.</li>
-            <li><strong>Sensor noise</strong> — filtering &amp; debouncing.</li>
-            <li><strong>Synchronization</strong> — a two-phase, verified start.</li>
-          </ul></div>
-        </div>
+    <!-- 8 TESTING & ITERATION -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">08</span> · Testing &amp; iteration</div>
+      <h2 class="rise">The real challenge was <span class="grad">wireless reliability</span> — not the motors.</h2>
+      <div class="split three rise">
+        <div class="col glass c-cyan"><div class="k">Environments</div><ul><li>A hand-built <strong>miniature town,</strong> measured to the centimetre.</li><li>A full <strong>simulator</strong> (virtual fleet) with <strong>injectable packet loss.</strong></li></ul></div>
+        <div class="col glass c-coral"><div class="k">Findings</div><ul><li>Commands could be <strong>lost, delayed, or duplicated</strong> — a robot left behind.</li><li>Sensors were noisy — <strong>ultrasonic spikes, encoder glitches.</strong></li></ul></div>
+        <div class="col glass c-green"><div class="k">Iterations</div><ul><li>Rebuilt comms: <strong>acknowledgment, retry, synchronized start, verification.</strong></li><li>An <strong>adversarial review</strong> found &amp; fixed <strong>10 reliability defects.</strong></li><li>Hardened firmware — <strong>idempotent commands, debounced obstacle detection.</strong></li></ul></div>
       </div>
-    </section>
+      <div class="codes rise"><span class="code ok">✓ Delivery holds at 40% simulated packet loss → still 3/3</span></div>
+    </div></section>
 
-    <!-- 9 · FUTURE IMPROVEMENTS -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise"><span class="num">09</span> · Future improvements</div>
-        <h2 class="rise">Where it goes next.</h2>
-        <div class="split three rise">
-          <div class="col"><div class="k">Sense</div><ul>
-            <li><strong>Head-height obstacle detection</strong> — the hazard the cane misses.</li>
-            <li><strong>Haptic feedback</strong> in the companion robot.</li>
-          </ul></div>
-          <div class="col"><div class="k">Scale</div><ul>
-            <li><strong>Larger swarms</strong> and longer routes.</li>
-            <li><strong>Automatic mapping</strong> of new indoor spaces.</li>
-            <li>Better <strong>battery &amp; range.</strong></li>
-          </ul></div>
-          <div class="col"><div class="k">Deploy</div><ul>
-            <li><strong>Real-world pilots</strong> — airports, care homes, hospitals.</li>
-            <li><strong>Trials with the people we built it for.</strong></li>
-          </ul></div>
-        </div>
-        <p class="lede rise">Every step toward the same goal: guidance that gives independence back.</p>
+    <!-- 9 RESULTS & IMPACT -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">09</span> · Results &amp; impact</div>
+      <h2 class="rise">A swarm you can trust to move together.</h2>
+      <div class="split three rise">
+        <div class="col glass c-green"><div class="k">Success metrics</div><ul><li>Commands <strong>confirmed by all 3</strong> — even at 40% simulated packet loss.</li><li><strong>Deterministic:</strong> the fleet starts in sync, or safely aborts.</li><li>Full <strong>voice → coordinate → guide → arrive</strong> validated in simulation.</li></ul></div>
+        <div class="col glass c-cyan"><div class="k">User-centred design</div><ul><li>Camera-free &amp; offline-capable — answers the <strong>privacy</strong> concern.</li><li>The user <strong>sets the pace</strong> — the system adapts to them.</li><li>Spoken guidance + arm tap for a <strong>non-visual</strong> experience.</li></ul></div>
+        <div class="col glass c-violet"><div class="k">Challenges overcome</div><ul><li><strong>BLE reliability</strong> — a verifiable, retrying protocol.</li><li><strong>Sensor noise</strong> — filtering &amp; debouncing.</li><li><strong>Synchronization</strong> — a two-phase, verified start.</li></ul></div>
       </div>
-    </section>
+    </div></section>
 
-    <!-- 10 · CONCLUSION -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise"><span class="num">10</span> · Conclusion &amp; demo</div>
-        <h2 class="rise">Problem identified. Solution built. Coordination proven.</h2>
-        <div class="split two rise">
-          <div class="col"><div class="k">Summary</div><ul>
-            <li><strong>Problem</strong> — a large, under-served population can't move independently indoors.</li>
-            <li><strong>Solution</strong> — a camera-free, voice-first robot swarm that physically guides.</li>
-            <li><strong>Result</strong> — a reliable, verifiable coordination layer, validated end-to-end.</li>
-          </ul></div>
-          <div class="col"><div class="k">Live demonstration</div><ul>
-            <li>Speak a destination — <strong>"Take me to the Eiffel Tower."</strong></li>
-            <li>The hub confirms all robots, then triggers a <strong>synchronized start.</strong></li>
-            <li>The fleet moves through the town and <strong>announces arrival.</strong></li>
-          </ul></div>
-        </div>
-        <div class="callout rise"><div class="k">Q &amp; A</div><p>Open floor — we'd love your questions.</p></div>
+    <!-- 10 FUTURE -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">10</span> · Future improvements</div>
+      <h2 class="rise">Where it goes next.</h2>
+      <div class="split three rise">
+        <div class="col glass c-cyan"><div class="k">Sense</div><ul><li><strong>Head-height obstacle detection</strong> — the hazard the cane misses.</li><li><strong>Haptic feedback</strong> in the companion robot.</li></ul></div>
+        <div class="col glass c-amber"><div class="k">Scale</div><ul><li><strong>Larger swarms</strong> and longer routes.</li><li><strong>Automatic mapping</strong> of new indoor spaces.</li><li>Better <strong>battery &amp; range.</strong></li></ul></div>
+        <div class="col glass c-pink"><div class="k">Deploy</div><ul><li><strong>Real-world pilots</strong> — airports, care homes, hospitals.</li><li><strong>Trials with the people we built it for.</strong></li></ul></div>
       </div>
-    </section>
+      <p class="lede rise">Every step toward the same goal: guidance that gives independence back.</p>
+    </div></section>
 
-    <!-- 11 · THANK YOU -->
-    <section class="slide">
-      <div class="rail"></div>
-      <div class="body">
-        <div class="eyebrow rise">Thank you</div>
-        <h1 class="rise">Thank you.</h1>
-        <p class="lede rise">To our mentors, teachers, and everyone who tested, questioned, and cheered us on — thank you. This project is for the travelers it's meant to serve.</p>
-        <div class="credits rise">
-          <span><b>Violet</b></span><span class="sep">·</span><span><b>Samuel</b></span><span class="sep">·</span><span><b>Gabriel</b></span>
-          <span class="sep">·</span><span>Contact: [insert contact details]</span>
-        </div>
-        <div class="footline rise">Navigation &amp; Guidance of Blind and Visually-Impaired People · Capstone 2026</div>
+    <!-- 11 CONCLUSION -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">11</span> · Conclusion &amp; demo</div>
+      <h2 class="rise">Problem identified. <span class="grad">Software built.</span> Coordination proven.</h2>
+      <div class="split two rise">
+        <div class="col glass c-cyan"><div class="k">Summary</div><ul><li><strong>Problem</strong> — a large, under-served population can't move independently indoors.</li><li><strong>Solution</strong> — a camera-free, voice-first robot swarm coordinated by a cloud-connected hub.</li><li><strong>Result</strong> — a reliable, verifiable coordination layer, validated end-to-end.</li></ul></div>
+        <div class="col glass c-amber"><div class="k">Live demonstration</div><ul><li>Speak a destination — <strong>"Take me to the Eiffel Tower."</strong></li><li>The hub confirms all robots, then triggers a <strong>synchronized start.</strong></li><li>The fleet moves through the town and <strong>announces arrival.</strong></li></ul></div>
       </div>
-    </section>
+      <div class="repo rise"><span class="gh">⌥</span><span>Code &amp; docs · <b>github.com/8b4p7b6v74-ship-it/sam-and-the-guides</b></span></div>
+    </div></section>
+
+    <!-- 12 THANK YOU -->
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise">Thank you</div>
+      <h1 class="rise"><span class="grad">Thank you.</span></h1>
+      <p class="lede rise">To our mentors, teachers, and everyone who tested, questioned, and cheered us on — thank you. This project is for the travelers it's meant to serve.</p>
+      <div class="repo rise"><span class="gh">⌥</span><span><b>github.com/8b4p7b6v74-ship-it/sam-and-the-guides</b></span></div>
+      <div class="credits rise"><span><b>Violet</b></span><span class="sep">·</span><span><b>Samuel</b></span><span class="sep">·</span><span><b>Gabriel</b></span><span class="sep">·</span><span>Contact: [insert contact details]</span></div>
+      <div class="footline rise">Navigation &amp; Guidance of Blind and Visually-Impaired People · Capstone 2026</div>
+    </div></section>
 
   </div>
-
   <div class="zone prev" id="zprev" aria-hidden="true"></div>
   <div class="zone next" id="znext" aria-hidden="true"></div>
   <div class="hint" id="hint">← → to navigate · F fullscreen</div>
-  <div class="counter"><b id="cur">01</b> / <span id="tot">11</span></div>
+  <div class="counter"><b id="cur">01</b> / <span id="tot">12</span></div>
 </div>
 
 <script>
 (function(){
-  const slides=[...document.querySelectorAll('.slide')];
-  const N=slides.length; let i=0;
-  slides.forEach((s,idx)=>{ s.querySelector('.rail').innerHTML='<div class="spine"></div><div class="fill"></div>'+slides.map((_,k)=>'<button class="stop" data-go="'+k+'" aria-label="Slide '+(k+1)+'"></button>').join(''); });
+  // ---- ambient swarm background ----
+  const cv=document.getElementById('swarm'),ctx=cv.getContext('2d');
+  const COLORS=['#2dd4ee','#a78bfa','#fbbf24','#fb7185','#34d399','#60a5fa'];
+  let W,H,DPR,nodes=[],raf=null;
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function resize(){DPR=Math.min(2,devicePixelRatio||1);W=cv.width=innerWidth*DPR;H=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';}
+  function seed(){nodes=[];const n=Math.round(Math.min(46,innerWidth/34));for(let i=0;i<n;i++)nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.16*DPR,vy:(Math.random()-.5)*.16*DPR,r:(1.1+Math.random()*2.2)*DPR,c:COLORS[i%COLORS.length]});}
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<nodes.length;i++){const a=nodes[i];a.x+=a.vx;a.y+=a.vy;
+      if(a.x<0||a.x>W)a.vx*=-1; if(a.y<0||a.y>H)a.vy*=-1;
+      for(let j=i+1;j<nodes.length;j++){const b=nodes[j];const dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy),m=150*DPR;
+        if(d<m){ctx.globalAlpha=(1-d/m)*.16;ctx.strokeStyle=a.c;ctx.lineWidth=DPR;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
+    }
+    for(const a of nodes){ctx.globalAlpha=.55;ctx.fillStyle=a.c;ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,7);ctx.fill();}
+    ctx.globalAlpha=1; raf=requestAnimationFrame(frame);
+  }
+  function boot(){resize();seed();ctx.clearRect(0,0,W,H);
+    // draw one static frame first (for screenshots / reduced motion)
+    for(let i=0;i<nodes.length;i++){const a=nodes[i];for(let j=i+1;j<nodes.length;j++){const b=nodes[j];const dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy),m=150*DPR;if(d<m){ctx.globalAlpha=(1-d/m)*.16;ctx.strokeStyle=a.c;ctx.lineWidth=DPR;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}}
+    for(const a of nodes){ctx.globalAlpha=.55;ctx.fillStyle=a.c;ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,7);ctx.fill();}ctx.globalAlpha=1;
+  }
+  addEventListener('resize',()=>{boot();});
+
+  // ---- deck nav ----
+  const slides=[...document.querySelectorAll('.slide')];const N=slides.length;let i=0;
+  slides.forEach((s)=>{s.querySelector('.rail').innerHTML='<div class="spine"></div><div class="fill"></div>'+slides.map((_,k)=>'<button class="stop" data-go="'+k+'" aria-label="Slide '+(k+1)+'"></button>').join('');});
   document.getElementById('tot').textContent=String(N).padStart(2,'0');
-  function render(){
-    slides.forEach((s,k)=>s.classList.toggle('on',k===i));
-    document.getElementById('cur').textContent=String(i+1).padStart(2,'0');
-    const rail=slides[i].querySelector('.rail');const stops=[...rail.querySelectorAll('.stop')];
+  function render(){slides.forEach((s,k)=>s.classList.toggle('on',k===i));document.getElementById('cur').textContent=String(i+1).padStart(2,'0');
+    const rail=slides[i].querySelector('.rail'),stops=[...rail.querySelectorAll('.stop')];
     stops.forEach((d,k)=>{d.classList.toggle('done',k<i);d.classList.toggle('cur',k===i);});
     const fill=rail.querySelector('.fill');if(fill){const h=stops.length>1?(i/(stops.length-1)):0;fill.style.height=h*(rail.clientHeight-112)+'px';}
-    location.hash=i+1;
-  }
-  function go(n){ i=Math.max(0,Math.min(N-1,n)); render(); }
-  const next=()=>{if(i<N-1)go(i+1)}, prev=()=>{if(i>0)go(i-1)};
-  document.addEventListener('keydown',e=>{
-    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();next();}
-    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
-    else if(e.key==='Home')go(0); else if(e.key==='End')go(N-1);
-    else if(e.key.toLowerCase()==='f')toggleFs();
-  });
-  document.getElementById('znext').onclick=next; document.getElementById('zprev').onclick=prev;
+    location.hash=i+1;}
+  function go(n){i=Math.max(0,Math.min(N-1,n));render();}
+  const next=()=>{if(i<N-1)go(i+1)},prev=()=>{if(i>0)go(i-1)};
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();next();}else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}else if(e.key==='Home')go(0);else if(e.key==='End')go(N-1);else if(e.key.toLowerCase()==='f')toggleFs();});
+  document.getElementById('znext').onclick=next;document.getElementById('zprev').onclick=prev;
   document.getElementById('slides').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(+b.dataset.go);});
-  const root=document.documentElement;
-  document.getElementById('theme').onclick=()=>{const cur=root.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');root.setAttribute('data-theme',cur==='dark'?'light':'dark');};
   function toggleFs(){if(!document.fullscreenElement)document.getElementById('deck').requestFullscreen?.();else document.exitFullscreen?.();}
   document.getElementById('fs').onclick=toggleFs;
+
   const qs=new URLSearchParams(location.search);
-  if(qs.get('theme'))root.setAttribute('data-theme',qs.get('theme'));
-  if(qs.get('still')){const st=document.createElement('style');st.textContent='*{animation:none!important;transition:none!important}.topbar,.hint{display:none!important}';document.head.appendChild(st);}
-  const start=parseInt(location.hash.slice(1))||1; i=Math.max(0,Math.min(N-1,start-1));
-  render(); addEventListener('resize',render);
+  const still=qs.get('still');
+  if(still){const st=document.createElement('style');st.textContent='*{animation:none!important;transition:none!important}.topbar,.hint{display:none!important}';document.head.appendChild(st);}
+  boot();
+  if(!reduce && !still) frame();   // animate only when live
+  const start=parseInt(location.hash.slice(1))||1;i=Math.max(0,Math.min(N-1,start-1));render();
   setTimeout(()=>{const h=document.getElementById('hint');if(h)h.style.transition='opacity 1s',h.style.opacity='0';},5000);
 })();
 </script>
