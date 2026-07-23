@@ -32,6 +32,19 @@
   .grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
     background:radial-gradient(1px 1px at 50% 50%,rgba(255,255,255,.05),transparent);mix-blend-mode:overlay}
   @media (prefers-reduced-motion:reduce){.blob{animation:none}}
+  #confetti{position:fixed;inset:0;z-index:5;pointer-events:none}
+  #intro{position:fixed;inset:0;z-index:20;display:grid;place-items:center;overflow:hidden;
+    background:radial-gradient(circle at 50% 44%,rgba(40,20,88,.65),var(--bg1) 72%);transition:opacity .9s ease,visibility .9s}
+  #intro.gone{opacity:0;visibility:hidden}
+  .iwrap{position:relative;text-align:center;animation:iin 1.15s cubic-bezier(.16,.84,.3,1) both}
+  @keyframes iin{from{opacity:0;transform:translateY(22px) scale(.88);filter:blur(16px)}to{opacity:1;transform:none;filter:blur(0)}}
+  .itag{font-family:var(--f-mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--cyan);margin-bottom:18px}
+  .ibig{font-family:var(--f-disp);font-weight:800;letter-spacing:-.03em;font-size:clamp(40px,8.4vw,110px);line-height:1}
+  .isub{font-family:var(--f-mono);font-size:13px;letter-spacing:.16em;color:var(--soft);margin-top:16px;opacity:.85}
+  .iring{position:absolute;left:50%;top:42%;width:44px;height:44px;border-radius:50%;border:2px solid var(--violet);transform:translate(-50%,-50%);opacity:0;animation:iring 2.8s ease-out infinite}
+  .iring2{border-color:var(--cyan);animation-delay:1s}
+  @keyframes iring{0%{width:44px;height:44px;opacity:.85}100%{width:130vw;height:130vw;opacity:0}}
+  @media (prefers-reduced-motion:reduce){.iwrap,.iring{animation:none}.iring{display:none}}
 
   .deck{position:fixed;inset:0;display:flex;flex-direction:column;z-index:2}
   .slides{position:relative;flex:1;overflow:hidden}
@@ -162,6 +175,14 @@
   .convoy .unit:nth-child(3) .em{animation-delay:.5s} .convoy .unit:nth-child(5) .em{animation-delay:1s}
   @keyframes bob{50%{transform:translateY(-7px)}}
   @media (prefers-reduced-motion:reduce){.flowstrip::before,.flowstrip::after,.unit .em{animation:none}}
+  /* live animated city map */
+  .maprow{display:grid;grid-template-columns:1.55fr 1fr;gap:24px;margin-top:10px;align-items:center}
+  .citymap{width:100%;aspect-ratio:16/9;border-radius:16px;border:1px solid var(--edge);display:block;
+    background:radial-gradient(120% 120% at 18% 8%,rgba(109,40,217,.2),transparent 60%),rgba(0,0,0,.24);box-shadow:inset 0 0 70px rgba(0,0,0,.35)}
+  .mapleg .lg{display:flex;align-items:center;gap:11px;font-size:15px;color:var(--soft);margin-bottom:12px;font-weight:600}
+  .mapleg .lg i{width:13px;height:13px;border-radius:50%;box-shadow:0 0 12px currentColor;flex:0 0 auto}
+  .mapleg p{margin-top:16px;font-size:14px;color:var(--soft);line-height:1.5}
+  @media (max-width:1040px){.maprow{grid-template-columns:1fr}}
 
   .repo{display:inline-flex;align-items:center;gap:12px;margin-top:18px;padding:12px 18px;border-radius:12px;background:var(--glass);border:1px solid var(--edge);font-family:var(--f-mono);font-size:15px}
   .repo b{color:var(--amber);font-weight:700} .repo .gh{font-size:20px}
@@ -183,6 +204,13 @@
 <body>
 <div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
 <canvas id="swarm"></canvas>
+<canvas id="confetti"></canvas>
+<div id="intro"><div class="iwrap">
+  <div class="itag">Engineering &amp; Robotics · Capstone 2026</div>
+  <div class="ibig grad">Sam &amp; the Guides</div>
+  <div class="isub">a swarm that guides · initializing…</div>
+  <div class="iring"></div><div class="iring iring2"></div>
+</div></div>
 <div class="deck" id="deck">
   <div class="topbar"><button class="tb" id="fs" title="Fullscreen" aria-label="Fullscreen">⛶</button></div>
   <div class="slides" id="slides">
@@ -216,6 +244,20 @@
         <div class="col glass c-cyan"><div class="k">Ask &amp; plan</div><ul><li><strong>Voice destination</strong> — "Take me to the store."</li><li><strong>Route + ETA</strong> — "be there by 6:00 PM" and it departs on time by itself.</li></ul></div>
         <div class="col glass c-violet"><div class="k">Coordinate</div><ul><li><strong>Real-time (~5 Hz)</strong> — balances speed &amp; spacing so no one is left behind.</li><li><strong>Safety</strong> — stops on obstacles, taps the arm, speaks every step; e-stop anytime.</li></ul></div>
         <div class="col glass c-amber"><div class="k">Private &amp; shared</div><ul><li><strong>Camera-free &amp; offline-capable</strong> — private by design.</li><li><strong>Live family view</strong> — a relative anywhere can follow the journey.</li></ul></div>
+      </div>
+    </div></section>
+
+    <section class="slide mapslide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise">▶ The journey — coordinated live</div>
+      <h2 class="rise">Say a place. The <span class="grad">swarm moves as one.</span></h2>
+      <div class="maprow rise">
+        <canvas class="citymap" id="citymap" aria-label="Animated map of the swarm travelling through the town"></canvas>
+        <div class="mapleg">
+          <div class="lg"><i style="background:var(--amber);color:var(--amber)"></i> Opener — leads the route</div>
+          <div class="lg"><i style="background:var(--cyan);color:var(--cyan)"></i> Sam — the traveler</div>
+          <div class="lg"><i style="background:var(--coral);color:var(--coral)"></i> Closer — holds the group</div>
+          <p>The hub plans the route, then coordinates all three <strong>~5&times; per second</strong> — balancing speed and spacing so no one is ever left behind.</p>
+        </div>
       </div>
     </div></section>
 
@@ -375,6 +417,65 @@
   boot(); addEventListener('resize',boot);
   if(!reduce && !still) loop();
 
+  // ---- cinematic intro overlay ----
+  const intro=document.getElementById('intro');
+  function killIntro(){if(intro&&!intro.classList.contains('gone')){intro.classList.add('gone');setTimeout(()=>{intro.style.display='none';},900);}}
+  if(still){ if(intro)intro.style.display='none'; }
+  else if(intro){ setTimeout(killIntro,2900); addEventListener('keydown',killIntro,{once:true}); intro.addEventListener('click',killIntro); }
+
+  // ---- confetti (finale) ----
+  const conf=document.getElementById('confetti'),cg=conf.getContext('2d'); let cP=[],cRaf=null,cW,cH,cD;
+  function confResize(){cD=Math.min(2,devicePixelRatio||1);cW=conf.width=innerWidth*cD;cH=conf.height=innerHeight*cD;}
+  confResize(); addEventListener('resize',confResize);
+  function burst(){ if(reduce)return; cP=[];
+    const cols=['#22e0f0','#b28dff','#fbbf24','#fb7185','#37e0a0','#f472b6','#63a4ff'];
+    for(let k=0;k<170;k++){const a=Math.random()*Math.PI*2,sp=(4+Math.random()*10)*cD;
+      cP.push({x:cW*0.5,y:cH*0.32,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-7*cD,g:.2*cD,r:(3+Math.random()*4)*cD,rot:Math.random()*6,vr:(Math.random()-.5)*.32,c:cols[k%cols.length],life:1});}
+    if(!cRaf)cLoop();
+  }
+  function cLoop(){cg.clearRect(0,0,cW,cH);let alive=0;
+    for(const p of cP){p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.vx*=.99;p.rot+=p.vr;p.life-=.0075;
+      if(p.life>0&&p.y<cH+30*cD){alive++;cg.save();cg.globalAlpha=Math.max(0,p.life);cg.translate(p.x,p.y);cg.rotate(p.rot);cg.fillStyle=p.c;cg.fillRect(-p.r,-p.r*.5,p.r*2,p.r);cg.restore();}}
+    if(alive>0)cRaf=requestAnimationFrame(cLoop); else {cRaf=null;cg.clearRect(0,0,cW,cH);}
+  }
+
+  // ---- live animated city map (the swarm travelling a route) ----
+  function initCityMap(){
+    const cv=document.getElementById('citymap'); if(!cv||cv._init)return cv; cv._init=true;
+    const g=cv.getContext('2d'); let W,H,D,raf=null,t=0,trail=[[],[],[]],seg=[],total=0;
+    const GX=p=>(0.05+p*0.90)*W, GY=p=>(0.09+p*0.80)*H;   // inset so labels stay inside
+    const P={home:[.10,.86],a:[.45,.86],c:[.90,.86],eiffel:[.90,.42],tr:[.90,.14],wh:[.45,.14],tl:[.10,.14],c1:[.45,.50],lib:[.66,.50],rest:[.50,.965]};
+    const edges=[['home','a'],['a','c'],['c','eiffel'],['eiffel','tr'],['tr','wh'],['wh','tl'],['tl','home'],['a','c1'],['c1','wh'],['c1','lib'],['a','rest']];
+    const marks=[['home','🏠','Home'],['wh','🏛️','White House'],['eiffel','🗼','Eiffel'],['lib','📚','Library'],['rest','🍽️','Restaurant']];
+    const route=['home','a','c','eiffel','tr','wh','tl','home'];
+    const COL=['#fbbf24','#22e0f0','#fb7185'];
+    function build(){seg=[];total=0;const pts=route.map(id=>[GX(P[id][0]),GY(P[id][1])]);for(let i=0;i<pts.length-1;i++){const dx=pts[i+1][0]-pts[i][0],dy=pts[i+1][1]-pts[i][1],L=Math.hypot(dx,dy);seg.push({x:pts[i][0],y:pts[i][1],dx,dy,L,acc:total});total+=L;}}
+    function posAt(d){d=((d%total)+total)%total;for(let i=0;i<seg.length;i++){const s=seg[i];if(d<=s.acc+s.L){const u=(d-s.acc)/s.L;return[s.x+s.dx*u,s.y+s.dy*u];}}const s=seg[seg.length-1];return[s.x+s.dx,s.y+s.dy];}
+    function resize(){D=Math.min(2,devicePixelRatio||1);const r=cv.getBoundingClientRect();W=cv.width=Math.max(2,r.width*D);H=cv.height=Math.max(2,r.height*D);build();}
+    function draw(){
+      t+=total/(7*60);
+      g.clearRect(0,0,W,H);
+      g.lineWidth=2*D;g.strokeStyle='rgba(255,255,255,.13)';
+      for(const e of edges){const A=P[e[0]],B=P[e[1]];g.beginPath();g.moveTo(GX(A[0]),GY(A[1]));g.lineTo(GX(B[0]),GY(B[1]));g.stroke();}
+      g.lineWidth=3*D;g.strokeStyle='rgba(178,141,255,.55)';g.setLineDash([9*D,9*D]);g.lineDashOffset=-t*0.12;
+      g.beginPath();for(let i=0;i<seg.length;i++){const s=seg[i];if(i===0)g.moveTo(s.x,s.y);g.lineTo(s.x+s.dx,s.y+s.dy);}g.stroke();g.setLineDash([]);
+      for(const id in P){const x=GX(P[id][0]),y=GY(P[id][1]);g.globalAlpha=.55;g.fillStyle='#9089c4';g.beginPath();g.arc(x,y,3*D,0,7);g.fill();}g.globalAlpha=1;
+      g.textAlign='center';
+      for(const m of marks){const x=GX(P[m[0]][0]),y=GY(P[m[0]][1]);g.font=(15*D)+'px system-ui';g.fillText(m[1],x,y-8*D);g.font='600 '+(10.5*D)+'px system-ui';g.fillStyle='#c7c0ec';g.fillText(m[2],x,y+17*D);}
+      const gap=total*0.05;
+      g.globalCompositeOperation='lighter';
+      for(let k=2;k>=0;k--){const [x,y]=posAt(t-k*gap);trail[k].push([x,y]);if(trail[k].length>15)trail[k].shift();
+        for(let m=0;m<trail[k].length;m++){const p=trail[k][m];g.globalAlpha=(m/trail[k].length)*.45;g.fillStyle=COL[k];g.beginPath();g.arc(p[0],p[1],(1.5+m/trail[k].length*3)*D,0,7);g.fill();}
+        g.globalAlpha=1;g.fillStyle=COL[k];g.shadowColor=COL[k];g.shadowBlur=16*D;g.beginPath();g.arc(x,y,5.5*D,0,7);g.fill();g.shadowBlur=0;}
+      g.globalCompositeOperation='source-over';g.globalAlpha=1;
+      raf=requestAnimationFrame(draw);
+    }
+    cv._start=()=>{if(raf)return;resize();draw();};
+    cv._stop=()=>{if(raf){cancelAnimationFrame(raf);raf=null;}};
+    addEventListener('resize',()=>{if(raf)resize();});
+    return cv;
+  }
+
   // ---- deck ----
   const slides=[...document.querySelectorAll('.slide')];const N=slides.length;let i=0;
   slides.forEach((s)=>{s.querySelector('.rail').innerHTML='<div class="spine"></div><div class="fill"></div>'+slides.map((_,k)=>'<button class="stop" data-go="'+k+'" aria-label="Slide '+(k+1)+'"></button>').join('');});
@@ -394,7 +495,8 @@
     const rail=slides[i].querySelector('.rail'),stops=[...rail.querySelectorAll('.stop')];
     stops.forEach((d,k)=>{d.classList.toggle('done',k<i);d.classList.toggle('cur',k===i);});
     const fill=rail.querySelector('.fill');if(fill){const h=stops.length>1?(i/(stops.length-1)):0;fill.style.height=h*(rail.clientHeight-112)+'px';}
-    countUp(slides[i]); location.hash=i+1;}
+    const cm=initCityMap(); if(cm){ if(slides[i].classList.contains('mapslide')){requestAnimationFrame(()=>cm._start());} else cm._stop(); }
+    countUp(slides[i]); if(i===N-1)burst(); location.hash=i+1;}
   function go(n){i=Math.max(0,Math.min(N-1,n));render();}
   const next=()=>{if(i<N-1)go(i+1)},prev=()=>{if(i>0)go(i-1)};
   document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();next();}else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}else if(e.key==='Home')go(0);else if(e.key==='End')go(N-1);else if(e.key.toLowerCase()==='f')toggleFs();});
