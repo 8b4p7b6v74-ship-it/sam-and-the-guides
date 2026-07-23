@@ -75,7 +75,7 @@
     background:linear-gradient(var(--cyan),var(--violet),var(--amber));background-size:100% 300%;animation:flow 3s linear infinite;box-shadow:0 0 12px var(--violet)}
   @keyframes flow{to{background-position:0 -300%}}
   .stop{position:relative;z-index:2;width:10px;height:10px;border-radius:50%;background:var(--bg2);border:2px solid rgba(255,255,255,.22);cursor:pointer;transition:.3s}
-  .stop+.stop{margin-top:calc((100vh - 220px)/11 - 10px)}
+  .stop+.stop{margin-top:calc((100vh - 200px)/(var(--n,12) - 1) - 10px)}
   .stop:hover{border-color:var(--cyan)} .stop.done{border-color:var(--violet);background:var(--violet)}
   .stop.cur{border-color:var(--cyan);background:var(--bg2);box-shadow:0 0 0 5px color-mix(in srgb,var(--cyan) 26%,transparent);animation:beat 1.8s ease-in-out infinite}
   @keyframes beat{50%{box-shadow:0 0 0 9px color-mix(in srgb,var(--cyan) 10%,transparent)}}
@@ -203,6 +203,47 @@
   :focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
   @media (max-width:1040px){.split.two,.split.three,.findings{grid-template-columns:1fr}.convoy{flex-direction:column}.arrow{transform:rotate(90deg)}.arch{grid-template-columns:1fr}.node.hub,.node.bots{grid-column:auto}}
   @media (max-width:760px){.slide{grid-template-columns:48px 1fr}.body{padding:40px 24px}.hint{display:none}}
+  .repo a{color:inherit;text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--amber) 45%,transparent);transition:.2s}
+  .repo a:hover{border-bottom-color:var(--amber)}
+  /* ---- decision matrix ---- */
+  .dmatrix{width:100%;border-collapse:collapse;margin-top:8px;font-size:clamp(11px,1.18vw,14.5px)}
+  .dmatrix th,.dmatrix td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--edge);font-variant-numeric:tabular-nums}
+  .dmatrix thead th{font-family:var(--f-mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);font-weight:700}
+  .dmatrix tbody th{text-align:left;font-weight:600;color:var(--soft);font-family:var(--f-body)}
+  .dmatrix td.w{color:var(--faint);font-family:var(--f-mono);font-size:12px}
+  .dmatrix .win{background:linear-gradient(color-mix(in srgb,var(--green) 15%,transparent),color-mix(in srgb,var(--cyan) 11%,transparent))}
+  .dmatrix thead th.win{color:var(--green);border-radius:10px 10px 0 0}
+  .dmatrix .tot td,.dmatrix .tot th{border-top:2px solid var(--edge);border-bottom:none;font-family:var(--f-disp);font-weight:800;font-size:clamp(13px,1.55vw,20px);padding-top:12px}
+  .dmatrix .tot .win{color:var(--green);border-radius:0 0 10px 10px}
+  .dmatrix .s5{color:var(--green);font-weight:700}.dmatrix .s4{color:var(--cyan);font-weight:700}.dmatrix .s3{color:var(--soft)}.dmatrix .s2{color:var(--amber)}.dmatrix .s1{color:var(--coral)}
+  /* ---- flowchart ---- */
+  .flowchart{width:100%;margin-top:6px}
+  .flowchart svg{width:100%;height:auto;display:block;overflow:visible}
+  .fc-edge{fill:none;stroke-width:2}
+  .fc-main{stroke:rgba(178,141,255,.72)}
+  .fc-main.flow{stroke-dasharray:7 7;animation:fcflow 1.1s linear infinite}
+  @keyframes fcflow{to{stroke-dashoffset:-14}}
+  .fc-no{stroke:var(--coral)} .fc-loop{stroke:var(--amber);stroke-dasharray:4 6}
+  .fc-proc{fill:var(--glass);stroke:var(--edge)}
+  .fc-dec{fill:color-mix(in srgb,var(--violet) 20%,transparent);stroke:color-mix(in srgb,var(--violet) 58%,var(--edge))}
+  .fc-term{fill:color-mix(in srgb,var(--cyan) 20%,transparent);stroke:color-mix(in srgb,var(--cyan) 52%,var(--edge))}
+  .fc-fail{fill:color-mix(in srgb,var(--coral) 15%,transparent);stroke:color-mix(in srgb,var(--coral) 52%,var(--edge))}
+  .fc-t{fill:var(--ink);font-family:var(--f-body);font-weight:600}
+  .fc-t.fc-warn{fill:#ffb3bd}
+  .fc-lbl{fill:var(--faint);font-family:var(--f-mono);font-weight:700}
+  @media (prefers-reduced-motion:reduce){.fc-main.flow{animation:none}}
+  /* ---- pseudocode ---- */
+  .pcols{display:grid;grid-template-columns:1.32fr 1fr;gap:16px;margin-top:6px}
+  .pseudo{font-family:var(--f-mono);font-size:clamp(10.5px,1.08vw,13px);line-height:1.5;background:rgba(0,0,0,.3);border:1px solid var(--edge);border-radius:13px;padding:15px 18px;margin:0;overflow:auto;white-space:pre;color:var(--soft)}
+  .pseudo .kw{color:var(--violet);font-weight:700}.pseudo .fn{color:var(--cyan)}.pseudo .cm{color:var(--faint);font-style:italic}.pseudo .st{color:var(--amber)}
+  @media (max-width:1040px){.pcols{grid-template-columns:1fr}}
+  /* ---- references ---- */
+  .refs{columns:2;column-gap:36px;margin-top:10px;font-size:clamp(11px,1.12vw,13.5px)}
+  .refs .ref{break-inside:avoid;margin-bottom:12px;color:var(--soft);padding-left:30px;position:relative;line-height:1.42}
+  .refs .ref .n{position:absolute;left:0;top:0;font-family:var(--f-mono);font-size:11.5px;color:var(--cyan);font-weight:700}
+  .refs .ref i{color:var(--ink);font-style:italic}
+  .refs a{color:var(--cyan);text-decoration:none}
+  @media (max-width:1040px){.refs{columns:1}}
 </style>
 </head>
 <body>
@@ -252,6 +293,22 @@
       </div>
     </div></section>
 
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">04</span> · Problem &amp; solution statement</div>
+      <h2 class="rise">Stated plainly.</h2>
+      <div class="split two rise stagger">
+        <div class="col glass c-coral"><div class="k">Problem statement</div><ul>
+          <li>A blind or visually-impaired person <strong>cannot travel independently</strong> through an unfamiliar indoor space.</li>
+          <li>Every existing aid falls short: apps are <strong>audio-only</strong> — they describe, they don't lead; a <strong>guide dog</strong> is a $45–60k, multi-year wait serving &lt;2%; a white cane <strong>misses every head-height hazard</strong>; the rest means <strong>depending on another person.</strong></li>
+        </ul></div>
+        <div class="col glass c-green"><div class="k">Solution statement</div><ul>
+          <li>A <strong>camera-free swarm of three low-cost robots</strong> that <strong>physically lead</strong> the traveler along a mapped indoor route.</li>
+          <li>Two robots guide, one companion holds the group, and a <strong>cloud-connected hub</strong> coordinates them over Bluetooth with spoken, step-by-step guidance — <strong>private, offline-capable, paced by the user.</strong></li>
+        </ul></div>
+      </div>
+      <div class="callout rise"><div class="k">Thesis</div><p>Keep the robots simple and put the intelligence in the hub, and a coordinated swarm can deliver the one thing no audio-only aid can: <strong>physical guidance.</strong></p></div>
+    </div></section>
+
     <section class="slide mapslide"><div class="rail"></div><div class="body">
       <div class="eyebrow rise">▶ The journey — coordinated live</div>
       <h2 class="rise">Say a place. The <span class="grad">swarm moves as one.</span></h2>
@@ -267,7 +324,7 @@
     </div></section>
 
     <section class="slide"><div class="rail"></div><div class="body">
-      <div class="eyebrow rise"><span class="num">04</span> · Objectives &amp; impact</div>
+      <div class="eyebrow rise"><span class="num">05</span> · Objectives &amp; impact</div>
       <h2 class="rise">What it must do — and why it matters.</h2>
       <div class="split two rise stagger">
         <div class="col glass c-cyan"><div class="k">Objectives</div><ul>
@@ -289,7 +346,7 @@
     </div></section>
 
     <section class="slide"><div class="rail"></div><div class="body">
-      <div class="eyebrow rise"><span class="num">05</span> · Design &amp; components</div>
+      <div class="eyebrow rise"><span class="num">06</span> · Design &amp; components</div>
       <h2 class="rise">Simple robots. One intelligent brain.</h2>
       <div class="convoy rise stagger" style="margin-bottom:16px">
         <div class="unit glass u-open"><span class="em">🧭</span><div class="role">Opener · front</div><h3>Scouts the route</h3><p>Line + ultrasonic sensors. Leads and calls the turns.</p></div>
@@ -312,7 +369,28 @@
     </div></section>
 
     <section class="slide"><div class="rail"></div><div class="body">
-      <div class="eyebrow rise"><span class="num">06</span> · The software — the hard part</div>
+      <div class="eyebrow rise"><span class="num">07</span> · Design rationale · decision matrix</div>
+      <h2 class="rise">Why a <span class="grad">camera-free swarm</span> — scored, not assumed.</h2>
+      <table class="dmatrix rise">
+        <thead><tr>
+          <th style="text-align:left">Criterion</th><th class="w">Weight</th>
+          <th>Vision robot</th><th>LiDAR robot</th><th>Audio-only app</th><th class="win">Camera-free swarm ▸ ours</th>
+        </tr></thead>
+        <tbody>
+          <tr><th>Privacy — no camera</th><td class="w">20%</td><td class="s1">1</td><td class="s4">4</td><td class="s4">4</td><td class="win s5">5</td></tr>
+          <tr><th>Affordability — &lt;$2k kit</th><td class="w">20%</td><td class="s2">2</td><td class="s1">1</td><td class="s5">5</td><td class="win s4">4</td></tr>
+          <tr><th>Physically leads the user</th><td class="w">20%</td><td class="s4">4</td><td class="s4">4</td><td class="s1">1</td><td class="win s5">5</td></tr>
+          <tr><th>Runs on low-cost compute</th><td class="w">15%</td><td class="s1">1</td><td class="s2">2</td><td class="s5">5</td><td class="win s4">4</td></tr>
+          <tr><th>Offline-capable</th><td class="w">10%</td><td class="s3">3</td><td class="s4">4</td><td class="s2">2</td><td class="win s5">5</td></tr>
+          <tr><th>Safety — obstacles + formation</th><td class="w">15%</td><td class="s4">4</td><td class="s5">5</td><td class="s2">2</td><td class="win s4">4</td></tr>
+        </tbody>
+        <tfoot><tr class="tot"><th>Weighted score / 5</th><td class="w"></td><td>2.45</td><td>3.25</td><td>3.25</td><td class="win">4.50</td></tr></tfoot>
+      </table>
+      <div class="callout rise"><div class="k">Decision</div><p>The swarm wins on what matters most to a blind traveler — <strong>privacy, physical guidance, offline reliability</strong> — and a <strong>Raspberry Pi Pico</strong> keeps each robot cheap. The compute limit is answered by moving the brain into the hub.</p></div>
+    </div></section>
+
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">08</span> · The software — the hard part</div>
       <h2 class="rise">The real project is the <span class="grad">brain</span>: a hub we coded from scratch.</h2>
       <div class="arch rise stagger">
         <div class="node voice"><div class="lab">Client</div><h3>🎙️ Voice interface</h3><p>Phone or laptop — listens for a destination, speaks every step of the way.</p></div>
@@ -321,11 +399,115 @@
         <div class="flowstrip"><span>commands ↓ · telemetry ↑</span></div>
         <div class="node bots"><div class="lab">Swarm · Bluetooth</div><span class="pill">🧭 Opener</span><span class="pill">🦯 Sam</span><span class="pill">🛡️ Closer</span><span class="pill">↑ telemetry back</span></div>
       </div>
-      <div class="repo rise"><span class="gh">⌥</span><span>Open source · <b>github.com/8b4p7b6v74-ship-it/sam-and-the-guides</b></span></div>
+      <div class="repo rise"><span class="gh">⌥</span><span>Open source · <a href="https://github.com/8b4p7b6v74-ship-it/sam-and-the-guides" target="_blank" rel="noopener"><b>github.com/8b4p7b6v74-ship-it/sam-and-the-guides</b></a></span></div>
     </div></section>
 
     <section class="slide"><div class="rail"></div><div class="body">
-      <div class="eyebrow rise"><span class="num">07</span> · Prototype development</div>
+      <div class="eyebrow rise"><span class="num">09</span> · System logic · flowchart</div>
+      <h2 class="rise">How a spoken place becomes a <span class="grad">synchronized move.</span></h2>
+      <div class="flowchart rise">
+        <svg viewBox="0 0 1160 400" role="img" aria-label="Flowchart of the reliable dispatch and guidance loop">
+          <defs>
+            <marker id="fcA" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="rgba(178,141,255,.9)"/></marker>
+            <marker id="fcAc" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#fb7185"/></marker>
+            <marker id="fcAa" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#fbbf24"/></marker>
+          </defs>
+          <path class="fc-edge fc-main flow" marker-end="url(#fcA)" d="M245,70 H283"/>
+          <path class="fc-edge fc-main flow" marker-end="url(#fcA)" d="M490,70 H528"/>
+          <path class="fc-edge fc-main flow" marker-end="url(#fcA)" d="M765,70 H803"/>
+          <path class="fc-edge fc-main flow" marker-end="url(#fcA)" d="M945,70 H983"/>
+          <path class="fc-edge fc-main flow" marker-end="url(#fcA)" d="M1065,96 V204"/>
+          <path class="fc-edge fc-main flow" marker-end="url(#fcA)" d="M995,250 H922"/>
+          <path class="fc-edge fc-main flow" marker-end="url(#fcA)" d="M690,250 H587"/>
+          <path class="fc-edge fc-main flow" marker-end="url(#fcA)" d="M455,250 H437"/>
+          <path class="fc-edge fc-no" marker-end="url(#fcAc)" d="M875,114 V137"/>
+          <path class="fc-edge fc-no" marker-end="url(#fcAc)" d="M1065,294 V314"/>
+          <path class="fc-edge fc-no" marker-end="url(#fcAc)" d="M805,276 V314"/>
+          <path class="fc-edge fc-loop" marker-end="url(#fcAa)" d="M520,206 V200 H805 V222"/>
+          <text class="fc-lbl" x="957" y="62" font-size="10">yes</text>
+          <text class="fc-lbl" x="951" y="242" font-size="10">yes</text>
+          <text class="fc-lbl" x="444" y="242" font-size="10">yes</text>
+          <text class="fc-lbl" x="885" y="131" font-size="10">no</text>
+          <text class="fc-lbl" x="1075" y="309" font-size="10">no</text>
+          <text class="fc-lbl" x="648" y="194" font-size="10">no · keep going</text>
+          <rect class="fc-term" x="30" y="44" width="215" height="52" rx="26"/>
+          <text class="fc-t" x="137" y="75" text-anchor="middle" font-size="13">🎙 “Take me to X”</text>
+          <rect class="fc-proc" x="285" y="44" width="205" height="52" rx="12"/>
+          <text class="fc-t" x="387" y="75" text-anchor="middle" font-size="12.5">Plan route · BFS</text>
+          <rect class="fc-proc" x="530" y="44" width="235" height="52" rx="12"/>
+          <text class="fc-t" x="647" y="75" text-anchor="middle" font-size="12.5">STOP all · preload · ACK</text>
+          <polygon class="fc-dec" points="875,26 945,70 875,114 805,70"/>
+          <text class="fc-t" x="875" y="74" text-anchor="middle" font-size="12.5">All 3 ACK?</text>
+          <rect class="fc-proc" x="985" y="44" width="160" height="52" rx="12"/>
+          <text class="fc-t" x="1065" y="75" text-anchor="middle" font-size="12.5">GO — sync burst</text>
+          <polygon class="fc-dec" points="1065,206 1135,250 1065,294 995,250"/>
+          <text class="fc-t" x="1065" y="254" text-anchor="middle" font-size="12">All in RUN?</text>
+          <rect class="fc-proc" x="690" y="224" width="230" height="52" rx="12"/>
+          <text class="fc-t" x="805" y="255" text-anchor="middle" font-size="12.5">Coordinate 5 Hz · drive</text>
+          <polygon class="fc-dec" points="520,206 585,250 520,294 455,250"/>
+          <text class="fc-t" x="520" y="254" text-anchor="middle" font-size="12.5">Arrived?</text>
+          <rect class="fc-term" x="210" y="224" width="225" height="52" rx="26"/>
+          <text class="fc-t" x="322" y="255" text-anchor="middle" font-size="13">📣 Announce arrival</text>
+          <rect class="fc-fail" x="765" y="139" width="220" height="50" rx="12"/>
+          <text class="fc-t fc-warn" x="875" y="168" text-anchor="middle" font-size="11.5">Abort — nothing moves</text>
+          <rect class="fc-fail" x="960" y="316" width="196" height="50" rx="12"/>
+          <text class="fc-t fc-warn" x="1058" y="345" text-anchor="middle" font-size="11.5">STOP fleet · safety</text>
+          <rect class="fc-fail" x="690" y="316" width="230" height="50" rx="12"/>
+          <text class="fc-t fc-warn" x="805" y="345" text-anchor="middle" font-size="11.5">Obstacle → stop + alert</text>
+        </svg>
+      </div>
+      <div class="callout rise"><div class="k">The guarantee</div><p>Nothing moves until <strong>all three confirm</strong>; the fleet starts <strong>in sync</strong> or <strong>safely aborts</strong>; and an obstacle stops everyone instantly.</p></div>
+    </div></section>
+
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">10</span> · Core algorithm · pseudocode</div>
+      <h2 class="rise">The coordination loop, in <span class="grad">plain steps.</span></h2>
+      <div class="pcols rise">
+        <pre class="pseudo"><span class="cm"># HUB — guide the traveler to a place</span>
+<span class="kw">function</span> <span class="fn">guide</span>(dest):
+  route ← <span class="fn">planRoute</span>(graph, here, dest)   <span class="cm"># BFS</span>
+
+  <span class="cm"># phase 1 · preload, confirmed</span>
+  <span class="fn">sendReliable</span>(all, <span class="st">"STOP"</span>)
+  <span class="kw">for</span> r <span class="kw">in</span> fleet:
+    ok ← <span class="fn">sendReliable</span>(r, mission[r], tries=4)
+    <span class="kw">if</span> <span class="kw">not</span> ok: <span class="fn">abort</span>(<span class="st">"unconfirmed"</span>); <span class="kw">return</span>
+
+  <span class="cm"># phase 2 · synchronized start</span>
+  <span class="fn">burst</span>(all, <span class="st">"GO"</span>)              <span class="cm"># fire ×3, one tick</span>
+  <span class="kw">wait</span> telemetry = RUN   (≤ 1.4 s)
+  <span class="kw">if</span> <span class="kw">not</span> allRunning: <span class="fn">stopAll</span>(); <span class="kw">return</span>
+
+  <span class="cm"># phase 3 · coordinate ~5 Hz</span>
+  <span class="kw">while</span> <span class="kw">not</span> arrived:
+    hold gap(Closer) → Sam.speed    <span class="cm"># user paces</span>
+    <span class="kw">if</span> front(Opener) &lt; safe: <span class="fn">stopAll</span>(); <span class="fn">alert</span>()
+    <span class="kw">on</span> turn: mirror → Sam, then Closer
+    <span class="fn">speak</span>(nextStep)
+  <span class="fn">speak</span>(<span class="st">"You have arrived."</span>)</pre>
+        <pre class="pseudo"><span class="cm"># ROBOT — one shared firmware</span>
+<span class="kw">on</span> receive(line):
+  <span class="kw">if</span> line starts <span class="st">"#id"</span>:
+    <span class="fn">emit</span>(<span class="st">"A|"</span>+id)       <span class="cm"># ACK, always</span>
+    <span class="kw">if</span> id <span class="kw">in</span> seen: <span class="kw">return</span>  <span class="cm"># dedup</span>
+    seen.add(id)
+  cmd ← strip(line)
+
+  <span class="kw">if</span> cmd = <span class="st">"GO"</span>:
+    <span class="kw">if</span> mission ≠ RUN:        <span class="cm"># idempotent</span>
+      <span class="fn">startMission</span>()
+  <span class="kw">elif</span> cmd = <span class="st">"STOP"</span>: <span class="fn">halt</span>()
+  <span class="kw">elif</span> cmd = <span class="st">"PATH …"</span>: load(path)
+
+<span class="cm"># telemetry, ~20 Hz</span>
+<span class="kw">every</span> 50 ms:
+  <span class="fn">emit</span>(<span class="st">"T|role|mission|front|…"</span>)</pre>
+      </div>
+      <div class="callout rise"><div class="k">Why it holds</div><p>Every command is <strong>acknowledged &amp; retried</strong>; <strong>GO is idempotent</strong>, so a duplicate never restarts a moving robot; and the fleet is <strong>verified in telemetry</strong> before it's trusted to move.</p></div>
+    </div></section>
+
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">11</span> · Prototype development</div>
       <h2 class="rise">From three kits to a coordinated convoy.</h2>
       <div class="split two rise stagger">
         <div class="col glass c-cyan"><div class="k">Building process</div><ul>
@@ -342,7 +524,7 @@
     </div></section>
 
     <section class="slide"><div class="rail"></div><div class="body">
-      <div class="eyebrow rise"><span class="num">08</span> · Testing &amp; iteration</div>
+      <div class="eyebrow rise"><span class="num">12</span> · Testing &amp; iteration</div>
       <h2 class="rise">The real challenge was <span class="grad">wireless reliability</span> — not the motors.</h2>
       <div class="split three rise stagger">
         <div class="col glass c-cyan"><div class="k">Environments</div><ul><li>A hand-built <strong>miniature town,</strong> measured to the centimetre.</li><li>A full <strong>simulator</strong> (virtual fleet) with <strong>injectable packet loss.</strong></li></ul></div>
@@ -353,7 +535,7 @@
     </div></section>
 
     <section class="slide"><div class="rail"></div><div class="body">
-      <div class="eyebrow rise"><span class="num">09</span> · Results &amp; impact</div>
+      <div class="eyebrow rise"><span class="num">13</span> · Results &amp; impact</div>
       <h2 class="rise">A swarm you can trust to move together.</h2>
       <div class="split three rise stagger">
         <div class="col glass c-green"><div class="k">Success metrics</div><ul><li>Commands <strong>confirmed by all 3</strong> — even at 40% simulated packet loss.</li><li><strong>Deterministic:</strong> the fleet starts in sync, or safely aborts.</li><li>Full <strong>voice → coordinate → guide → arrive</strong> validated in simulation.</li></ul></div>
@@ -363,7 +545,7 @@
     </div></section>
 
     <section class="slide"><div class="rail"></div><div class="body">
-      <div class="eyebrow rise"><span class="num">10</span> · Future improvements</div>
+      <div class="eyebrow rise"><span class="num">14</span> · Future improvements</div>
       <h2 class="rise">Where it goes next.</h2>
       <div class="split three rise stagger">
         <div class="col glass c-cyan"><div class="k">Sense</div><ul><li><strong>Head-height obstacle detection</strong> — the hazard the cane misses.</li><li><strong>Haptic feedback</strong> in the companion robot.</li></ul></div>
@@ -374,20 +556,39 @@
     </div></section>
 
     <section class="slide"><div class="rail"></div><div class="body">
-      <div class="eyebrow rise"><span class="num">11</span> · Conclusion &amp; demo</div>
+      <div class="eyebrow rise"><span class="num">15</span> · Conclusion &amp; demo</div>
       <h2 class="rise">Problem identified. <span class="grad">Software built.</span> Coordination proven.</h2>
       <div class="split two rise stagger">
         <div class="col glass c-cyan"><div class="k">Summary</div><ul><li><strong>Problem</strong> — a large, under-served population can't move independently indoors.</li><li><strong>Solution</strong> — a camera-free, voice-first robot swarm coordinated by a cloud-connected hub.</li><li><strong>Result</strong> — a reliable, verifiable coordination layer, validated end-to-end.</li></ul></div>
         <div class="col glass c-amber"><div class="k">Live demonstration</div><ul><li>Speak a destination — <strong>"Take me to the Eiffel Tower."</strong></li><li>The hub confirms all robots, then triggers a <strong>synchronized start.</strong></li><li>The fleet moves through the town and <strong>announces arrival.</strong></li></ul></div>
       </div>
-      <div class="repo rise"><span class="gh">⌥</span><span>Code &amp; docs · <b>github.com/8b4p7b6v74-ship-it/sam-and-the-guides</b></span></div>
+      <div class="repo rise"><span class="gh">⌥</span><span>Code &amp; docs · <a href="https://github.com/8b4p7b6v74-ship-it/sam-and-the-guides" target="_blank" rel="noopener"><b>github.com/8b4p7b6v74-ship-it/sam-and-the-guides</b></a></span></div>
+    </div></section>
+
+    <section class="slide"><div class="rail"></div><div class="body">
+      <div class="eyebrow rise"><span class="num">16</span> · References</div>
+      <h2 class="rise">Sources &amp; standards.</h2>
+      <div class="refs rise">
+        <div class="ref"><span class="n">[1]</span> World Health Organization, <i>Blindness and vision impairment</i>, Fact sheet, 2023.</div>
+        <div class="ref"><span class="n">[2]</span> R. R. A. Bourne <i>et al.</i>, “Trends in prevalence of blindness and distance and near vision impairment over 30 years,” <i>The Lancet Global Health</i>, 2021.</div>
+        <div class="ref"><span class="n">[3]</span> R. Manduchi and S. Kurniawan, “Mobility-related accidents experienced by people with visual impairment,” <i>Insight: Research &amp; Practice in Visual Impairment &amp; Blindness (AER)</i>, 2011.</div>
+        <div class="ref"><span class="n">[4]</span> Worcester Polytechnic Institute &amp; SparkFun, <i>XRP — Experiential Robotics Platform</i>, documentation, 2024.</div>
+        <div class="ref"><span class="n">[5]</span> Raspberry Pi Ltd., <i>RP2350 Datasheet</i>, 2024.</div>
+        <div class="ref"><span class="n">[6]</span> Web Bluetooth Community Group, <i>Web Bluetooth</i>, W3C Draft Community Group Report, 2024.</div>
+        <div class="ref"><span class="n">[7]</span> Nordic Semiconductor, <i>Nordic UART Service (NUS)</i>, nRF Connect SDK documentation.</div>
+        <div class="ref"><span class="n">[8]</span> J. Gray, “Notes on Data Base Operating Systems,” in <i>Operating Systems: An Advanced Course</i>, Springer, 1978 — two-phase commit.</div>
+        <div class="ref"><span class="n">[9]</span> European Union, <i>European Accessibility Act</i>, Directive (EU) 2019/882, 2019.</div>
+        <div class="ref"><span class="n">[10]</span> U.S. Department of Justice, <i>Americans with Disabilities Act of 1990</i> (ADA), 42 U.S.C. § 12101.</div>
+        <div class="ref"><span class="n">[11]</span> MicroPython, <i>MicroPython documentation</i>, 2024.</div>
+        <div class="ref"><span class="n">[12]</span> Guide Dogs of America, “The cost &amp; training of a guide dog,” 2023.</div>
+      </div>
     </div></section>
 
     <section class="slide"><div class="rail"></div><div class="body">
       <div class="eyebrow rise">Thank you</div>
       <h1 class="rise"><span class="grad">Thank you.</span></h1>
       <p class="lede rise">To our mentors, teachers, and everyone who tested, questioned, and cheered us on — thank you. This project is for the travelers it's meant to serve.</p>
-      <div class="repo rise"><span class="gh">⌥</span><span><b>github.com/8b4p7b6v74-ship-it/sam-and-the-guides</b></span></div>
+      <div class="repo rise"><span class="gh">⌥</span><span><a href="https://github.com/8b4p7b6v74-ship-it/sam-and-the-guides" target="_blank" rel="noopener"><b>github.com/8b4p7b6v74-ship-it/sam-and-the-guides</b></a></span></div>
       <div class="credits rise"><span><b>Violet</b></span><span class="sep">·</span><span><b>Samuel</b></span><span class="sep">·</span><span><b>Gabriel</b></span><span class="sep">·</span><span>Contact: [insert contact details]</span></div>
       <div class="footline rise">UC Berkeley · Engineering &amp; Robotics · Navigation &amp; Guidance of Blind and Visually-Impaired People · 2026</div>
     </div></section>
@@ -486,6 +687,7 @@
   const slides=[...document.querySelectorAll('.slide')];const N=slides.length;let i=0;
   slides.forEach((s)=>{s.querySelector('.rail').innerHTML='<div class="spine"></div><div class="fill"></div>'+slides.map((_,k)=>'<button class="stop" data-go="'+k+'" aria-label="Slide '+(k+1)+'"></button>').join('');});
   document.getElementById('tot').textContent=String(N).padStart(2,'0');
+  document.documentElement.style.setProperty('--n',N);
   function animNum(el){
     const mb=el.dataset.mb!==undefined;
     const target=parseFloat(mb?el.dataset.mb:el.dataset.count), suf=el.dataset.suffix||'';
