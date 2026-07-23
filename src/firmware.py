@@ -513,7 +513,7 @@ def handle(line):
         if cid in _seen_ids:         # duplicate (retry whose original already landed) -> ACK but DON'T re-run
             return
         _seen_ids.append(cid)
-        if len(_seen_ids) > 24:
+        if len(_seen_ids) > 64:
             _seen_ids.pop(0)
         if sp < 0:
             return
@@ -524,7 +524,8 @@ def handle(line):
     if up == "STOP" or u == " ":
         stop_mission()
     elif up == "GO":
-        start_mission()
+        if MISSION != "RUN":        # idempotent: a duplicate/late GO never restarts a running mission
+            start_mission()
     elif up == "TAP":
         arm_tap()
     elif up == "TURNL":
@@ -576,7 +577,10 @@ def run():
     while True:
         line = read_line()
         if line is not None:
-            handle(line)
+            try:
+                handle(line)          # one bad command must never kill the control loop
+            except Exception:
+                pass
         if MISSION == "MANUAL":
             step_manual()
         elif MISSION == "RUN":

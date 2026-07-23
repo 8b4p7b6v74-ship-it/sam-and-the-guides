@@ -278,24 +278,27 @@ function delivChip(s){
   const tx=st==="ok"?"✓ ack":st==="fail"?"✗ no ack":st?("↻ "+st):"";
   return tx?`<span style="font-size:10px;font-weight:700;color:${c};margin-left:6px">${tx}</span>`:"";
 }
+// A robot is "live" only if telemetry is FRESH — a wedged link (connected but silent) is NOT live.
+const isLive=s=>!!(s&&s.connected&&(s.sim||(s._lastT&&Date.now()-s._lastT<=2500)));
 function liveDot(s){
   if(!(s&&s.connected))return`<span style="color:#ff5b5b">● offline</span>`;
-  const age=s._lastT?Date.now()-s._lastT:99999;
   if(!s._lastT)return`<span style="color:#e0a83b">● no telemetry</span>`;
+  const age=Date.now()-s._lastT;
   if(age>2500)return`<span style="color:#e0a83b">● stale ${(age/1000).toFixed(0)}s</span>`;
   return`<span style="color:#2fbf71">● live</span>`;
 }
 function renderFleet(){
   const host=$("#fleet");host.innerHTML="";
-  for(let i=0;i<3;i++){const s=slots[i],on=s&&s.connected;
-    host.innerHTML+=`<div class="bot ${on?(s.alert?'alert':'on'):''}">
+  for(let i=0;i<3;i++){const s=slots[i],on=s&&s.connected,live=isLive(s);
+    const border=s&&s.alert?'alert':(live?'on':'');
+    host.innerHTML+=`<div class="bot ${border}">
       <span class="avatar">${RMETA[i].em}</span>
       <div class="who"><div class="role">${ROLES[i]}${delivChip(s)}</div><div class="desc">${liveDot(s)} · ${RMETA[i].desc}</div></div>
       <div class="live" id="lv${i}">${on?('<b>'+(s.state||'—')+'</b><br>'+(s.front!=null&&s.front<900?'F '+Math.round(s.front):'F —')+(i===0?(s.rear!=null&&s.rear<900?' · R '+Math.round(s.rear):''):'')):'offline'}</div>
       <button onclick="${on?`disc(${i})`:`conn(${i})`}">${on?"✕":"Connect"}</button></div>`;}
-  const n=slots.filter(s=>s&&s.connected).length;
-  $("#online").textContent=n+(n===1?" robot":" robots");
-  $("#fleetLed").className="led "+(slots.some(s=>s&&s.alert)?"alert":(n?"on":""));
+  const nConn=slots.filter(s=>s&&s.connected).length, nLive=slots.filter(isLive).length;
+  $("#online").textContent=nLive+"/"+Math.max(nConn,nLive)+" live";
+  $("#fleetLed").className="led "+(slots.some(s=>s&&s.alert)?"alert":(nLive?"on":""));
 }
 // refresh liveness dots ~2×/s so "stale" shows up even without new telemetry
 setInterval(()=>{if(slots.some(s=>s&&s.connected))renderFleet();},600);
@@ -310,10 +313,11 @@ async function attach(i,dev){
   await tx.startNotifications();const buf={s:""};
   tx.addEventListener("characteristicvaluechanged",e=>{const t=dec.decode(e.target.value);dbgAdd(i,t);buf.s+=t;let k;while((k=buf.s.indexOf("\n"))>=0){const ln=buf.s.slice(0,k).trim();buf.s=buf.s.slice(k+1);if(ln)parse(i,ln);}});
   dev.addEventListener("gattserverdisconnected",()=>{
-    const s=slots[i];if(!s)return;s.connected=false;renderFleet();
+    const s=slots[i];if(!s||s.sim||s.dev!==dev)return;   // ignore stale/foreign/sim slot
+    s.connected=false;renderFleet();
     if(s._userDisc){log("info",ROLES[i]+" disconnected");return;}
     log("alert",ROLES[i]+" dropped — auto-reconnecting…");autoReconnect(i,dev);
-  });
+  },{once:true});   // self-removes so listener count == active connections
   slots[i]={dev,rx,connected:true,state:"",front:null,rear:null,alert:false,_lastT:0,_flashed:false,_acks:{},_deliv:null,_userDisc:false};
   send(i,"ROLE "+ROLES[i]);renderFleet();log("ok",ROLES[i]+" connected ("+(dev.name||"XRP")+")");
   const s=slots[i];
@@ -338,12 +342,15 @@ async function conn(i){
 }
 // auto-reconnect after an unexpected drop — gatt.connect on the SAME device needs no picker
 async function autoReconnect(i,dev){
-  for(let a=1;a<=6;a++){
-    if(slots[i]&&slots[i].connected)return;
-    try{await attach(i,dev);log("ok",ROLES[i]+" reconnected automatically");return;}
-    catch(e){log("info",ROLES[i]+": reconnect attempt "+a+"/6 failed");await sleep(Math.min(700*a,3500));}
-  }
-  log("alert",ROLES[i]+": auto-reconnect gave up — click Connect on "+ROLES[i]);
+  if(dev._reconnecting)return; dev._reconnecting=true;   // one loop at a time (two handlers can't race)
+  try{
+    for(let a=1;a<=6;a++){
+      if(slots[i]&&slots[i].connected)return;
+      try{await attach(i,dev);log("ok",ROLES[i]+" reconnected automatically");return;}
+      catch(e){log("info",ROLES[i]+": reconnect attempt "+a+"/6 failed");await sleep(Math.min(700*a,3500));}
+    }
+    log("alert",ROLES[i]+": auto-reconnect gave up — click Connect on "+ROLES[i]);
+  } finally { dev._reconnecting=false; }
 }
 async function reconnectKnown(){
   if(!navigator.bluetooth||!navigator.bluetooth.getDevices){st("getDevices unavailable — use Connect buttons");return;}
@@ -426,6 +433,9 @@ function send(i,str){const s=slots[i];if(!s||!s.connected)return false;try{const
 function sendAll(str){for(let i=0;i<3;i++)send(i,str);}
 
 // ---------- RELIABLE transport: command id + ACK + retry (deterministic delivery) ----------
+// Session-unique ids: a hub reload must NOT restart ids at 0 and collide with a robot's
+// dedup ring (which would ACK-but-skip new commands while reporting "confirmed").
+const SESSION=Math.floor(Math.random()*1e9).toString(36)+"-";
 let _cid=0;
 function setDeliv(i,st){const s=slots[i];if(!s)return;s._deliv=st;s._delivT=Date.now();const d=document.getElementById("dv"+i);if(d){d.textContent=st;d.className="deliv "+(st==="ok"?"ok":st==="fail"?"fail":"pend");}}
 // resolves true once the robot ACKs "A|<id>", retries up to `tries` on timeout, false if it never confirms
@@ -434,7 +444,7 @@ function sendReliable(i,cmd,opts){
   const s=slots[i];
   if(!s||!s.connected)return Promise.resolve(false);
   s._acks=s._acks||{};
-  const id=(++_cid).toString(36);
+  const id=SESSION+(++_cid).toString(36);
   return new Promise(resolve=>{
     let attempt=0,done=false;
     const finish=ok=>{if(done)return;done=true;delete s._acks[id];setDeliv(i,ok?"ok":"fail");if(!ok)log("alert",ROLES[i]+": command not confirmed — «"+cmd+"»");resolve(ok);};
@@ -503,6 +513,8 @@ const SIMV=66;                 // speed effort -> cm/s (0.45 ≈ 30 cm/s, same b
 let SIM=null;
 function simFleet(){
   if(SIM){simEnd();return;}
+  // tear down any REAL connection first, so a later real drop can't auto-reconnect into a sim slot
+  for(let i=0;i<3;i++){const s=slots[i];if(s&&!s.sim&&s.connected){s._userDisc=true;try{s.dev.gatt.disconnect();}catch(e){}slots[i]=null;}}
   const p0=N(cur),h=curHead*Math.PI/180;
   SIM={bots:[],rep:null};
   try{SIM.w=new Worker(URL.createObjectURL(new Blob(["setInterval(function(){postMessage(1)},100)"],{type:"text/javascript"})));SIM.w.onmessage=simTick;}   // workers dodge background-tab timer throttling
@@ -590,25 +602,40 @@ async function dispatchTrip(){
   const spd=parseFloat($("#spd").value)||0.45;
   _dispatching=true;
   try{
+    // PHASE 0 — clean slate: reliably STOP everyone so GO idempotency starts from IDLE
+    await sendAllReliable("STOP");
     // PHASE 1 — preload the mission on every robot, confirmed by ACK (retries on loss)
     log("info","Preloading mission on "+conn.length+" robot(s)…");
     const pre=[];
     pre.push(...(await sendAllReliable("SPD "+spd)));
     const navCmd=(MODE==="LINE"?("ROUTE "+p.route):("PATH "+p.pathCmd));
-    pre.push({role:"OPENER",...(await sendReliable(0,navCmd).then(ok=>({i:0,ok})))});
+    pre.push({i:0,...(await sendReliable(0,navCmd).then(ok=>({ok})))});
     const preFail=pre.filter(x=>x&&x.ok===false);
     if(preFail.length){
       log("alert","⛔ Aborted — "+preFail.length+" robot(s) didn't confirm the mission. Nothing moved.");
       say("One of the robots isn't responding. Let me try again in a moment.","alert");
       return;
     }
-    // PHASE 2 — synchronized trigger: GO to all at once (they're preloaded → start together)
-    log("info","All confirmed — GO (synchronized)");
-    const gos=await sendAllReliable("GO");
-    const goFail=gos.filter(x=>!x.ok);
-    if(goFail.length){log("alert","⚠ "+goFail.map(x=>ROLES[x.i]).join(", ")+" didn't confirm GO — retrying");
-      for(const f of goFail)await sendReliable(f.i,"GO");}
-    log("ok","→ "+N(selDest).name+(via?" via "+N(via).name:"")+"  ["+MODE+"] · all robots confirmed");
+    // PHASE 2 — synchronized trigger. All robots are preloaded; fire GO in ONE burst
+    // (fire-and-forget ×3 within one tick) so they start within a BLE round of each other.
+    // GO is idempotent on the robot (a duplicate never restarts a running mission).
+    log("info","All confirmed — GO (synchronized burst)");
+    for(let k=0;k<3;k++)for(const i of conn)send(i,"GO");
+    // PHASE 3 — VERIFY via telemetry that every robot actually entered RUN; if not, abort+STOP.
+    const t0=Date.now();let started=[];
+    while(Date.now()-t0<1400){
+      started=conn.filter(i=>slots[i]&&(slots[i].mission==="RUN"||["RUN","DRIVE","TURN","FOLLOW","KEEP","HOLD"].includes(slots[i].state)));
+      if(started.length===conn.length)break;
+      await sleep(120);
+    }
+    if(started.length<conn.length){
+      const stuck=conn.filter(i=>!started.includes(i)).map(i=>ROLES[i]);
+      log("alert","⛔ "+stuck.join(", ")+" didn't start — STOPPING the whole fleet (safety).");
+      stopAll();say("A robot didn't start. Stopping everyone for safety. Let's try again.","alert");
+      plan=null;selDest=null;renderChips();drawMap();
+      return;
+    }
+    log("ok","→ "+N(selDest).name+(via?" via "+N(via).name:"")+"  ["+MODE+"] · "+started.length+"/"+conn.length+" running (verified)");
     say("Sure — taking you to "+N(selDest).name+(via?", passing by "+N(via).name:"")+". Stay close to me, I'll guide you the whole way.","go");
   } finally { _dispatching=false; }
 }
@@ -638,7 +665,7 @@ function parse(i,line){
   if(p[0]==="A"){const id=p[1];const cb=s._acks&&s._acks[id];if(cb)cb();return;}   // ACK
   if(p[0]==="T"){s._lastT=Date.now();
     if(p[1]&&p[1]!==ROLES[i]&&Date.now()-(s._roleT||0)>1500){s._roleT=Date.now();send(i,"ROLE "+ROLES[i]);}
-    s.front=parseFloat(p[3]);s.rear=parseFloat(p[4]);s.state=p[8]||p[7];s.alert=(s.state==="ALERT");
+    s.mission=p[2];s.front=parseFloat(p[3]);s.rear=parseFloat(p[4]);s.state=p[8]||p[7];s.alert=(s.state==="ALERT");
     const lv=document.getElementById("lv"+i);
     if(lv)lv.innerHTML="<b>"+(s.state||"—")+"</b><br>"+(s.front<900?"F "+s.front.toFixed(0):"F —")+(i===0?(s.rear<900?" · R "+s.rear.toFixed(0):" · R —"):"");
     if(i===0)samSpeed(s.rear<900?s.rear:null);
@@ -650,7 +677,7 @@ function parse(i,line){
     else if(t==="MARK"||t==="STEP"){if(plan){plan.prog=parseInt(m)||plan.prog+1;
       const idx=(t==="STEP"&&plan.nodeOf)?plan.nodeOf[Math.min(plan.prog-1,plan.nodeOf.length-1)]:Math.min(plan.prog,plan.path.length-1);
       cur=plan.path[idx];if(idx>0)curHead=hd(plan.path[idx-1],plan.path[idx]);moveConvoy(cur);$("#pos").textContent=N(cur).name;}log("info",(t==="MARK"?"Marker ":"Step ")+m);}
-    else if(t==="ARRIVE"&&i===0){if(plan){if(plan.path.length>1)curHead=hd(plan.path[plan.path.length-2],plan.path[plan.path.length-1]);cur=plan.dest;plan=null;}selDest=null;renderChips();drawMap();log("ok","Arrived at "+N(cur).name);say("You have arrived at "+N(cur).name+".","ok");CLK(()=>sendAll("STOP"),200);}
+    else if(t==="ARRIVE"&&i===0){if(plan){if(plan.path.length>1)curHead=hd(plan.path[plan.path.length-2],plan.path[plan.path.length-1]);cur=plan.dest;plan=null;}selDest=null;renderChips();drawMap();log("ok","Arrived at "+N(cur).name);say("You have arrived at "+N(cur).name+".","ok");CLK(()=>sendAllReliable("STOP"),200);}
     else if(t==="READY")log("ok",ROLES[i]+" firmware ready ["+m+"]");
     else if(t==="ROLE")log("info",ROLES[i]+" role set");}
 }
