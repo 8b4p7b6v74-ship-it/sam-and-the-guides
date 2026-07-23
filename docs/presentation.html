@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navigation & Guidance for the Blind — Capstone</title>
+<style>
+  :root{
+    --ink:#0c1420; --ink2:#111c2b; --line:#22344a;
+    --paper:#eef1f4; --paper2:#e4e9ee;
+    --fg:#0c1420; --fg-soft:#41546a; --fg-faint:#7688a0;
+    --bg:#eef1f4; --panel:#ffffff; --edge:#d3dae2;
+    --amber:#e8890a; --amber-bright:#ffb02e; --ok:#1e9e62; --alert:#e0453f; --route:#2f7fc0;
+    --f-disp:"Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+    --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --f-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --fg:#eaf0f7; --fg-soft:#9fb1c6; --fg-faint:#63768e;
+      --bg:#0c1420; --panel:#111d2c; --edge:#22344a; --amber:#ffb02e; --route:#5aa9e6; --ok:#34c77b; --alert:#ff5a5f;}
+  }
+  :root[data-theme="light"]{ --fg:#0c1420; --fg-soft:#41546a; --fg-faint:#7688a0;
+    --bg:#eef1f4; --panel:#ffffff; --edge:#d3dae2; --amber:#e8890a; --route:#2f7fc0; --ok:#1e9e62; --alert:#e0453f;}
+  :root[data-theme="dark"]{ --fg:#eaf0f7; --fg-soft:#9fb1c6; --fg-faint:#63768e;
+    --bg:#0c1420; --panel:#111d2c; --edge:#22344a; --amber:#ffb02e; --route:#5aa9e6; --ok:#34c77b; --alert:#ff5a5f;}
+
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--fg);font-family:var(--f-body);
+    -webkit-font-smoothing:antialiased;overflow:hidden}
+  .deck{position:fixed;inset:0;display:flex;flex-direction:column}
+
+  /* slides */
+  .slides{position:relative;flex:1;overflow:hidden}
+  .slide{position:absolute;inset:0;display:grid;grid-template-columns:96px 1fr;
+    opacity:0;visibility:hidden;transition:opacity .5s ease;pointer-events:none}
+  .slide.on{opacity:1;visibility:visible;pointer-events:auto}
+  .slide.on .rise{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+  .slide.on .rise:nth-child(2){animation-delay:.05s}
+  .slide.on .rise:nth-child(3){animation-delay:.1s}
+  .slide.on .rise:nth-child(4){animation-delay:.15s}
+  .slide.on .rise:nth-child(5){animation-delay:.2s}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.slide,.slide.on .rise{transition:none;animation:none}}
+
+  /* left wayfinding rail — the guidance line */
+  .rail{position:relative;border-right:1px solid var(--edge);display:flex;flex-direction:column;
+    align-items:center;padding:26px 0;gap:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.02))}
+  .rail .spine{position:absolute;top:60px;bottom:60px;left:50%;width:2px;transform:translateX(-50%);
+    background:var(--edge)}
+  .rail .fill{position:absolute;top:60px;left:50%;width:2px;transform:translateX(-50%);
+    background:var(--amber);transition:height .5s ease}
+  .stop{position:relative;z-index:2;width:11px;height:11px;border-radius:50%;background:var(--bg);
+    border:2px solid var(--edge);margin:0;cursor:pointer;transition:.3s}
+  .stop+.stop{margin-top:calc((100vh - 240px)/10 - 11px)}
+  .stop:hover{border-color:var(--amber)}
+  .stop.done{border-color:var(--amber);background:var(--amber)}
+  .stop.cur{border-color:var(--amber);background:var(--bg);box-shadow:0 0 0 4px color-mix(in srgb,var(--amber) 30%,transparent)}
+
+  /* content column */
+  .body{padding:min(7vh,66px) min(6vw,84px);display:flex;flex-direction:column;justify-content:center;
+    max-width:1180px;position:relative}
+  .eyebrow{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--amber);font-weight:600;margin-bottom:22px;display:flex;align-items:center;gap:12px}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--amber)}
+  h1{font-family:var(--f-disp);font-weight:800;letter-spacing:-.02em;line-height:1.02;
+    text-wrap:balance;margin:0;font-size:clamp(34px,5.6vw,72px)}
+  h2{font-family:var(--f-disp);font-weight:800;letter-spacing:-.02em;line-height:1.04;
+    text-wrap:balance;margin:0 0 20px;font-size:clamp(28px,4.4vw,54px)}
+  .lede{font-size:clamp(17px,2vw,23px);line-height:1.5;color:var(--fg-soft);max-width:62ch;margin:22px 0 0}
+  p{line-height:1.55;color:var(--fg-soft)}
+  strong{color:var(--fg);font-weight:650}
+  .amber{color:var(--amber)}
+  .mono{font-family:var(--f-mono)}
+
+  .credits{margin-top:40px;display:flex;flex-wrap:wrap;gap:10px 28px;align-items:center;
+    font-family:var(--f-mono);font-size:14px;color:var(--fg-soft)}
+  .credits b{color:var(--fg);font-weight:650}
+  .credits .sep{color:var(--amber)}
+
+  /* generic building blocks */
+  .grid{display:grid;gap:18px;margin-top:8px}
+  .cards3{grid-template-columns:repeat(3,1fr)}
+  .cards2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:22px 22px}
+  .card .k{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);font-weight:600}
+  .card h3{margin:12px 0 8px;font-size:20px;font-weight:700;letter-spacing:-.01em;font-family:var(--f-disp)}
+  .card p{margin:0;font-size:15px;line-height:1.5}
+  .stat{font-family:var(--f-disp);font-weight:800;letter-spacing:-.02em;font-size:clamp(40px,7vw,86px);line-height:.95}
+  .stat small{display:block;font-family:var(--f-body);font-weight:500;font-size:16px;color:var(--fg-soft);letter-spacing:0;margin-top:14px;max-width:34ch}
+
+  ul.checks{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:13px;max-width:66ch}
+  ul.checks li{position:relative;padding-left:30px;font-size:16.5px;line-height:1.5}
+  ul.checks li::before{content:"✓";position:absolute;left:0;top:0;color:var(--ok);font-weight:800;font-family:var(--f-mono)}
+
+  /* formation diagram */
+  .convoy{display:flex;align-items:stretch;gap:0;margin-top:14px;flex-wrap:wrap}
+  .unit{flex:1;min-width:210px;background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:22px;position:relative}
+  .unit .role{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+  .unit .em{font-size:30px;line-height:1;margin-bottom:12px;display:block}
+  .unit h3{margin:8px 0 6px;font-size:19px;font-family:var(--f-disp);font-weight:700}
+  .unit p{margin:0;font-size:14px;line-height:1.45}
+  .arrow{align-self:center;color:var(--amber);font-weight:800;font-size:26px;padding:0 8px;font-family:var(--f-mono)}
+  .u-open .role{color:var(--amber)} .u-you .role{color:var(--route)} .u-close .role{color:var(--fg-soft)}
+
+  /* voice exchange */
+  .chat{display:flex;flex-direction:column;gap:12px;margin-top:12px;max-width:70ch}
+  .bub{padding:14px 18px;border-radius:14px;font-size:17px;line-height:1.4;max-width:80%}
+  .bub.you{align-self:flex-end;background:var(--route);color:#fff;border-bottom-right-radius:4px;font-weight:600}
+  .bub.sys{align-self:flex-start;background:var(--panel);border:1px solid var(--edge);border-bottom-left-radius:4px}
+  .bub.sys .who{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);font-weight:700;margin-bottom:4px}
+
+  /* architecture stack */
+  .stack{display:flex;flex-direction:column;gap:10px;margin-top:8px;max-width:760px}
+  .layer{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--edge);
+    border-radius:12px;padding:15px 18px}
+  .layer .n{font-family:var(--f-mono);font-size:12px;color:var(--amber);font-weight:700;flex:0 0 30px}
+  .layer .t{font-weight:650;font-size:16px}
+  .layer .d{color:var(--fg-soft);font-size:14px;margin-left:auto;font-family:var(--f-mono)}
+  .flowdot{color:var(--amber);text-align:center;font-family:var(--f-mono);font-size:13px;letter-spacing:.3em}
+
+  /* route codes chip row */
+  .codes{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .code{font-family:var(--f-mono);font-size:15px;font-weight:600;padding:7px 12px;border-radius:8px;
+    background:color-mix(in srgb,var(--amber) 14%,transparent);color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent)}
+
+  /* top bar */
+  .topbar{position:absolute;top:20px;right:26px;display:flex;gap:8px;z-index:6}
+  .tb{width:38px;height:34px;border-radius:9px;border:1px solid var(--edge);background:var(--panel);
+    color:var(--fg-soft);cursor:pointer;font-size:15px;display:grid;place-items:center;transition:.2s;font-family:var(--f-mono)}
+  .tb:hover{color:var(--amber);border-color:var(--amber)}
+  .counter{position:absolute;bottom:20px;right:28px;font-family:var(--f-mono);font-size:13px;color:var(--fg-faint);letter-spacing:.1em;z-index:6}
+  .counter b{color:var(--amber)}
+  .hint{position:absolute;bottom:20px;left:120px;font-family:var(--f-mono);font-size:12px;color:var(--fg-faint);letter-spacing:.06em;z-index:6}
+
+  /* click zones for nav */
+  .zone{position:absolute;top:0;bottom:60px;width:22%;z-index:4;cursor:pointer}
+  .zone.prev{left:96px} .zone.next{right:0;width:34%}
+
+  .footline{margin-top:auto;padding-top:26px;font-family:var(--f-mono);font-size:12px;color:var(--fg-faint);letter-spacing:.08em}
+
+  :focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+  @media (max-width:1040px){
+    .convoy{flex-direction:column}
+    .arrow{transform:rotate(90deg);padding:6px 0}
+    .unit{min-width:0}
+  }
+  @media (max-width:760px){
+    .slide{grid-template-columns:52px 1fr}
+    .rail{padding:16px 0}.stop+.stop{margin-top:calc((100vh - 160px)/10 - 11px)}
+    .body{padding:44px 26px}
+    .cards3,.cards2{grid-template-columns:1fr}
+    .zone.prev{left:52px}
+    .hint{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <div class="topbar">
+    <button class="tb" id="theme" title="Toggle light / dark" aria-label="Toggle theme">◐</button>
+    <button class="tb" id="fs" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+  </div>
+
+  <div class="slides" id="slides">
+
+    <!-- 1 · TITLE -->
+    <section class="slide" data-eyebrow="Engineering &amp; Robotics · Capstone 2026">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">Engineering &amp; Robotics · Capstone 2026</div>
+        <h1 class="rise">Navigation &amp; Guidance<br>for the Blind and<br>Visually-Impaired</h1>
+        <p class="lede rise">A camera-free swarm of three robots that listens, coordinates, and physically guides a blind traveler through a mapped city — using nothing but spoken words.</p>
+        <div class="credits rise">
+          <span>Presented by <b>Violet</b></span><span class="sep">·</span><span><b>Samuel</b></span><span class="sep">·</span><span><b>Gabriel</b></span>
+          <span class="sep">·</span><span>July 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 · PROBLEM -->
+    <section class="slide">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">The problem</div>
+        <h2 class="rise">Getting somewhere new is still the hard part.</h2>
+        <div class="grid cards3 rise">
+          <div class="card"><div class="stat">250M+<small>people worldwide are blind or have low vision.</small></div></div>
+          <div class="card"><div class="k">The white cane</div><h3>Feels the ground — not the way.</h3><p>It finds the next step and the next obstacle, but it can't tell you which way leads to the door.</p></div>
+          <div class="card"><div class="k">The guide dog</div><h3>Costs a small fortune.</h3><p>Tens of thousands of dollars and up to two years of training — and it can't learn a brand-new building on demand.</p></div>
+        </div>
+        <p class="lede rise">The gap: <strong>on-demand guidance through unfamiliar spaces</strong> — an airport, a campus, a station you've never walked before.</p>
+      </div>
+    </section>
+
+    <!-- 3 · IDEA -->
+    <section class="slide">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">Our idea</div>
+        <h2 class="rise">What if a small team of robots<br>could lead you there — just by asking?</h2>
+        <p class="lede rise">You speak a destination. The system understands it, plans the route, and a formation of robots physically walks you to it — narrating every step out loud.</p>
+        <div class="grid cards3 rise">
+          <div class="card"><div class="k">No camera</div><p>Nothing to film the people around you. Privacy by design.</p></div>
+          <div class="card"><div class="k">No screen to read</div><p>The interface is your voice and a calm guiding voice back.</p></div>
+          <div class="card"><div class="k">Works as a team</div><p>Three robots share one job: keeping you on the path, together.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · FORMATION -->
+    <section class="slide">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">The formation</div>
+        <h2 class="rise">Three robots. One identical program. Roles assigned live.</h2>
+        <div class="convoy rise">
+          <div class="unit u-open"><span class="em">🧭</span><div class="role">Opener · front</div><h3>Scouts the route</h3><p>Leads the way and calls the turns — the eyes of the group.</p></div>
+          <div class="arrow">→</div>
+          <div class="unit u-you"><span class="em">🦯</span><div class="role">The traveler</div><h3>You</h3><p>Walk in the middle. No sensors needed — the swarm does the seeing.</p></div>
+          <div class="arrow">→</div>
+          <div class="unit u-close"><span class="em">🛡️</span><div class="role">Closer · rear</div><h3>Keeps you together</h3><p>Follows at a steady distance so the group never breaks apart.</p></div>
+        </div>
+        <p class="lede rise">The intelligence lives in the software, not the robots — so the robots stay simple and cheap.</p>
+      </div>
+    </section>
+
+    <!-- 5 · HOW YOU USE IT -->
+    <section class="slide">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">How you use it</div>
+        <h2 class="rise">You talk. It takes you there.</h2>
+        <div class="chat rise">
+          <div class="bub you">"Take me to the Eiffel Tower."</div>
+          <div class="bub sys"><div class="who">Guide</div>Sure — taking you to the Eiffel Tower. Stay close to me, I'll guide you the whole way.</div>
+          <div class="bub sys"><div class="who">Guide</div>Turning left now. I've got you — watch your step.</div>
+          <div class="bub sys"><div class="who">Guide</div>You have arrived at the Eiffel Tower.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 · ARCHITECTURE -->
+    <section class="slide">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">System architecture</div>
+        <h2 class="rise">Simple robots. One intelligent hub.</h2>
+        <div class="stack rise">
+          <div class="layer"><span class="n">01</span><span class="t">Voice interface</span><span class="d">phone / laptop · listen &amp; speak</span></div>
+          <div class="flowdot">↓</div>
+          <div class="layer"><span class="n">02</span><span class="t">The Hub — the brain</span><span class="d">route planning · coordination</span></div>
+          <div class="flowdot">↓ &nbsp; commands &nbsp; · &nbsp; telemetry &nbsp; ↑</div>
+          <div class="layer"><span class="n">03</span><span class="t">Bluetooth link</span><span class="d">one channel per robot</span></div>
+          <div class="flowdot">↓</div>
+          <div class="layer"><span class="n">04</span><span class="t">The swarm</span><span class="d">Opener · Traveler · Closer</span></div>
+        </div>
+        <p class="lede rise">Every robot reports its state back continuously, so the hub always knows what the whole fleet is doing.</p>
+      </div>
+    </section>
+
+    <!-- 7 · RELIABLE CONTROL (the engineering highlight) -->
+    <section class="slide">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">The hard part</div>
+        <h2 class="rise">A swarm is only as good as the command<br>that reaches <span class="amber">all</span> of it.</h2>
+        <p class="lede rise">Wireless commands get lost, delayed, or arrive out of order. So we rebuilt the whole communication layer to be <strong>reliable, deterministic, and verifiable.</strong></p>
+        <ul class="checks rise">
+          <li>Every command is <strong>acknowledged</strong> by each robot — the hub knows exactly who received it.</li>
+          <li>Lost commands are <strong>retried automatically</strong>; the fleet starts <strong>in sync</strong>.</li>
+          <li>The system <strong>verifies</strong> all three are actually moving — or it <strong>stops everyone for safety</strong>.</li>
+          <li>Survives dropouts with <strong>automatic reconnection</strong>, and shows each robot's state live.</li>
+        </ul>
+        <div class="codes rise">
+          <span class="code" style="background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);border-color:color-mix(in srgb,var(--ok) 35%,transparent)">✓ Tested at 40% simulated packet loss → still 3/3 delivered</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 · THE CITY -->
+    <section class="slide">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">The mapped city</div>
+        <h2 class="rise">We built a miniature town — and handed the robots its map.</h2>
+        <p class="lede rise">Every street measured to the centimeter. The hub turns a destination into an exact sequence of distances and turns, so the swarm navigates by dead-reckoning — no lines to follow, no camera to see.</p>
+        <div class="codes rise">
+          <span class="code">D30</span><span class="code">D79</span><span class="code">D55</span><span class="code">D88</span><span class="code">L90</span><span class="code">D51</span><span class="code">ARRIVE</span>
+        </div>
+        <p class="rise" style="margin-top:14px;font-family:var(--f-mono);font-size:13px;color:var(--fg-faint);letter-spacing:.04em">↑ the actual route the swarm drives to reach the Eiffel Tower</p>
+      </div>
+    </section>
+
+    <!-- 9 · DEMO -->
+    <section class="slide">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">Live demo</div>
+        <h2 class="rise">Watch it coordinate — from a spoken word to a moving fleet.</h2>
+        <div class="grid cards3 rise">
+          <div class="card"><div class="k">Step 1</div><h3>Speak</h3><p>"Take me to the Eiffel Tower." The system confirms out loud.</p></div>
+          <div class="card"><div class="k">Step 2</div><h3>Coordinate</h3><p>The hub confirms all three robots, then triggers a synchronized start.</p></div>
+          <div class="card"><div class="k">Step 3</div><h3>Guide</h3><p>The fleet moves through the town, narrating each turn, and announces arrival.</p></div>
+        </div>
+        <p class="lede rise">The live map shows every robot's position and state in real time as it happens.</p>
+      </div>
+    </section>
+
+    <!-- 10 · WHAT WE LEARNED -->
+    <section class="slide">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">What we learned</div>
+        <h2 class="rise">The motors were never the hard part.</h2>
+        <div class="grid cards2 rise">
+          <div class="card"><div class="k">The real problem</div><h3>Wireless reliability</h3><p>Coordinating three robots over Bluetooth — not driving them — is where a swarm succeeds or fails.</p></div>
+          <div class="card"><div class="k">Our response</div><h3>Rebuild for trust</h3><p>We rearchitected communication around acknowledgment and verification, then stress-tested it against heavy packet loss.</p></div>
+          <div class="card"><div class="k">Engineering lesson</div><h3>Robust beats fast</h3><p>A command that always arrives — or safely aborts — is worth more than one that's quick but uncertain.</p></div>
+          <div class="card"><div class="k">Design lesson</div><h3>Simplicity scales</h3><p>Keeping the robots "dumb" and the hub smart made the whole system cheaper, clearer, and easier to trust.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 · IMPACT -->
+    <section class="slide">
+      <div class="rail"></div>
+      <div class="body">
+        <div class="eyebrow rise">Impact &amp; next steps</div>
+        <h2 class="rise">From a model town to real spaces.</h2>
+        <div class="grid cards3 rise">
+          <div class="card"><div class="k">Who it helps</div><h3>Independent travel</h3><p>Guidance on demand for anyone navigating a space they've never walked before.</p></div>
+          <div class="card"><div class="k">Where it goes</div><h3>Airports · campuses · transit</h3><p>Large, mapped indoor spaces where getting lost is the daily barrier.</p></div>
+          <div class="card"><div class="k">What's next</div><h3>Sense · scale · pilot</h3><p>On-board obstacle sensing, larger swarms, and real-world trials with the people we built it for.</p></div>
+        </div>
+        <p class="lede rise">Camera-free, voice-first, and coordinated by a communication layer we can trust — <strong>guidance that gives independence back.</strong></p>
+        <div class="footline rise">Navigation &amp; Guidance for the Blind and Visually-Impaired · Violet · Samuel · Gabriel · 2026</div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="zone prev" id="zprev" aria-hidden="true"></div>
+  <div class="zone next" id="znext" aria-hidden="true"></div>
+  <div class="hint" id="hint">← → to navigate · F fullscreen</div>
+  <div class="counter"><b id="cur">01</b> / <span id="tot">11</span></div>
+</div>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const N=slides.length; let i=0;
+  const railTemplate=(idx)=>{
+    return '<div class="spine"></div><div class="fill" id="fill'+idx+'"></div>'+
+      slides.map((_,k)=>'<button class="stop" data-go="'+k+'" aria-label="Slide '+(k+1)+'"></button>').join('');
+  };
+  slides.forEach((s,idx)=>{ s.querySelector('.rail').innerHTML=railTemplate(idx); });
+  document.getElementById('tot').textContent=String(N).padStart(2,'0');
+
+  function render(){
+    slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+    document.getElementById('cur').textContent=String(i+1).padStart(2,'0');
+    // update rails on the active slide
+    const rail=slides[i].querySelector('.rail');
+    const stops=[...rail.querySelectorAll('.stop')];
+    stops.forEach((d,k)=>{d.classList.toggle('done',k<i);d.classList.toggle('cur',k===i);});
+    const fill=rail.querySelector('.fill');
+    if(fill){const h=stops.length>1?(i/(stops.length-1))*100:0;fill.style.height='calc('+h+'% * (100% - 0px))';fill.style.height=(h/100)*(rail.clientHeight-120)+'px';}
+    location.hash=i+1;
+  }
+  function go(n){ i=Math.max(0,Math.min(N-1,n)); render(); }
+  function next(){ if(i<N-1)go(i+1); }
+  function prev(){ if(i>0)go(i-1); }
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();next();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
+    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(N-1);}
+    else if(e.key.toLowerCase()==='f'){toggleFs();}
+  });
+  document.getElementById('znext').onclick=next;
+  document.getElementById('zprev').onclick=prev;
+  document.getElementById('slides').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(+b.dataset.go);});
+
+  // theme
+  const root=document.documentElement;
+  document.getElementById('theme').onclick=()=>{
+    const cur=root.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+    root.setAttribute('data-theme',cur==='dark'?'light':'dark');
+  };
+  // fullscreen
+  function toggleFs(){ if(!document.fullscreenElement)document.getElementById('deck').requestFullscreen?.(); else document.exitFullscreen?.(); }
+  document.getElementById('fs').onclick=toggleFs;
+
+  const qs=new URLSearchParams(location.search);
+  if(qs.get('theme'))root.setAttribute('data-theme',qs.get('theme'));
+  if(qs.get('still')){const st=document.createElement('style');st.textContent='*{animation:none!important;transition:none!important}.topbar,.hint{display:none!important}';document.head.appendChild(st);}
+  const start=parseInt(location.hash.slice(1))||1; i=Math.max(0,Math.min(N-1,start-1));
+  render();
+  addEventListener('resize',render);
+  setTimeout(()=>{const h=document.getElementById('hint');if(h)h.style.transition='opacity 1s',h.style.opacity='0';},5000);
+})();
+</script>
+</body>
+</html>
