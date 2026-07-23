@@ -549,7 +549,7 @@ function simRx(b,i,str){
 }
 function simCmd(b,line){b.cmds.push(line);const up=line.toUpperCase();
   if(up.startsWith("SPD "))b.speed=parseFloat(line.slice(4))||b.speed;
-  else if(up==="GO"){b.mission="RUN";b.prog=0;b.segDone=0;b.turnLeft=0;}   // firmware clears pending turns on GO too
+  else if(up==="GO"){if(b.mission!=="RUN"){b.mission="RUN";b.prog=0;b.segDone=0;b.turnLeft=0;}}   // idempotent: a duplicate GO never restarts a running mission (mirrors firmware)
   else if(up==="STOP")b.mission="IDLE";
   else if(up.startsWith("PATH "))b.path=line.slice(5).split(",").map(s=>s.trim()).filter(Boolean);
   else if(up.startsWith("ROLE "))b.role=line.slice(5).trim();
